@@ -82,10 +82,8 @@ namespace DeadCapTracker
             services.AddDbContext<DeadCapTrackerContext>(
                 options =>
                 {
-                    options.UseNpgsql(
-
-                        (string) Configuration.GetValue(typeof(string), connectionString),
-                        options => options.EnableRetryOnFailure());
+                    options.UseNpgsql(connectionString);
+                    //options.EnableRetryOnFailure();
                 });
         }
 
