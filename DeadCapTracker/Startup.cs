@@ -61,27 +61,28 @@ namespace DeadCapTracker
             services.AddAutoMapper(typeof(Startup));
             
             //pull in connection string
-            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-            var databaseUri = new Uri(databaseUrl);
-            var userInfo = databaseUri.UserInfo.Split(':');
-
-            var builder = new NpgsqlConnectionStringBuilder
-            {
-                Host = databaseUri.Host,
-                Port = databaseUri.Port,
-                Username = userInfo[0],
-                Password = userInfo[1],
-                Database = databaseUri.LocalPath.TrimStart('/'),
-                SslMode = SslMode.Require, 
-                TrustServerCertificate = true
-            };
+            // var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            // var databaseUri = new Uri(databaseUrl);
+            // var userInfo = databaseUri.UserInfo.Split(':');
+            //
+            // var builder = new NpgsqlConnectionStringBuilder
+            // {
+            //     Host = databaseUri.Host,
+            //     Port = databaseUri.Port,
+            //     Username = userInfo[0],
+            //     Password = userInfo[1],
+            //     Database = databaseUri.LocalPath.TrimStart('/'),
+            //     SslMode = SslMode.Require, 
+            //     TrustServerCertificate = true
+            //};
 
 
             services.AddDbContext<DeadCapTrackerContext>(
                 options =>
                 {
-                    options.UseNpgsql(builder.ToString());
-                    //options.EnableRetryOnFailure();
+                    //options.UseNpgsql(builder.ToString());
+                    options.UseNpgsql((string) Configuration.GetValue(typeof(string),
+                        "DatabaseOptions:ConnectionString"));
                 });
         }
 

@@ -107,13 +107,13 @@ namespace DeadCapTracker
             catch (Exception e) { }
 
             var franchiseListYr1 = res1.LeagueStandings.Franchise;
-            if (res2 != null) { franchiseListYr2 = res2.LeagueStandings.Franchise;}
-            if (res3 != null) {franchiseListYr3 = res3.LeagueStandings.Franchise;}
-            if (res2 == null)
+            if (res2?.LeagueStandings != null) { franchiseListYr2 = res2.LeagueStandings.Franchise;}
+            if (res3?.LeagueStandings != null) {franchiseListYr3 = res3.LeagueStandings.Franchise;}
+            if (res2?.LeagueStandings == null)
             {
                 return manualMapper.MapOneYearStandings(franchiseListYr1);
             }
-            else if(res3 == null)
+            else if(res3?.LeagueStandings == null)
             {
                 return manualMapper.MapTwoYearStandings(franchiseListYr1, franchiseListYr2);
             }
