@@ -58,13 +58,33 @@ namespace DeadCapTracker
             //TODO : use config for value instead of hardcoding
 
             services.AddAutoMapper(typeof(Startup));
+            
+            //pull in connection string
+            string connectionString = null;
+            string envVar = Environment.GetEnvironmentVariable("DATABASE_URL");
+            // if (string.IsNullOrEmpty(envVar)){
+            //     connectionString = Configuration["DatabaseOptions:ConnectionString"];
+            // }
+            // else{
+                //parse database URL. Format is postgres://<username>:<password>@<host>/<dbname>
+            var uri = new Uri(envVar);
+            var username = uri.UserInfo.Split(':')[0];
+            var password = uri.UserInfo.Split(':')[1];
+            connectionString = 
+                "; Database=" + uri.AbsolutePath.Substring(1) +
+                "; Username=" + username +
+                "; Password=" + password + 
+                "; Port=" + uri.Port +
+                "; SSL Mode=Require; Trust Server Certificate=true;";
+            
+
 
             services.AddDbContext<DeadCapTrackerContext>(
                 options =>
                 {
                     options.UseNpgsql(
 
-                        (string) Configuration.GetValue(typeof(string), "DatabaseOptions:ConnectionString"),
+                        (string) Configuration.GetValue(typeof(string), connectionString),
                         options => options.EnableRetryOnFailure());
                 });
         }
