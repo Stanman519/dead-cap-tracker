@@ -1,0 +1,12 @@
+---
+applications:
+- name: ryan-passion-project
+instances: 1
+memory: 1G
+env:
+  ASPNETCORE_ENVIRONMENT: Prod
+stack: cflinuxfs3
+services:
+  - ryan-passion-project
+buildpacks:
+- dotnet_core_buildpack
