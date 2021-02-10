@@ -17,6 +17,7 @@ using AutoMapper;
 using DeadCapTracker.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Steeltoe.CloudFoundry.Connector.PostgreSql.EFCore;
 
 
@@ -60,31 +61,24 @@ namespace DeadCapTracker
             services.AddAutoMapper(typeof(Startup));
             
             //pull in connection string
-            string connectionString = null;
-            string envVar = Environment.GetEnvironmentVariable("DATABASE_URL");
-            // if (string.IsNullOrEmpty(envVar)){
-            //     connectionString = Configuration["DatabaseOptions:ConnectionString"];
-            // }
-            // else{
-                //parse database URL. Format is postgres://<username>:<password>@<host>/<dbname>
-                connectionString = envVar;
-                
-                // var uri = new Uri(envVar);
-            // var username = uri.UserInfo.Split(':')[0];
-            // var password = uri.UserInfo.Split(':')[1];
-            // connectionString = 
-            //     "; Database=" + uri.AbsolutePath.Substring(1) +
-            //     "; Username=" + username +
-            //     "; Password=" + password + 
-            //     "; Port=" + uri.Port +
-            //     "; SSL Mode=Require; Trust Server Certificate=true;";
-            
+            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            var databaseUri = new Uri(databaseUrl);
+            var userInfo = databaseUri.UserInfo.Split(':');
+
+            var builder = new NpgsqlConnectionStringBuilder
+            {
+                Host = databaseUri.Host,
+                Port = databaseUri.Port,
+                Username = userInfo[0],
+                Password = userInfo[1],
+                Database = databaseUri.LocalPath.TrimStart('/')
+            };
 
 
             services.AddDbContext<DeadCapTrackerContext>(
                 options =>
                 {
-                    options.UseNpgsql(connectionString);
+                    options.UseNpgsql(builder.ToString());
                     //options.EnableRetryOnFailure();
                 });
         }
