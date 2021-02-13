@@ -39,7 +39,7 @@ namespace DeadCapTracker
             {
                 c.AddPolicy("AllowSpecificOrigin",
                     options => options.WithOrigins("https://*.dcsg.com", "https://capn-crunch-gm-bot.herokuapp.com", "https://stanfan.herokuapp.com",
-                            "http://localhost:3000", "https://localhost:3000")
+                            "http://localhost:3000", "https://localhost:3000", "https://capn-crunch.herokuapp.com")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials()
