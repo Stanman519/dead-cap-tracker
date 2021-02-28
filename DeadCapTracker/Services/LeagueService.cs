@@ -107,7 +107,7 @@ namespace DeadCapTracker
             catch (Exception e) { }
 
             var franchiseListYr1 = res1.LeagueStandings.Franchise;
-            if (res2?.LeagueStandings != null) { franchiseListYr2 = res2.LeagueStandings.Franchise;}
+            if (res2?.LeagueStandings != null) {franchiseListYr2 = res2.LeagueStandings.Franchise;}
             if (res3?.LeagueStandings != null) {franchiseListYr3 = res3.LeagueStandings.Franchise;}
             if (res2?.LeagueStandings == null)
             {
