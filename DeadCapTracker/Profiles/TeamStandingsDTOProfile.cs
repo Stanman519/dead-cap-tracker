@@ -16,15 +16,15 @@ namespace DeadCapTracker.Profiles
                 .ForMember(dest => dest.H2hWins, opts =>
                     opts.MapFrom(src => src.h2hw))
                 .ForMember(dest => dest.H2hLosses, opts =>
-                    opts.MapFrom(src => src.h2hl))
-                .ForMember(dest => dest.VictoryPoints, opts =>
-                    opts.MapFrom(src => src.vp))
-                .ForMember(dest => dest.AllPlayWins,
-                    opts => opts.MapFrom(src => src.all_play_w))
-                .ForMember(dest => dest.AllPlayLosses,
-                    opts => opts.MapFrom(src => src.all_play_l))
-                .ForMember(dest => dest.AllPlayTies,
-                    opts => opts.MapFrom(src => src.all_play_t));
+                    opts.MapFrom(src => src.h2hl));
+            // .ForMember(dest => dest.VictoryPoints, opts =>
+            //     opts.MapFrom(src => src.vp))
+            // .ForMember(dest => dest.AllPlayWins,
+            //     opts => opts.MapFrom(src => src.all_play_w))
+            // .ForMember(dest => dest.AllPlayLosses,
+            //     opts => opts.MapFrom(src => src.all_play_l))
+            // .ForMember(dest => dest.AllPlayTies,
+            //     opts => opts.MapFrom(src => src.all_play_t));
         }
         
     }
