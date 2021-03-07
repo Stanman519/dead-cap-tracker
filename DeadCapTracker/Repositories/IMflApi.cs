@@ -16,16 +16,16 @@ namespace DeadCapTracker.Repositories
         
         // TODO: eventually add: trade announcements
 
-        [Get("{year}/export?TYPE=leagueStandings&L=13894&APIKEY=ahBv1sGSvuWvx1GmOVrJaDYeFLox&JSON=1")]
+        [Get("{year}/export?TYPE=leagueStandings&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
         Task<MflStandingsParent> GetStandings([Path] int year);
         
-        [Get("{year}/export?TYPE=pendingTrades&L=13894&APIKEY=ahBv1sGSvuWvx1GmOVrJaDYeFLox&FRANCHISE_ID=&JSON=1")]
+        [Get("{year}/export?TYPE=pendingTrades&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&FRANCHISE_ID=&JSON=1")]
         Task<HttpResponseMessage> GetPendingTrades([Path] int year);
 
-        [Get("{year}/export?TYPE=freeAgents&L=13894&APIKEY=ahBv1sGSvuWvx1GmOVrJaDYeFLox&JSON=1")]
+        [Get("{year}/export?TYPE=freeAgents&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
         Task<MflAgentsParent> GetFreeAgents([Path] int year);
         
-        [Get("{year}/export?TYPE=salaries&L=13894&APIKEY=ahBv1sGSvuWvx1GmOVrJaDYeFLox&JSON=1")]
+        [Get("{year}/export?TYPE=salaries&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
         Task<MflSalariesParent> GetSalaries([Path] int year);
         
         [Get("{year}/export?TYPE=playerProfile&P={ids}&JSON=1")]
