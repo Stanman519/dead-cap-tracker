@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using AutoMapper;
 using DeadCapTracker.Models;
@@ -143,11 +144,22 @@ namespace DeadCapTracker
         //TODO: Needs Testing!
         public async Task<List<PendingTradeDTO>> FindPendingTrades(int year)
         {
-            var response =  await _api.GetPendingTrades(year);
+            var DTOs = new List<PendingTradeDTO>();
+            var responses = new List<Task<HttpResponseMessage>>();
+            for (int i = 2; i < 13; i++)
+            {
+                string franchiseNum = i.ToString("D4");
+                responses.Add(_api.GetPendingTrades(year, franchiseNum));
+            }
+            await Task.WhenAll(responses);
             var deserializer = new JsonResponseDeserializer();
             var info = new ResponseDeserializerInfo();
-            var resString = string.Empty;
-            var bodyContent = response.Content.ReadAsStreamAsync().ContinueWith(t =>
+
+            foreach (var task in responses)
+            {
+                var response = task.Result;
+                var resString = string.Empty;
+                var bodyContent = response.Content.ReadAsStreamAsync().ContinueWith(t =>
                 {
                     var streamRes = t.Result;
                     using (var reader = new StreamReader(streamRes))
@@ -155,22 +167,24 @@ namespace DeadCapTracker
                         resString = reader.ReadToEnd();
                     }
                 }); //response.StringContent;
-            bodyContent.Wait();
-            var DTOs = new List<PendingTradeDTO>();
-            
-            if (resString.Contains("pendingTrade\":["))
-            {
-                //TODO: parse response as JObject instead?? newtonsoft.json
-                var tradesList = deserializer.Deserialize<MflPendingTradesListRoot>(resString, response, info);
-                DTOs = _mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(tradesList.pendingTrades.PendingTrade);
-            } 
-            else if (resString.Contains("pendingTrade\":{"))
-            {
-                var singleTrade = deserializer.Deserialize<MflPendingSingleTradeRoot>(resString, response, info);
-                var singleDTO = _mapper.Map<MflPendingTrade, PendingTradeDTO>(singleTrade.pendingTrades.PendingTrade);
-                DTOs.Add(singleDTO);
+                bodyContent.Wait();
+                if (resString.Contains("pendingTrade\":["))
+                {
+                    //TODO: parse response as JObject instead?? newtonsoft.json
+                    var tradesList = deserializer.Deserialize<MflPendingTradesListRoot>(resString, response, info);
+                    var multiTrades = _mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(tradesList.pendingTrades.PendingTrade);
+                    DTOs.AddRange(multiTrades);
+                } 
+                else if (resString.Contains("pendingTrade\":{"))
+                {
+                    var singleTrade = deserializer.Deserialize<MflPendingSingleTradeRoot>(resString, response, info);
+                    var singleDTO = _mapper.Map<MflPendingTrade, PendingTradeDTO>(singleTrade.pendingTrades.PendingTrade);
+                    DTOs.Add(singleDTO);
+                }
             }
-            return DTOs;
+
+            //select only unique trade ids
+            return DTOs.GroupBy(t => t.tradeId).Select(t => t.First()).ToList();
         }
         
         public async Task<List<FranchiseDTO>> UpdateFranchises(int year)
@@ -217,6 +231,7 @@ namespace DeadCapTracker
         }
         public async Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year)
         {
+            
             var rawMfl = await _api.GetFreeAgents(year);
             var freeAgents = rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
             

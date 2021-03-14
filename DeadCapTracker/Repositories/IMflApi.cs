@@ -19,8 +19,8 @@ namespace DeadCapTracker.Repositories
         [Get("{year}/export?TYPE=leagueStandings&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
         Task<MflStandingsParent> GetStandings([Path] int year);
         
-        [Get("{year}/export?TYPE=pendingTrades&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&FRANCHISE_ID=&JSON=1")]
-        Task<HttpResponseMessage> GetPendingTrades([Path] int year);
+        [Get("{year}/export?TYPE=pendingTrades&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&FRANCHISE_ID={franchiseNum}&JSON=1")]
+        Task<HttpResponseMessage> GetPendingTrades([Path] int year, [Path] string franchiseNum);
 
         [Get("{year}/export?TYPE=freeAgents&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
         Task<MflAgentsParent> GetFreeAgents([Path] int year);

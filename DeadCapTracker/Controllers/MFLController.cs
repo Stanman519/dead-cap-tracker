@@ -1,12 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DeadCapTracker.Models;
-using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using RestEase;
 
 namespace DeadCapTracker.Controllers
 {
