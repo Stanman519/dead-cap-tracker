@@ -131,7 +131,7 @@ namespace DeadCapTracker
             var transactionList = results.salaryAdjustments.salaryAdjustment;
             transactionList = SortTransactions(transactionList);
             var DTOs = _mapper.Map<List<MflTransaction>, List<TransactionDTO>>(transactionList);
-            DTOs.ForEach(d => d.YearOfTransaction = year);
+            DTOs.ForEach(d => d.YearOfTransaction = d.Timestamp.Year);
             latestTransId = efdb.Transactions.OrderByDescending(t => t.Transactionid).Take(1).FirstOrDefault()?.Transactionid ?? 0;
             //this filter should be in a service.  keep each layer simpler
             var newEntities = _mapper.Map<List<TransactionDTO>, List<Transaction>>(DTOs).Where(t => t.Transactionid > latestTransId);
