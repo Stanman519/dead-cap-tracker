@@ -18,7 +18,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="" />
+    <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionProfile.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,7 +59,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflTransaction.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionDTOProfile.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker.Tests/Profiles/TransactionProfileTests.cs" />
         <option value="$PROJECT_DIR$/ConsoleApp1/Program.cs" />
@@ -107,6 +109,7 @@
         <option value="$PROJECT_DIR$/DeadCapTracker/Models/Transaction.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" />
+        <option value="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionProfile.cs" />
       </list>
     </option>
   </component>
@@ -400,7 +403,7 @@
       <workItem from="1615314199900" duration="1530000" />
       <workItem from="1615749519993" duration="5873000" />
       <workItem from="1615985245054" duration="2541000" />
-      <workItem from="1617646629872" duration="4275000" />
+      <workItem from="1617646629872" duration="4747000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
