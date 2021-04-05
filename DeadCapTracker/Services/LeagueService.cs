@@ -132,7 +132,7 @@ namespace DeadCapTracker
             transactionList = SortTransactions(transactionList);
             var DTOs = _mapper.Map<List<MflTransaction>, List<TransactionDTO>>(transactionList);
             DTOs.ForEach(d => d.YearOfTransaction = d.Timestamp.Year);
-            DTOs.ForEach(d => d.TransactionId = year * 10 + d.TransactionId);
+            DTOs.ForEach(d => d.TransactionId = (year * 10) + d.TransactionId);
             latestTransId = efdb.Transactions.OrderByDescending(t => t.Transactionid).Take(1).FirstOrDefault()?.Transactionid ?? 0;
             //this filter should be in a service.  keep each layer simpler
             //prepend the trans id with the year and a leading 0
