@@ -7,6 +7,7 @@ namespace DeadCapTracker.Models
 {
     public partial class Transaction
     {
+        public int GlobalId { get; set; }
         public DateTime? Timestamp { get; set; }
         public int Transactionid { get; set; }
         public int Franchiseid { get; set; }

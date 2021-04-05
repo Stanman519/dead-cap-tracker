@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "1MF7OhIdS1Ca2ZpmHC+QP7Ca8BlSj4w0mZhRNr8syAShrDBOsvlPlDYnbPObZY8npmI5dvIBOtbJnh/JLP2b0w==",
+  "dgSpecHash": "QdEEjbXatEnkIsoGpubgGloRXVLvk2Q7zcDn5PhKcy0FKWhDnwStuDfL4ep2yh1d6fT4ZYL9cdi5lozoFPu34w==",
   "success": true,
   "projectFilePath": "/Users/dks0584182/Documents/Heroku/Ryan-passion-project/DeadCapTracker.Tests/DeadCapTracker.Tests.csproj",
   "expectedPackageFiles": [
@@ -191,7 +191,8 @@
     "/Users/dks0584182/.nuget/packages/xunit.core/2.4.0/xunit.core.2.4.0.nupkg.sha512",
     "/Users/dks0584182/.nuget/packages/xunit.extensibility.core/2.4.0/xunit.extensibility.core.2.4.0.nupkg.sha512",
     "/Users/dks0584182/.nuget/packages/xunit.extensibility.execution/2.4.0/xunit.extensibility.execution.2.4.0.nupkg.sha512",
-    "/Users/dks0584182/.nuget/packages/xunit.runner.visualstudio/2.4.0/xunit.runner.visualstudio.2.4.0.nupkg.sha512"
+    "/Users/dks0584182/.nuget/packages/xunit.runner.visualstudio/2.4.0/xunit.runner.visualstudio.2.4.0.nupkg.sha512",
+    "/Users/dks0584182/.nuget/packages/microsoft.aspnetcore.app.ref/3.1.10/microsoft.aspnetcore.app.ref.3.1.10.nupkg.sha512"
   ],
   "logs": []
 }

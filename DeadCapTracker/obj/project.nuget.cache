@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "gdzbsN0xSdGWSklYZsLjRGL3ur4JYhi1OEES22f2PXNQBo677pObaHl85a3sCy1CvfBfWGR/cd+WNHZO67WVsQ==",
+  "dgSpecHash": "Sz0Iwukb7QRiApcCRnFBg2b01AjeQ+vv6LqPohXWznPpDdg/OUbZUyCzXb2c1mCEnUu8cj2T99e3HbgwFJSq4A==",
   "success": true,
   "projectFilePath": "/Users/dks0584182/Documents/Heroku/Ryan-passion-project/DeadCapTracker/DeadCapTracker.csproj",
   "expectedPackageFiles": [
@@ -182,7 +182,8 @@
     "/Users/dks0584182/.nuget/packages/system.threading.thread/4.0.0/system.threading.thread.4.0.0.nupkg.sha512",
     "/Users/dks0584182/.nuget/packages/system.threading.timer/4.3.0/system.threading.timer.4.3.0.nupkg.sha512",
     "/Users/dks0584182/.nuget/packages/system.xml.readerwriter/4.3.0/system.xml.readerwriter.4.3.0.nupkg.sha512",
-    "/Users/dks0584182/.nuget/packages/system.xml.xdocument/4.3.0/system.xml.xdocument.4.3.0.nupkg.sha512"
+    "/Users/dks0584182/.nuget/packages/system.xml.xdocument/4.3.0/system.xml.xdocument.4.3.0.nupkg.sha512",
+    "/Users/dks0584182/.nuget/packages/microsoft.aspnetcore.app.ref/3.1.10/microsoft.aspnetcore.app.ref.3.1.10.nupkg.sha512"
   ],
   "logs": []
 }
