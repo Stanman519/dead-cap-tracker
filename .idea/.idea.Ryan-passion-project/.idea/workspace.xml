@@ -20,6 +20,8 @@
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,11 +106,11 @@
         <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflFranchiseStandings.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Profiles/ManualMapService.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Profiles/TeamStandingsDTOProfile.cs" />
-        <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Startup.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Models/Transaction.cs" />
         <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
+        <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" />
       </list>
     </option>
   </component>
@@ -402,7 +404,7 @@
       <workItem from="1615314199900" duration="1530000" />
       <workItem from="1615749519993" duration="5873000" />
       <workItem from="1615985245054" duration="2541000" />
-      <workItem from="1617646629872" duration="2711000" />
+      <workItem from="1617646629872" duration="3811000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
@@ -1170,13 +1172,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs</url>
-          <line>83</line>
+          <line>89</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" initialLine="82">
             <startOffsets>
-              <option value="3197" />
+              <option value="3453" />
             </startOffsets>
             <endOffsets>
-              <option value="3239" />
+              <option value="3495" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="11" />

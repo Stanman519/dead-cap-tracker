@@ -22,6 +22,7 @@ namespace DeadCapTracker
         Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year);
         Task<List<DeadCapData>> GetDeadCapData();
         Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year);
+        List<TransactionDTO> GetAllTransactions();
     }
     
     public class LeagueService : ILeagueService
@@ -78,6 +79,11 @@ namespace DeadCapTracker
                 return returnData;
         }
 
+        public List<TransactionDTO> GetAllTransactions()
+        {
+            var res = efdb.Transactions.ToList();
+            return _mapper.Map<List<Transaction>, List<TransactionDTO>>(res);
+        }
         public async Task<List<TeamStandings>> GetStandings(int year)
         {
             var manualMapper = new ManualMapService();
