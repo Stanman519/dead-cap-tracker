@@ -19,48 +19,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/shelf/Uncommitted_changes_before_Checkout_at_2_10_21,_8_34_AM_[Default_Changelist]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/shelf/Uncommitted_changes_before_Checkout_at_2_10_21__8_34_AM__Default_Changelist_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/shelf/Uncommitted_changes_before_Checkout_at_2_5_21,_11_27_AM_[Default_Changelist]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/shelf/Uncommitted_changes_before_Checkout_at_2_5_21__11_27_AM__Default_Changelist_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/DeadCapTracker.Tests.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/DeadCapTracker.Tests.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/DeadCapTracker.Tests.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/DeadCapTracker.Tests.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/bin/Debug/netcoreapp3.1/appsettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/DeadCapTracker.Tests.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/DeadCapTracker.Tests.csproj.nuget.dgspec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/DeadCapTracker.Tests.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/DeadCapTracker.Tests.csproj.nuget.g.props" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.assets.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csproj.FileListAbsolute.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.genruntimeconfig.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.genruntimeconfig.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/project.assets.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/project.nuget.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/project.packagespec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/rider.project.restore.info" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/Transaction.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/Transaction.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.runtimeconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.runtimeconfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/Properties/launchSettings.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/DeadCapTracker.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/DeadCapTracker.csproj.nuget.dgspec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/DeadCapTracker.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/DeadCapTracker.csproj.nuget.g.props" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.assets.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.FileListAbsolute.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.genruntimeconfig.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.genruntimeconfig.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/project.assets.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/project.nuget.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/project.packagespec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/rider.project.restore.info" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -443,7 +402,7 @@
       <workItem from="1615314199900" duration="1530000" />
       <workItem from="1615749519993" duration="5873000" />
       <workItem from="1615985245054" duration="2541000" />
-      <workItem from="1617646629872" duration="1960000" />
+      <workItem from="1617646629872" duration="2711000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
