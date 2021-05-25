@@ -242,15 +242,27 @@ namespace DeadCapTracker
             
             var rawMfl = await _api.GetFreeAgents(year);
             var freeAgents = rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
-            
+            var freeAgents1 = new List<MflPlayer>();
+            var freeAgents2 = new List<MflPlayer>();
+
             // get names via other get call
-            string queryParam = "";
+            string queryParam1 = "";
+            string queryParam2 = "";
 
-            freeAgents.ForEach(p => queryParam = $"{queryParam}{p.Id},");
 
-            var playerDetails = await _globalApi.GetPlayerDetails(year, queryParam);
+            freeAgents1 = freeAgents.GetRange(0, (int) Math.Floor(((decimal) freeAgents.Count) / 2));
+            freeAgents2 = freeAgents.GetRange((int) Math.Floor(((decimal) freeAgents.Count) / 2), (freeAgents.Count) - (int) Math.Floor(((decimal) freeAgents.Count) / 2));
 
-            var playerDetailsList = playerDetails.playerProfiles.playerProfile.ToList();
+            freeAgents1.ForEach(p => queryParam1 = $"{queryParam1}{p.Id},");
+            freeAgents2.ForEach(p => queryParam2 = $"{queryParam2}{p.Id},");
+
+
+            var playerDetails1 = await _globalApi.GetPlayerDetails(year, queryParam1);
+            var playerDetails2 = await _globalApi.GetPlayerDetails(year, queryParam2);
+
+
+            var playerDetailsList = playerDetails1.playerProfiles.playerProfile.ToList();
+            playerDetailsList.AddRange(playerDetails2.playerProfiles.playerProfile.ToList());
             //map to DTO
 
             var DTOs = _mapper.Map<List<MflPlayerProfile>, List<PlayerDetailsDTO>>(playerDetailsList);
