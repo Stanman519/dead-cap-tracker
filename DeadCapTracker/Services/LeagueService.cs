@@ -61,10 +61,15 @@ namespace DeadCapTracker
                     }).ToList();
                 
                 // go through each transaction - add up amount for each year
-                allTransactions.GroupBy(t => t.FranchiseId)
+                var distinct = allTransactions.GroupBy(t => t.FranchiseId)
                     .Select(grp => grp.First())
                     .Select(t => new DeadCapData(t.FranchiseId, t.TeamName))
                     .ToList();
+                
+                distinct.ForEach(t =>
+                {
+                    returnData.Add(new DeadCapData(t.FranchiseId, t.Team));
+                });
                 
                 allTransactions.ForEach(t =>
                 {
