@@ -17,10 +17,10 @@ namespace DeadCapTracker.Models
 
         public void AddPenalties(int yearOfTransaction, decimal amount, int numOfYears)
         {
-            var indeciesRequired = yearOfTransaction + numOfYears - 2020;
-            if (Amount.Count < indeciesRequired)
+            var indicesRequired = yearOfTransaction + numOfYears - 2020;
+            if (Amount.Count < indicesRequired)
             {
-                var addsNeeded = indeciesRequired - Amount.Count;
+                var addsNeeded = indicesRequired - Amount.Count;
                 for (int x = 0; x < addsNeeded; x++)
                 {
                     Amount.Add(0);

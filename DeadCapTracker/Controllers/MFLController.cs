@@ -30,15 +30,13 @@ namespace DeadCapTracker.Controllers
         [HttpGet("franchises/{year}")]
         public async Task<List<FranchiseDTO>> GetFranchises(int year)
         {
-            var franchiseList = await _leagueService.UpdateFranchises(year);
-            return franchiseList;
+            return await _leagueService.UpdateFranchises(year);
         }
         
         [HttpGet("standings/{year}")]
         public async Task<List<TeamStandings>> GetStandings(int year)
         {
-            var franchiseList = await _leagueService.GetStandings(year);
-            return franchiseList;
+            return await _leagueService.GetStandings(year);
         }
 
         [HttpGet("pendingTrades/{year}")]

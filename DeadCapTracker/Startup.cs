@@ -52,7 +52,8 @@ namespace DeadCapTracker
             services.AddAutoMapper(typeof(Startup));
             
             //pull in connection string
-             var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            var databaseUrl =
+                @"postgres://xhnlfkdajqdqbw:1579aa856e474268243f3b0c049dbf7395766298730f3407c78537851dcd9779@ec2-35-174-118-71.compute-1.amazonaws.com:5432/d1ea1gn980l2dr";//Environment.GetEnvironmentVariable("DATABASE_URL");
              var databaseUri = new Uri(databaseUrl);
              var userInfo = databaseUri.UserInfo.Split(':');
             
@@ -71,7 +72,7 @@ namespace DeadCapTracker
             services.AddDbContext<DeadCapTrackerContext>(
                 options =>
                 {
-                    options.UseNpgsql(builder.ToString());
+                    options.UseNpgsql(builder.ConnectionString);
                     // options.UseNpgsql((string) Configuration.GetValue(typeof(string),
                     //     "DatabaseOptions:ConnectionString"));
                 });

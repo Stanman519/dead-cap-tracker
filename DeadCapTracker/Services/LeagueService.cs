@@ -30,22 +30,22 @@ namespace DeadCapTracker
         private IMflApi _api;
         private IGlobalMflApi _globalApi;
         private readonly IMapper _mapper;
-        private DeadCapTrackerContext efdb;
+        private DeadCapTrackerContext _context;
 
         public LeagueService(IMflApi api, IMapper mapper, IGlobalMflApi globalApi, DeadCapTrackerContext context)
         {
             _api = api;
             _mapper = mapper;
             _globalApi = globalApi;
-            efdb = context;
+            _context = context;
         }
 
         public async Task<List<DeadCapData>> GetDeadCapData()
         {
             var returnData = new List<DeadCapData>();
             //get all transactions from table and join with franchise to have team names
-            var transactions =  efdb.Transactions.ToList();
-            var franchises = efdb.Franchises.ToList();
+            var transactions =  _context.Transactions.ToList();
+            var franchises = _context.Franchises.ToList();
             var allTransactions = (
                 from t in transactions
                 join f in franchises on t.Franchiseid equals f.Franchiseid into penalties
@@ -61,15 +61,11 @@ namespace DeadCapTracker
                     }).ToList();
                 
                 // go through each transaction - add up amount for each year
-                var distinct = allTransactions.GroupBy(t => t.FranchiseId)
+                allTransactions.GroupBy(t => t.FranchiseId)
                     .Select(grp => grp.First())
+                    .Select(t => new DeadCapData(t.FranchiseId, t.TeamName))
                     .ToList();
                 
-                distinct.ForEach(t =>
-                {
-                    returnData.Add(new DeadCapData(t.FranchiseId, t.TeamName));
-                });
-
                 allTransactions.ForEach(t =>
                 {
                     //get year, then get length.  add ammount to list for each year in that span. 0 = 2020
@@ -81,13 +77,12 @@ namespace DeadCapTracker
 
         public List<TransactionDTO> GetAllTransactions()
         {
-            var res = efdb.Transactions.ToList();
+            var res = _context.Transactions.ToList();
             return _mapper.Map<List<Transaction>, List<TransactionDTO>>(res);
         }
         public async Task<List<TeamStandings>> GetStandings(int year)
         {
             var manualMapper = new ManualMapService();
-            var standings = new List<TeamStandings>();
             //figure out what year of the 3 year group we are in then make api calls based on that
             //year 1 is a 1 year 2 is a 2 year 3 is a 0
             var modYear = year % 3;
@@ -103,9 +98,7 @@ namespace DeadCapTracker
                 res2 = await _api.GetStandings(yearArr[1]);
             }
             catch (Exception e)
-            {
-                // ignored
-            }
+            { /* ignore */ }
 
             try
             {
@@ -114,38 +107,32 @@ namespace DeadCapTracker
             catch (Exception e) { }
 
             var franchiseListYr1 = res1.LeagueStandings.Franchise;
-            if (res2?.LeagueStandings != null) {franchiseListYr2 = res2.LeagueStandings.Franchise;}
-            if (res3?.LeagueStandings != null) {franchiseListYr3 = res3.LeagueStandings.Franchise;}
+            if (res2?.LeagueStandings != null) 
+                franchiseListYr2 = res2.LeagueStandings.Franchise;
+            if (res3?.LeagueStandings != null) 
+                franchiseListYr3 = res3.LeagueStandings.Franchise;
             if (res2?.LeagueStandings == null)
-            {
                 return manualMapper.MapOneYearStandings(franchiseListYr1);
-            }
-            else if(res3?.LeagueStandings == null)
-            {
+            if(res3?.LeagueStandings == null)
                 return manualMapper.MapTwoYearStandings(franchiseListYr1, franchiseListYr2);
-            }
-            else 
-            {
-                return manualMapper.MapThreeYearStandings(franchiseListYr1, franchiseListYr2, franchiseListYr3);
-            }
+
+            return manualMapper.MapThreeYearStandings(franchiseListYr1, franchiseListYr2, franchiseListYr3);
         }
 
         public async Task<List<TransactionDTO>> GetTransactions(int year)
         {
-            var latestTransId = 0;
-            var results = await _api.GetTransactions(year);
-            var transactionList = results.salaryAdjustments.salaryAdjustment;
+            var transactionList = (await _api.GetTransactions(year)).salaryAdjustments.salaryAdjustment;
             transactionList = SortTransactions(transactionList);
             var DTOs = _mapper.Map<List<MflTransaction>, List<TransactionDTO>>(transactionList);
             DTOs.ForEach(d => d.YearOfTransaction = d.Timestamp.Year);
             DTOs.ForEach(d => d.TransactionId = (year * 1000) + d.TransactionId);
-            latestTransId = efdb.Transactions.OrderByDescending(t => t.Transactionid).Take(1).FirstOrDefault()?.Transactionid ?? 0;
+            var latestTransId = _context.Transactions.OrderByDescending(t => t.Transactionid).Take(1).FirstOrDefault()?.Transactionid ?? 0;
             //this filter should be in a service.  keep each layer simpler
 
             var newEntities = _mapper.Map<List<TransactionDTO>, List<Transaction>>(DTOs).Where(t => t.Transactionid > latestTransId);
             //these should live in the repository layer
-            await efdb.Transactions.AddRangeAsync(newEntities);
-            await efdb.SaveChangesAsync();
+            await _context.Transactions.AddRangeAsync(newEntities);
+            await _context.SaveChangesAsync();
 
             return DTOs;
         }
@@ -201,14 +188,14 @@ namespace DeadCapTracker
             var allFranchises = leagueInfo.League.Franchises.Franchise;
             var DTOs = _mapper.Map<List<MflFranchise>, List<FranchiseDTO>>(allFranchises);
 
-            var existingFranchiseIds = efdb.Franchises
+            var existingFranchiseIds = _context.Franchises
                                                 .OrderBy(f => f.Franchiseid)
                                                 .Select(f => f.Franchiseid)
                                                 .ToList();
             var newFranchises = _mapper.Map<List<FranchiseDTO>, List<Franchise>>(DTOs).Where(_ => (!existingFranchiseIds.Contains(_.Franchiseid))).ToList();
 
-            await efdb.Franchises.AddRangeAsync(newFranchises);
-            await efdb.SaveChangesAsync();
+            await _context.Franchises.AddRangeAsync(newFranchises);
+            await _context.SaveChangesAsync();
             
             return DTOs;
         }

@@ -33,7 +33,7 @@ namespace DeadCapTracker.Profiles
             var t = new List<TeamStandings>();
             foreach (var o in one)
             {
-                var yearTwo = two.Where(_ => Int32.Parse(_.id) == Int32.Parse(o.id)).First();
+                var yearTwo = two.First(_ => Int32.Parse((string) _.id) == Int32.Parse(o.id));
                 var team = new TeamStandings
                 {
                     FranchiseId = Int32.Parse(o.id),
@@ -45,7 +45,7 @@ namespace DeadCapTracker.Profiles
                     // AllPlayWins1 = Int32.Parse(o.all_play_w),
                     PointsFor1 = Decimal.Parse(o.pf), 
                     H2hLosses2 = Int32.Parse(yearTwo.h2hl),
-                    H2hWins2 = Int32.Parse(yearTwo.h2hw),
+                    H2hWins2 = Int32.Parse(yearTwo.h2hw) + (Int32.Parse(yearTwo.vp) - (Int32.Parse(yearTwo.h2hw) * 2)),
                     // VictoryPoints2 = Int32.Parse(yearTwo.vp),
                     // AllPlayLosses2 = Int32.Parse(yearTwo.all_play_l),
                     // AllPlayTies2 = Int32.Parse(yearTwo.all_play_t),
@@ -76,14 +76,14 @@ namespace DeadCapTracker.Profiles
                     // AllPlayWins1 = Int32.Parse(o.all_play_w),
                     PointsFor1 = Decimal.Parse(o.pf), 
                     H2hLosses2 = Int32.Parse(yearTwo.h2hl),
-                    H2hWins2 = Int32.Parse(yearTwo.h2hw),
+                    H2hWins2 = Int32.Parse(yearTwo.h2hw) + (Int32.Parse(yearTwo.vp) - (Int32.Parse(yearTwo.h2hw) * 2)),
                     // VictoryPoints2 = Int32.Parse(yearTwo.vp),
                     // AllPlayLosses2 = Int32.Parse(yearTwo.all_play_l),
                     // AllPlayTies2 = Int32.Parse(yearTwo.all_play_t),
                     // AllPlayWins2 = Int32.Parse(yearTwo.all_play_w),
                     PointsFor2 = Decimal.Parse(yearTwo.pf),
                     H2hLosses3 = Int32.Parse(yearThree.h2hl),
-                    H2hWins3 = Int32.Parse(yearThree.h2hw),
+                    H2hWins3 = Int32.Parse(yearThree.h2hw) + (Int32.Parse(yearThree.vp) - (Int32.Parse(yearThree.h2hw) * 2)),
                     // VictoryPoints3 = Int32.Parse(yearThree.vp),
                     // AllPlayLosses3 = Int32.Parse(yearThree.all_play_l),
                     // AllPlayTies3 = Int32.Parse(yearThree.all_play_t),
