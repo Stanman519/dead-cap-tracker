@@ -20,6 +20,12 @@
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/ManualMapService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/ManualMapService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,6 +57,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/AE604AFE-B657-4617-A94D-F2A743C6288E/95/IMapper.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/87C7963D-8EAF-4D66-9D4A-6CE8385B67C4/B/ConfigureServicesBuilder.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/7D4EC089-175C-434C-89DB-7DCF04F93318/96/99e3f652/RestClient.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/dks0584182/Documents/Heroku/Ryan-passion-project/DeadCapTracker/Profiles/ManualMapService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/EB067793-5C3F-4219-AEF1-3AB117C20649/1D8/ExceptionDispatchInfo.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../PassionProj/DeadCapTracker/Ryan-passion-project/DeadCapTracker.Tests/Profiles/TransactionProfileTests.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/DeadCapTracker.Tests/Services/TransactionServiceTests.cs" root0="FORCE_HIGHLIGHTING" />
@@ -63,9 +70,9 @@
     <changedPaths>
       <option value="$PROJECT_DIR$/DeadCapTracker/Startup.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/DeadCapData.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflFranchiseStandings.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Profiles/ManualMapService.cs" />
     </changedPaths>
   </component>
@@ -77,7 +84,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="DatabaseDriversLRU" value="postgresql" />
-    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.215311" />
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.21532258" />
     <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -373,7 +380,8 @@
       <workItem from="1628258991431" duration="1171000" />
       <workItem from="1631029726594" duration="292000" />
       <workItem from="1631124519022" duration="1152000" />
-      <workItem from="1631631871435" duration="2834000" />
+      <workItem from="1631631871435" duration="3516000" />
+      <workItem from="1632237198781" duration="549000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
@@ -770,13 +778,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs</url>
-          <line>246</line>
+          <line>251</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" initialLine="250" containingFunctionPresentation="method 'GetCurrentFreeAgents'">
             <startOffsets>
-              <option value="10914" />
+              <option value="11098" />
             </startOffsets>
             <endOffsets>
-              <option value="10988" />
+              <option value="11172" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="14" />
