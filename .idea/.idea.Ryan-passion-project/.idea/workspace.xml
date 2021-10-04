@@ -18,58 +18,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/ErrorMessage.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/GmMessage.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/GroupModel.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/GroupParent.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/MemberModel.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/Message.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/PendingTrade.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/Player.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/Salaries.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TYTScore.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeBait.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeTransaction.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflRostersRoot.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Repositories/IGroupMeApi.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Services/RumorService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/Profiles/FranchiseProfileTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/Profiles/FranchiseProfileTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/Profiles/TransactionProfileTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/Profiles/TransactionProfileTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/Services/TransactionServiceTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/Services/TransactionServiceTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/FranchiseDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/FranchiseDTO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/PendingTradeDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/PendingTradeDTO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/PlayerDetailsDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/PlayerDetailsDTO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/TeamStandingsDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/TeamStandingsDTO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/TransactionDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/TransactionDTO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/DeadCapData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/DeadCapData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/Franchise.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/Franchise.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/TeamStandings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TeamStandings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/Transaction.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/Transaction.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/FranchiseDTOProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/FranchiseDTOProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/FranchiseProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/FranchiseProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/ManualMapService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/ManualMapService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/PendingTradeDTOProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/PendingTradeDTOProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/PlayerDetailsDTOProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/PlayerDetailsDTOProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/TeamStandingsDTOProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/TeamStandingsDTOProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/TeamStandingsProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/TeamStandingsProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionDTOProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionDTOProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Repositories/DeadCapTrackerContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Repositories/DeadCapTrackerContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Startup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Startup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
-    </list>
+    <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -442,7 +391,7 @@
       <workItem from="1631124519022" duration="1152000" />
       <workItem from="1631631871435" duration="3516000" />
       <workItem from="1632237198781" duration="662000" />
-      <workItem from="1632944310613" duration="14541000" />
+      <workItem from="1632944310613" duration="15202000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>

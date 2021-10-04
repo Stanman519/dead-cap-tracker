@@ -61,11 +61,10 @@ namespace DeadCapTracker.Controllers
 
         [HttpPost("contractSearch/{year}")]
         public async Task<string> ContractSearch([FromBody] GmMessage message, int year)
-
-    {
-            if (!message.text.Contains("@The Cap'n"))
+        {
+            if (!message.text.ToLower().Contains("@the cap'n"))
                 return "Did not contain Cap'n tag.";
-            var capIndex = message.text.IndexOf("@The Cap'n", StringComparison.Ordinal);
+            var capIndex = message.text.ToLower().IndexOf("@the cap'n", StringComparison.Ordinal);
             var searchText = message.text.Remove(capIndex, 11);
             return await _groupMeService.FindAndPostContract(year, searchText.ToLower());
         }
