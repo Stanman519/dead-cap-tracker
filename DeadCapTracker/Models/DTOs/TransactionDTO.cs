@@ -1,6 +1,6 @@
 using System;
 
-namespace DeadCapTracker
+namespace DeadCapTracker.Models.DTOs
 {
     public class TransactionDTO
     {

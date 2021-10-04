@@ -1,4 +1,4 @@
-namespace DeadCapTracker
+namespace DeadCapTracker.Models.DTOs
 {
     public class TeamStandingsDTO
     {

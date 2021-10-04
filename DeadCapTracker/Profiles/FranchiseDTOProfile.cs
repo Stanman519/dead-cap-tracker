@@ -1,6 +1,7 @@
 using DeadCapTracker.Models.MFL;
 using AutoMapper;
 using DeadCapTracker.Models;
+using DeadCapTracker.Models.DTOs;
 
 namespace DeadCapTracker.Profiles
 {

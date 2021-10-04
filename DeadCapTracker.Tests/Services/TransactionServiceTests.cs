@@ -1,11 +1,8 @@
-using DeadCapTracker.Models.MFL;
-using System;
 using AutoMapper;
 using DeadCapTracker.Profiles;
 using DeadCapTracker.Repositories;
-using Xunit;
 
-namespace DeadCapTracker.Tests
+namespace DeadCapTracker.Tests.Services
 {
     public class TransactionServiceTests
     {

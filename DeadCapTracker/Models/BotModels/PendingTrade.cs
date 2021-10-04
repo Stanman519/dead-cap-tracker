@@ -1,9 +1,9 @@
 using System;
 
-namespace DeadCapTracker.Models.DTOs
+namespace DeadCapTracker.Models.BotModels
 {
-    public class PendingTradeDTO
-    {
+    public class PendingTrade
+    {        
         public int tradeId { get; set; }
         public int offeredTo { get; set; }
         public int offeringTeam { get; set; }
@@ -13,5 +13,6 @@ namespace DeadCapTracker.Models.DTOs
         public string willGiveUp { get; set; }
         public DateTime timeStamp { get; set; }
         public DateTime expires { get; set; }
+        
     }
 }

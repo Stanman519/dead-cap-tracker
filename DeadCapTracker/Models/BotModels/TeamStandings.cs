@@ -1,8 +1,7 @@
-namespace DeadCapTracker.Models
+namespace DeadCapTracker.Models.BotModels
 {
     public class TeamStandings
     {
-        //public string TeamName { get; set; }
         public int FranchiseId { get; set; }
         public decimal PointsFor1 { get; set; }
         public int H2hWins1 { get; set; }
@@ -25,6 +24,5 @@ namespace DeadCapTracker.Models
         public int AllPlayWins3 { get; set; }
         public int AllPlayLosses3 { get; set; }
         public int AllPlayTies3 { get; set; }
-        
     }
 }

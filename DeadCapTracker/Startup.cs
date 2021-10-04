@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RestEase;
 using AutoMapper;
+using DeadCapTracker.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -42,14 +43,18 @@ namespace DeadCapTracker
             services.AddSwaggerGen();
             services.AddSingleton(RestClient.For<IGlobalMflApi>("https://api.myfantasyleague.com"));
             services.AddSingleton(RestClient.For<IMflApi>("https://www64.myfantasyleague.com"));
+            services.AddSingleton(RestClient.For<IGroupMeApi>("https://api.groupme.com"));
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<ILeagueService, LeagueService>();
+            services.AddScoped<IGroupMeService, GroupMeService>();
+            services.AddScoped<IRumorService, RumorService>();
             //I dont know if i need this.
             // services.AddOptions();
             // services.Configure<DatabaseOptions>(Configuration.GetSection("DatabaseOptions"));
             //TODO : use config for value instead of hardcoding
 
             services.AddAutoMapper(typeof(Startup));
+            services.AddHttpClient();
             
             //pull in connection string
             var databaseUrl =

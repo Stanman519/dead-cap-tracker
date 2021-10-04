@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace DeadCapTracker.Models
+namespace DeadCapTracker.Models.BotModels
 {
     public class DeadCapData
     {

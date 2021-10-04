@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DeadCapTracker.Models;
+using DeadCapTracker.Models.BotModels;
 using Microsoft.EntityFrameworkCore;
 
 #nullable disable

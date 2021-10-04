@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 
 #nullable disable
 
-namespace DeadCapTracker.Models
+namespace DeadCapTracker.Models.BotModels
 {
     public partial class Transaction
     {

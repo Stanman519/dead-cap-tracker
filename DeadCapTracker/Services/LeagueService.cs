@@ -5,13 +5,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AutoMapper;
-using DeadCapTracker.Models;
+using DeadCapTracker.Models.BotModels;
+using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Profiles;
 using DeadCapTracker.Repositories;
 using RestEase;
 
-namespace DeadCapTracker
+namespace DeadCapTracker.Services
 {
     public interface ILeagueService
     {
@@ -207,7 +208,7 @@ namespace DeadCapTracker
 
         public async Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year)
         {
-            var salaries = await _api.GetSalaries(year);
+            var salaries = await _api.GetSalaries();
             var oneYearPlayers = salaries.Salaries.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
             
             // get names via other get call

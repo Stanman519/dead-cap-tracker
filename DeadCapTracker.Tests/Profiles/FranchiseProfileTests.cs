@@ -1,5 +1,6 @@
 using System;
 using AutoMapper;
+using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Profiles;
 using Xunit;

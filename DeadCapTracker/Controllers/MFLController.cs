@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DeadCapTracker.Models;
+using DeadCapTracker.Models.BotModels;
+using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Repositories;
+using DeadCapTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DeadCapTracker.Controllers
