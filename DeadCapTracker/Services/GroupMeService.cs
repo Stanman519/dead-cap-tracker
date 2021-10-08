@@ -18,6 +18,7 @@ namespace DeadCapTracker.Services
         public Task PostCompletedTradeToGroup();
         Task BotPost(string text);
         public Task<string> FindAndPostContract(int year, string nameSearch);
+        Task<string> FindAndPostLiveScores();
     }
     
     public class GroupMeService : IGroupMeService
@@ -300,6 +301,59 @@ namespace DeadCapTracker.Services
 
             await BotPost(stringForBot);
             return stringForBot;
+        }
+
+        public async Task<string> FindAndPostLiveScores()
+        {
+            var thisWeek = (await _mfl.GetMatchupSchedule()).schedule.weeklySchedule.First(_ =>
+                _.matchup.All(gm => gm.franchise.All(tm => tm.result == "T" && tm.score == null))).week;
+            var botText = "Live Scores (with live projections)\n";
+            var matchupScoresTask = _mfl.GetLiveScores(thisWeek);
+            var scoreProjectionsTask = _mfl.GetProjections(thisWeek);
+            await Task.WhenAll(new List<Task> {matchupScoresTask, scoreProjectionsTask});
+            var matchups = matchupScoresTask.Result.liveScoring.matchup;
+            var projections = scoreProjectionsTask.Result.projectedScores.playerScore;
+            matchups.ForEach(_ =>
+            {
+                owners.TryGetValue(Int32.Parse(_.franchise.First().id), out var tm1);
+                owners.TryGetValue(Int32.Parse(_.franchise.Last().id), out var tm2);
+                var success = Double.TryParse(_.franchise.First().score, out var tm1Score);
+                var success2 = Double.TryParse(_.franchise.Last().score, out var tm2Score);
+                
+                // go through all the "starter"s on each team and add up their projected score.
+                var tm1Starters = _.franchise.First().players.player.Where(p => p.status == "starter").ToList();
+                var tm2Starters = _.franchise.Last().players.player.Where(p => p.status == "starter").ToList();
+
+                tm1Starters.ForEach(s => s.origProjectedScore = projections.FirstOrDefault(p => p.id == s.id)?.score ?? "0");
+                tm2Starters.ForEach(s => s.origProjectedScore = projections.FirstOrDefault(p => p.id == s.id)?.score ?? "0");
+                
+                // for each player
+                // get % of game left for each player (out of 3600) multiply 
+                // add actual score + remaining projection
+                var tm1ProjectedScore = 0.0;
+                var tm2ProjectedScore = 0.0;
+                tm1Starters.ForEach(p =>
+                {
+                    var pctRemaining = Double.Parse(p.gameSecondsRemaining) / 3600;
+                    p.liveRemainingProjectedScore = Double.Parse(p.score) + (Double.Parse(p.origProjectedScore) * pctRemaining);
+                    tm1ProjectedScore += p.liveRemainingProjectedScore;
+                });
+                tm2Starters.ForEach(p =>
+                {
+                    var pctRemaining = Double.Parse(p.gameSecondsRemaining) / 3600;
+                    p.liveRemainingProjectedScore = Double.Parse(p.score) + (Double.Parse(p.origProjectedScore) * pctRemaining);
+                    tm2ProjectedScore += p.liveRemainingProjectedScore;
+                });
+                
+                if (!success || !success2) return;
+                tm1 += $": {tm1Score} ({tm1ProjectedScore.ToString("F")}) --- ";
+                tm2 += $": {tm2Score} ({tm2ProjectedScore.ToString("F")})";
+                botText += $"{tm1}{tm2}\n";
+                
+                
+            });
+            await BotPost(botText);
+            return botText;
         }
 
         private string InvertNameString(string commaName)

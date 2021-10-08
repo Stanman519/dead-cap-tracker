@@ -2,7 +2,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.MFL;
-using Microsoft.AspNetCore.Http;
 using RestEase;
 
 namespace DeadCapTracker.Repositories
@@ -47,5 +46,13 @@ namespace DeadCapTracker.Repositories
         [Get("{year}/export?TYPE=rosters&L=13894&APIKEY=&FRANCHISE=&W=&JSON=1")]
         Task<MflRostersRoot> GetRostersWithContracts([Path] int year);
 
+        [Get("2021/export?TYPE=liveScoring&L=13894&APIKEY=&W={weekNum}&DETAILS=&JSON=1")]
+        Task<LiveScoreRoot> GetLiveScores([Path] string weekNum);
+
+        [Get("2021/export?TYPE=projectedScores&L=13894&APIKEY=&W={weekNum}&PLAYERS=&POSITION=&STATUS=&COUNT=&JSON=1")]
+        Task<ProjectedScoresRoot> GetProjections([Path] string weekNum);
+
+        [Get("2021/export?TYPE=schedule&L=13894&APIKEY=&W=&F=&JSON=1")]
+        Task<ScheduleRoot> GetMatchupSchedule();
     }
 }
