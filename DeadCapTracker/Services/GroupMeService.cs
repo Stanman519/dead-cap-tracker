@@ -306,7 +306,7 @@ namespace DeadCapTracker.Services
         public async Task<string> FindAndPostLiveScores()
         {
             var thisWeek = (await _mfl.GetMatchupSchedule()).schedule.weeklySchedule.First(_ =>
-                _.matchup.All(gm => gm.franchise.All(tm => tm.result == "T" && tm.score == null))).week;
+                _.matchup.All(gm => gm.franchise.Any(tm => tm.result == "T" && tm.score == null))).week;
             var botText = "Live Scores (with live projections)\n";
             var matchupScoresTask = _mfl.GetLiveScores(thisWeek);
             var scoreProjectionsTask = _mfl.GetProjections(thisWeek);
