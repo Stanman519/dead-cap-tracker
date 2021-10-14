@@ -244,7 +244,7 @@ namespace DeadCapTracker.Services
                 foreach (var post in tradeBaits)
                 {
                     var postDate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(post.timestamp));
-                    if (postDate > DateTime.Now.AddDays(-1))
+                    if (postDate > DateTime.Now.AddMinutes(-11))
                     {
                         strForBot += _rumor.GetSources();
                         owners.TryGetValue(Int32.Parse(post.franchise_id), out var ownerName);
@@ -307,7 +307,7 @@ namespace DeadCapTracker.Services
         {
             var thisWeek = (await _mfl.GetMatchupSchedule()).schedule.weeklySchedule.First(_ =>
                 _.matchup.All(gm => gm.franchise.Any(tm => tm.result == "T" && tm.score == null))).week;
-            var botText = "Live Scores (with live projections)\n";
+            var botText = "Live Scores (Live Projections)\n";
             var matchupScoresTask = _mfl.GetLiveScores(thisWeek);
             var scoreProjectionsTask = _mfl.GetProjections(thisWeek);
             await Task.WhenAll(new List<Task> {matchupScoresTask, scoreProjectionsTask});
@@ -346,9 +346,9 @@ namespace DeadCapTracker.Services
                 });
                 
                 if (!success || !success2) return;
-                tm1 += $": {tm1Score} ({tm1ProjectedScore.ToString("F")}) --- ";
-                tm2 += $": {tm2Score} ({tm2ProjectedScore.ToString("F")})";
-                botText += $"{tm1}{tm2}\n";
+                tm1 += $": {tm1Score} ({tm1ProjectedScore.ToString("F")})\n";
+                tm2 += $": {tm2Score} ({tm2ProjectedScore.ToString("F")})\n";
+                botText += $"{tm1}{tm2}\n-----\n";
                 
                 
             });
@@ -383,7 +383,4 @@ namespace DeadCapTracker.Services
             await _gmApi.SendMessage(message);
         }
     }
-    
-    
-    
 }
