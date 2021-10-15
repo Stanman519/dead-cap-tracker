@@ -348,7 +348,7 @@ namespace DeadCapTracker.Services
                 if (!success || !success2) return;
                 tm1 += $": {tm1Score} ({tm1ProjectedScore.ToString("F")})\n";
                 tm2 += $": {tm2Score} ({tm2ProjectedScore.ToString("F")})\n";
-                botText += $"{tm1}{tm2}\n-----\n";
+                botText += $"{tm1}{tm2}-----\n";
                 
                 
             });
