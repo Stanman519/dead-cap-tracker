@@ -271,22 +271,28 @@ namespace DeadCapTracker.Services
         public async Task<string> FindAndPostContract(int year, string nameSearch)
         {
             // get list of players on rosters
-            var rosters = (await _mfl.GetRostersWithContracts(year)).rosters.franchise.SelectMany(_ => _.player).ToList();
+            var rosters = (await _mfl.GetRostersWithContracts(year)).rosters.franchise;
+            var rosteredPlayers = rosters.SelectMany(_ => _.player).ToList();
             // build query string with all player ids in that list 
             var queryIds = "";
-            rosters.ForEach(player => queryIds = $"{queryIds}{player.id},");
+            rosteredPlayers.ForEach(player => queryIds = $"{queryIds}{player.id},");
 
             // get player details for that query
             var playerDetails = (await _mfl.GetBotPlayersDetails(queryIds)).players.player;
             // match the list of players with the list of contracts
-            rosters.ForEach(player =>
+            rosteredPlayers.ForEach(player =>
             {
                 var match = playerDetails.FirstOrDefault(p => p.id == player.id);
                 if (match != null)
                     player.name = InvertNameString(match.name);
             });
             // search through with the name search to find players with that string in their name
-            var hits = rosters.Where(p => p.name.Contains(nameSearch)).ToList();
+            var hits = rosteredPlayers.Where(p => p.name.Contains(nameSearch)).ToList();
+            hits.ForEach(p =>
+            {
+                var owner = rosters.FirstOrDefault(tm => tm.player.Any(_ => _.id == p.id));
+                p.owner = owner == null ? "" : owners.GetValueOrDefault(Int32.Parse(owner.id));
+            });
             // bot post those names and contracts
             var stringForBot = "";
             if (!hits.Any())
@@ -295,7 +301,7 @@ namespace DeadCapTracker.Services
             {
                 hits.ForEach(p =>
                 {
-                    stringForBot = $"{stringForBot}{p.name} - ${p.salary}/{p.contractYear}\n";
+                    stringForBot = $"{stringForBot}{p.name} - ${p.salary}/{p.contractYear} ({p.owner})\n";
                 });
             }
 
@@ -348,7 +354,7 @@ namespace DeadCapTracker.Services
                 if (!success || !success2) return;
                 tm1 += $": {tm1Score} ({tm1ProjectedScore.ToString("F")})\n";
                 tm2 += $": {tm2Score} ({tm2ProjectedScore.ToString("F")})\n";
-                botText += $"{tm1}{tm2}-----\n";
+                botText += $"-----\n{tm1}{tm2}";
                 
                 
             });
