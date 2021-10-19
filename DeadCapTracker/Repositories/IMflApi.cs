@@ -54,5 +54,8 @@ namespace DeadCapTracker.Repositories
 
         [Get("2021/export?TYPE=schedule&L=13894&APIKEY=&W=&F=&JSON=1")]
         Task<ScheduleRoot> GetMatchupSchedule();
+
+        [Get("2021/export?TYPE=players&L=13894&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1")]
+        Task<PlayersParent> GetAllMflPlayers();
     }
 }

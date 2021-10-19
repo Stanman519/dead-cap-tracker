@@ -12,6 +12,7 @@ namespace DeadCapTracker.Models.MFL
         public string id { get; set; }
         public string origProjectedScore { get; set; }
         public double liveRemainingProjectedScore { get; set; }
+        public string nflTeam { get; set; }
     }
 
     public class LiveScoringPlayers
@@ -28,6 +29,7 @@ namespace DeadCapTracker.Models.MFL
         public string playersYetToPlay { get; set; }
         public string score { get; set; }
         public string id { get; set; }
+        public string owner { get; set; }
     }
 
     public class Matchup

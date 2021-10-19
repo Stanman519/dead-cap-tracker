@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
+using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
 using RestEase;
 
@@ -19,12 +20,14 @@ namespace DeadCapTracker.Services
         Task BotPost(string text);
         public Task<string> FindAndPostContract(int year, string nameSearch);
         Task<string> FindAndPostLiveScores();
+        Task CheckLineupsForHoles();
     }
     
     public class GroupMeService : IGroupMeService
     {
         private IGroupMeApi _gmApi;
         private readonly IMflApi _mfl;
+        private readonly IGlobalMflApi _globalMflApi;
         private readonly ILeagueService _leagueService;
         private readonly IRumorService _rumor;
         private readonly IHttpClientFactory _clientFactory;
@@ -61,11 +64,12 @@ namespace DeadCapTracker.Services
             {12, "2513725"}
         };
         
-        public GroupMeService(IGroupMeApi gmApi, IMflApi mfl, ILeagueService leagueService, IRumorService rumor)
+        public GroupMeService(IGroupMeApi gmApi, IMflApi mfl, IGlobalMflApi globalMflApi, ILeagueService leagueService, IRumorService rumor)
         {
 
             _gmApi = gmApi;
             _mfl = mfl;
+            _globalMflApi = globalMflApi;
             _leagueService = leagueService;
             _rumor = rumor;
         }
@@ -307,6 +311,84 @@ namespace DeadCapTracker.Services
 
             await BotPost(stringForBot);
             return stringForBot;
+        }
+
+        public async Task CheckLineupsForHoles()
+        {
+            var thisWeek = (await _mfl.GetMatchupSchedule()).schedule.weeklySchedule.First(_ =>
+                _.matchup.All(gm => gm.franchise.Any(tm => tm.result == "T" && tm.score == null))).week;
+
+            // task when all get injuries and byes get scores with that week num
+            var scoresTask = _mfl.GetLiveScores(thisWeek);
+            var projectionsTask = _mfl.GetProjections(thisWeek);
+            var byesTask = _globalMflApi.GetByesForWeek(thisWeek);
+            var injuriesTask = _globalMflApi.GetInjuries(thisWeek);
+            var allPlayersTask = _mfl.GetAllMflPlayers();
+            var groupTask = _gmApi.GetMemberIds();
+
+            try
+            {
+                await Task.WhenAll(scoresTask, projectionsTask, injuriesTask, byesTask, allPlayersTask, groupTask);
+            }
+            catch (Exception e)
+            {
+                await BotPost("There was an issue retrieving the data.");
+                return;
+            }
+            
+            var memberList = groupTask.Result.response.members;
+            // go through starters for each team. make sure theres no OUT or BYE (could also check for other messages)
+
+            var teams = scoresTask.Result.liveScoring.matchup
+                .SelectMany(game => game.franchise)
+                .ToList();
+            var onlyStarters = teams.Select(tm => new LiveScoreFranchise
+            {
+                id = tm.id,
+                players = new LiveScoringPlayers
+                {
+                    player = tm.players.player.Where(p => p.status.ToLower() == "starter").ToList()
+                }
+            }).ToList();
+            var allPlayers = allPlayersTask.Result.players.player
+                .Where(p => p.position == "WR" || p.position == "QB" || p.position == "TE" || p.position == "RB").ToList();
+            var byesThisWeek = byesTask.Result.nflByeWeeks.team.Select(t => t.id).ToList();
+            var playersWhoAreOut = injuriesTask.Result.injuries.injury
+                .Where(p => p.status.ToLower() != "questionable" || p.status.ToLower() != "doubtful")
+                .Select(_ => _.id).ToList();
+            var projectedForZero =
+                projectionsTask.Result.projectedScores.playerScore
+                    .Where(p =>
+                    { 
+                        var success = Double.TryParse(p.score, out var score); 
+                        return success ? score == 0.0 : true;
+                    }).Select(_ => _.id).ToList();
+
+            onlyStarters.ForEach(async t =>
+            {
+                var botStr = "";
+                var hasBye = false;
+                var isOut = false;
+                var isZeroPoints = false;
+                
+                foreach (var player in t.players.player)
+                {
+                    //if (player.status == "nonstarter") return;
+                    player.nflTeam = allPlayers.FirstOrDefault(allPlayer => allPlayer.id == player.id)?.team;
+                    if (byesThisWeek.Contains(player.nflTeam)) hasBye = true;
+                    if (playersWhoAreOut.Contains(player.id)) isOut = true;
+                    if (projectedForZero.Contains(player.id)) isZeroPoints = true;
+                    if (hasBye || isOut || isZeroPoints)
+                    {
+                        var tagName = memberList.Find(m => m.user_id == memberIds[Int32.Parse(t.id)]);
+                        var tagString = $"@{tagName?.nickname}";
+                        botStr = ", your lineup is invalid";
+                        await BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
+                        return;
+                    }
+                }
+            });
+            //TODO: mark if tankin'?
         }
 
         public async Task<string> FindAndPostLiveScores()

@@ -64,7 +64,9 @@ namespace DeadCapTracker.Controllers
         {
             var isContractRequest = message.text.ToLower().StartsWith("#contract");
             var isScoresRequest = message.text.ToLower().StartsWith("#scores");
-            if (!isContractRequest && !isScoresRequest)
+            var isLineupChecker = message.text.ToLower().StartsWith("#lineups");
+            
+            if (!isContractRequest && !isScoresRequest && !isLineupChecker)
                 return null;
             if (isContractRequest)
             {
@@ -76,6 +78,11 @@ namespace DeadCapTracker.Controllers
             if (isScoresRequest)
             {
                 return await _groupMeService.FindAndPostLiveScores();
+            }
+
+            if (isLineupChecker)
+            {
+                await _groupMeService.CheckLineupsForHoles();
             }
 
             return null;
