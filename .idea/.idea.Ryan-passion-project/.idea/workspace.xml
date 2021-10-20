@@ -19,20 +19,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflInjuries.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflTeamByes.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflLiveScoring.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflLiveScoring.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Repositories/IGlobalMflApi.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Repositories/IGlobalMflApi.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -420,7 +410,8 @@
       <workItem from="1634228867338" duration="232000" />
       <workItem from="1634303771366" duration="648000" />
       <workItem from="1634561186403" duration="2741000" />
-      <workItem from="1634595214431" duration="11515000" />
+      <workItem from="1634595214431" duration="12750000" />
+      <workItem from="1634733272935" duration="1741000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
@@ -830,29 +821,29 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs</url>
-          <line>311</line>
+          <line>312</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs" initialLine="307" containingFunctionPresentation="method 'FindAndPostContract'">
             <startOffsets>
-              <option value="14351" />
+              <option value="14383" />
             </startOffsets>
             <endOffsets>
-              <option value="14379" />
+              <option value="14411" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs</url>
-          <line>373</line>
-          <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs" initialLine="373" containingFunctionPresentation="lambda expression inside method 'CheckLineupsForHoles'">
+          <line>477</line>
+          <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs" initialLine="470" containingFunctionPresentation="method 'BotPostWithTag'">
             <startOffsets>
-              <option value="17300" />
+              <option value="22470" />
             </startOffsets>
             <endOffsets>
-              <option value="17342" />
+              <option value="22504" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="20" />
+          <option name="timeStamp" value="22" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

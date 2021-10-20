@@ -21,6 +21,7 @@ namespace DeadCapTracker.Services
         public Task<string> FindAndPostContract(int year, string nameSearch);
         Task<string> FindAndPostLiveScores();
         Task CheckLineupsForHoles();
+        Task PostHelpMessage();
     }
     
     public class GroupMeService : IGroupMeService
@@ -386,6 +387,7 @@ namespace DeadCapTracker.Services
                         await BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
                         return;
                     }
+                    //TODO: see if not starting TEN!
                 }
             });
             //TODO: mark if tankin'?
@@ -449,6 +451,13 @@ namespace DeadCapTracker.Services
             if (string.IsNullOrEmpty(commaName)) return "";
             var nameArr = commaName.Split(",");
             return $"{nameArr[1]} {nameArr[0]}".ToLower();
+        }
+
+        public async Task PostHelpMessage()
+        {
+            var str = $"Check live scores with \"#scores\"\nCheck standings with \"#standings\"\n" +
+                      $"Check player contract with \"#contract playername\"\nCheck if lineups are valid with \"#lineups\"";
+            await BotPost(str);
         }
 
         public async Task BotPost(string text)

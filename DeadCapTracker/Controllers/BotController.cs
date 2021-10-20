@@ -62,12 +62,17 @@ namespace DeadCapTracker.Controllers
         [HttpPost("contractSearch/{year}")]
         public async Task<string> ContractSearch([FromBody] GmMessage message, int year)
         {
-            var isContractRequest = message.text.ToLower().StartsWith("#contract");
-            var isScoresRequest = message.text.ToLower().StartsWith("#scores");
-            var isLineupChecker = message.text.ToLower().StartsWith("#lineups");
+            var request = message.text.ToLower();
+            var isContractRequest = request.StartsWith("#contract");
+            var isScoresRequest = request.StartsWith("#scores");
+            var isLineupChecker = request.StartsWith("#lineups");
+            var isStandings = request.StartsWith("#standings");
+            var isHelp = request.StartsWith("#help");
             
-            if (!isContractRequest && !isScoresRequest && !isLineupChecker)
+            if (!isContractRequest && !isScoresRequest && !isLineupChecker && isStandings && !isHelp)
                 return null;
+            
+            
             if (isContractRequest)
             {
                 var capIndex = message.text.ToLower().IndexOf("#contract", StringComparison.Ordinal);
@@ -76,15 +81,14 @@ namespace DeadCapTracker.Controllers
             }
 
             if (isScoresRequest)
-            {
                 return await _groupMeService.FindAndPostLiveScores();
-            }
 
-            if (isLineupChecker)
-            {
-                await _groupMeService.CheckLineupsForHoles();
-            }
+            if (isLineupChecker) await _groupMeService.CheckLineupsForHoles();
 
+            if (isHelp) await _groupMeService.PostHelpMessage();
+
+            if (isStandings) await _groupMeService.PostStandingsToGroup(year);
+            
             return null;
         }
     }
