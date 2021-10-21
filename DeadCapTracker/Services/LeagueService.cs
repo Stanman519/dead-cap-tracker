@@ -21,7 +21,7 @@ namespace DeadCapTracker.Services
         Task<List<TeamStandings>> GetStandings(int year);
         Task<List<PendingTradeDTO>> FindPendingTrades(int year);
         Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year);
-        Task<List<DeadCapData>> GetDeadCapData();
+        List<DeadCapData> GetDeadCapData();
         Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year);
         List<TransactionDTO> GetAllTransactions();
     }
@@ -41,7 +41,7 @@ namespace DeadCapTracker.Services
             _context = context;
         }
 
-        public async Task<List<DeadCapData>> GetDeadCapData()
+        public List<DeadCapData> GetDeadCapData()
         {
             var returnData = new List<DeadCapData>();
             //get all transactions from table and join with franchise to have team names
@@ -75,7 +75,7 @@ namespace DeadCapTracker.Services
                 allTransactions.ForEach(t =>
                 {
                     //get year, then get length.  add ammount to list for each year in that span. 0 = 2020
-                    returnData.FirstOrDefault(_ => _.FranchiseId == t.FranchiseId).AddPenalties((int)t.TransactionYear, t.DeadAmount, t.NumOfYears);
+                    returnData.FirstOrDefault(_ => _.FranchiseId == t.FranchiseId)?.AddPenalties((int)t.TransactionYear, t.DeadAmount, t.NumOfYears);
                     
                 });
                 return returnData;
@@ -103,14 +103,14 @@ namespace DeadCapTracker.Services
             {
                 res2 = await _api.GetStandings(yearArr[1]);
             }
-            catch (Exception e)
+            catch (Exception)
             { /* ignore */ }
 
             try
             {
                 res3 = await _api.GetStandings(yearArr[2]);
             }
-            catch (Exception e) { }
+            catch (Exception) { }
 
             var franchiseListYr1 = res1.LeagueStandings.Franchise;
             if (res2?.LeagueStandings != null) 

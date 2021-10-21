@@ -44,9 +44,10 @@ namespace DeadCapTracker
             services.AddSingleton(RestClient.For<IGlobalMflApi>("https://api.myfantasyleague.com"));
             services.AddSingleton(RestClient.For<IMflApi>("https://www64.myfantasyleague.com"));
             services.AddSingleton(RestClient.For<IGroupMeApi>("https://api.groupme.com"));
+            services.AddSingleton(RestClient.For<IInsultApi>("https://evilinsult.com/"));
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<ILeagueService, LeagueService>();
-            services.AddScoped<IGroupMeService, GroupMeService>();
+            services.AddScoped<IGroupMeRequestService, GroupMeRequestRequestService>();
             services.AddScoped<IRumorService, RumorService>();
             //I dont know if i need this.
             // services.AddOptions();

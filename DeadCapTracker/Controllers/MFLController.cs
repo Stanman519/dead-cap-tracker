@@ -25,7 +25,7 @@ namespace DeadCapTracker.Controllers
             return await _leagueService.GetTransactions(year);
         }
         [HttpGet("allTransactions/")]
-        public async Task<List<TransactionDTO>> GetAllTransactions()
+        public List<TransactionDTO> GetAllTransactions()
         {
             return _leagueService.GetAllTransactions();
         }
@@ -61,9 +61,9 @@ namespace DeadCapTracker.Controllers
         }
         
         [HttpGet("deadCapInfo")]
-        public async Task<List<DeadCapData>> GetDeadCapPenalties()
+        public List<DeadCapData> GetDeadCapPenalties()
         {
-            return await _leagueService.GetDeadCapData();
+            return _leagueService.GetDeadCapData();
         }
 
     }

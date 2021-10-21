@@ -1,5 +1,21 @@
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+
 namespace DeadCapTracker.Models.MFL
 {
+    public class MflPendingTradesListRoot
+    {
+        public string Version { get; set; }
+        public MflPendingTradesListParent pendingTrades { get; set; }
+        public string Encoding { get; set; }
+    }
+    public class MflPendingTradesListParent
+    {
+        [JsonPropertyName("pendingTrade")]
+        public List<MflPendingTrade> PendingTrade { get; set; }
+        // [JsonPropertyName("pendingTrade")]
+        // public MflPendingTrade pendingTrade { get; set; }
+    }
     public class MflPendingTrade
     {
         public string trade_id { get; set; }

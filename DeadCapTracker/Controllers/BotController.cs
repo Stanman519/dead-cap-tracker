@@ -13,11 +13,11 @@ namespace DeadCapTracker.Controllers
     [Route("[controller]")]
     public class BotController : ControllerBase
     {
-        private IGroupMeService _groupMeService;
+        private IGroupMeRequestService _groupMeRequestService;
 
-        public BotController(IGroupMeService groupMeService)
+        public BotController(IGroupMeRequestService groupMeRequestService)
         {
-            _groupMeService = groupMeService;
+            _groupMeRequestService = groupMeRequestService;
         }
 
         [HttpGet("standings/{year}")]
@@ -25,7 +25,7 @@ namespace DeadCapTracker.Controllers
         {
             try
             {
-                return await _groupMeService.PostStandingsToGroup(year);
+                return await _groupMeRequestService.PostStandingsToGroup(year);
             }
             catch (Exception e)
             {
@@ -38,25 +38,25 @@ namespace DeadCapTracker.Controllers
         [HttpGet("pendingTrades/{year}")]
         public async Task<List<PendingTradeDTO>> PostTradeOffers(int year)
         {
-            return await _groupMeService.PostTradeOffersToGroup(year);
+            return await _groupMeRequestService.PostTradeOffersToGroup(year);
         }
 
         [HttpGet("tradeBait")]
         public async Task PostTradeRumor()
         {
-            await _groupMeService.PostTradeRumor();
+            await _groupMeRequestService.PostTradeRumor();
         }
 
         [HttpGet("completedTrades/{year}")]
         public async Task PostCompletedTrades(int year)
         {
-            await _groupMeService.PostCompletedTradeToGroup();
+            await _groupMeRequestService.PostCompletedTradeToGroup();
         }
 
         [HttpPost("auctionError")]
         public async Task PostCompletedTrades([FromBody] ErrorMessage error)
         {
-            await _groupMeService.BotPost(error.Message);
+            await _groupMeRequestService.BotPost(error.Message);
         }
 
         [HttpPost("contractSearch/{year}")]
@@ -67,9 +67,12 @@ namespace DeadCapTracker.Controllers
             var isScoresRequest = request.StartsWith("#scores");
             var isLineupChecker = request.StartsWith("#lineups");
             var isStandings = request.StartsWith("#standings");
+            var isCapSpace = request.StartsWith("#cap");
             var isHelp = request.StartsWith("#help");
+            var strayTag = request.StartsWith("@cap");
             
-            if (!isContractRequest && !isScoresRequest && !isLineupChecker && isStandings && !isHelp)
+            
+            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace)
                 return null;
             
             
@@ -77,18 +80,24 @@ namespace DeadCapTracker.Controllers
             {
                 var capIndex = message.text.ToLower().IndexOf("#contract", StringComparison.Ordinal);
                 var searchText = message.text.Remove(capIndex, 10);
-                return await _groupMeService.FindAndPostContract(year, searchText.ToLower());
+                return await _groupMeRequestService.FindAndPostContract(year, searchText.ToLower());
             }
 
             if (isScoresRequest)
-                return await _groupMeService.FindAndPostLiveScores();
+                return await _groupMeRequestService.FindAndPostLiveScores();
 
-            if (isLineupChecker) await _groupMeService.CheckLineupsForHoles();
+            if (isLineupChecker) await _groupMeRequestService.CheckLineupsForHoles();
 
-            if (isHelp) await _groupMeService.PostHelpMessage();
+            if (isHelp) await _groupMeRequestService.PostHelpMessage();
 
-            if (isStandings) await _groupMeService.PostStandingsToGroup(year);
-            
+            if (isStandings) await _groupMeRequestService.PostStandingsToGroup(year);
+
+            if (isCapSpace) await _groupMeRequestService.PostCapSpace();
+
+            if (strayTag) await _groupMeRequestService.StrayTag();
+
+            //TODO: dead cap per team!
+
             return null;
         }
     }

@@ -1,7 +1,17 @@
-using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 namespace DeadCapTracker.Models.MFL
 {
+    public class ParentTransaction
+    {
+        public string version { get; set; }
+        public ChildTransaction salaryAdjustments { get; set; }
+        public string encoding { set; get; }
+    }
+    public class ChildTransaction
+    {
+        public List<MflTransaction> salaryAdjustment { get; set; }
+    }
     public class MflTransaction
     {
         

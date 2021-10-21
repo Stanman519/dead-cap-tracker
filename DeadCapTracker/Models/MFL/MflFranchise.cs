@@ -1,9 +1,27 @@
 
 
+#nullable enable
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace DeadCapTracker.Models.MFL
 {
+    
+    public class LeagueInfo
+    {
+        public string Version { get; set; }
+        public League League { get; set; }
+        public string Encoding { get; set; }
+    }
+    public class League
+    {
+        public FranchiseParent Franchises { get; set; }
+    }
+    
+    public class FranchiseParent
+    {
+        public List<MflFranchise> Franchise { get; set; }
+    }
     [JsonObject]
     public class MflFranchise
     {

@@ -14,6 +14,9 @@ namespace DeadCapTracker.Repositories
         [Get("{year}/export?TYPE=league&L=13894&APIKEY=&JSON=1")]
         Task<LeagueInfo> GetLeagueInfo([Path] int year);
         
+        [Get("{year}/export?TYPE=league&L=13894&APIKEY=&JSON=1")]
+        Task<LeagueRoot> GetFullLeagueDetails([Path] int year);
+        
         // TODO: eventually add: trade announcements
 
         [Get("{year}/export?TYPE=leagueStandings&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
