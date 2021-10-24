@@ -331,23 +331,23 @@ namespace DeadCapTracker.Services
                 .Where(p => p.position == "WR" || p.position == "QB" || p.position == "TE" || p.position == "RB").ToList();
             var byesThisWeek = byesTask.Result.nflByeWeeks.team.Select(t => t.id).ToList();
             var playersWhoAreOut = injuriesTask.Result.injuries.injury
-                .Where(p => p.status.ToLower() != "questionable" || p.status.ToLower() != "doubtful")
+                .Where(p => p.status.ToLower() != "questionable" && p.status.ToLower() != "doubtful")
                 .Select(_ => _.id).ToList();
             var projectedForZero =
                 projectionsTask.Result.projectedScores.playerScore
                     .Where(p =>
                     { 
                         var success = Double.TryParse(p.score, out var score); 
-                        return success ? score == 0.0 : true;
+                        return success && score == 0.0;
                     }).Select(_ => _.id).ToList();
-
+            var bustedTeams = 0;
             onlyStarters.ForEach(async t =>
             {
                 var botStr = "";
                 var hasBye = false;
                 var isOut = false;
                 var isZeroPoints = false;
-                var bustedTeams = 0;
+                
                 foreach (var player in t.players.player)
                 {
                     //if (player.status == "nonstarter") return;
@@ -362,13 +362,17 @@ namespace DeadCapTracker.Services
                         botStr = ", your lineup is invalid";
                         await BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
                         bustedTeams++;
+                        hasBye = false;
+                        isOut = false;
+                        isZeroPoints = false;
                         return;
                     }
                     //TODO: see if not starting TEN!
                 }
-                if (bustedTeams == 0) await BotPost("Lineups are all straight, mate.");
+                
             });
             //TODO: mark if tankin'?
+            if (bustedTeams == 0) await BotPost("Lineups are all straight, mate.");
         }
 
         public async Task PostCapSpace()
