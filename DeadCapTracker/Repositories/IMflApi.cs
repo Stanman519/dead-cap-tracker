@@ -2,12 +2,15 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.MFL;
+using DeadCapTracker.Services;
 using RestEase;
 
 namespace DeadCapTracker.Repositories
 {
     public interface IMflApi
     {
+        
+        // TODO: add API key to UTILs
         [Get("{year}/export?TYPE=salaryAdjustments&L=13894&APIKEY=&JSON=1")]
         Task<ParentTransaction> GetTransactions([Path] int year);
         
@@ -16,8 +19,6 @@ namespace DeadCapTracker.Repositories
         
         [Get("{year}/export?TYPE=league&L=13894&APIKEY=&JSON=1")]
         Task<LeagueRoot> GetFullLeagueDetails([Path] int year);
-        
-        // TODO: eventually add: trade announcements
 
         [Get("{year}/export?TYPE=leagueStandings&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
         Task<MflStandingsParent> GetStandings([Path] int year);
@@ -52,13 +53,17 @@ namespace DeadCapTracker.Repositories
         [Get("2021/export?TYPE=liveScoring&L=13894&APIKEY=&W={weekNum}&DETAILS=&JSON=1")]
         Task<LiveScoreRoot> GetLiveScores([Path] string weekNum);
 
-        [Get("2021/export?TYPE=projectedScores&L=13894&APIKEY=&W={weekNum}&PLAYERS=&POSITION=&STATUS=&COUNT=&JSON=1")]
+        [Get("2021/export?TYPE=projectedScores&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&W={weekNum}&PLAYERS=&POSITION=&STATUS=&COUNT=&JSON=1")]
         Task<ProjectedScoresRoot> GetProjections([Path] string weekNum);
 
-        [Get("2021/export?TYPE=schedule&L=13894&APIKEY=&W=&F=&JSON=1")]
+        [Get("2021/export?TYPE=schedule&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&W=&F=&JSON=1")]
         Task<ScheduleRoot> GetMatchupSchedule();
 
-        [Get("2021/export?TYPE=players&L=13894&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1")]
+        [Get("2021/export?TYPE=players&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&DETAILS=&SINCE=&PLAYERS=&JSON=1")]
         Task<PlayersParent> GetAllMflPlayers();
+
+        [Get("2021/export?TYPE=assets&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
+        Task<MflAssetsRoot> GetFranchiseAssets();
     }
+    
 }

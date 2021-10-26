@@ -23,6 +23,7 @@ namespace DeadCapTracker.Services
         Task CheckLineupsForHoles();
         Task PostHelpMessage();
         Task PostCapSpace();
+        Task PostDraftProjections(int year);
         Task StrayTag();
     }
     
@@ -357,16 +358,15 @@ namespace DeadCapTracker.Services
                     if (projectedForZero.Contains(player.id)) isZeroPoints = true;
                     if (hasBye || isOut || isZeroPoints)
                     {
+                        bustedTeams++;
                         var tagName = memberList.Find(m => m.user_id == _memberIds[Int32.Parse(t.id)]);
                         var tagString = $"@{tagName?.nickname}";
                         botStr = ", your lineup is invalid";
                         await BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
-                        bustedTeams++;
-                        hasBye = false;
-                        isOut = false;
-                        isZeroPoints = false;
-                        return;
                     }
+                    hasBye = false;
+                    isOut = false;
+                    isZeroPoints = false;
                     //TODO: see if not starting TEN!
                 }
                 
@@ -500,6 +500,58 @@ namespace DeadCapTracker.Services
             return botText;
         }
 
+        public async Task PostDraftProjections(int year)
+        {
+            var standingsTask = _mfl.GetStandings(2021);
+            var draftPicksTask = _mfl.GetFranchiseAssets();
+            await Task.WhenAll(standingsTask, draftPicksTask);
+            
+            var franchises = draftPicksTask.Result.assets.franchise.Select(_ => new
+            {
+                DraftPicks = _.futureYearDraftPicks.draftPick.Select(x =>
+                {
+                    var arr = x.pick.Split("_");
+                    return new DraftPickTranslation
+                    {
+                        Year = Int32.Parse(arr[2]),
+                        Round = Int32.Parse(arr[3]),
+                        OriginalOwner = Int32.Parse(arr[1]),
+                        CurrentOwner = Int32.Parse(_.id)
+                    };
+                })
+            }).ToList();
+            var draftPicks = franchises.SelectMany(_ => _.DraftPicks).ToList();
+            var standings = standingsTask.Result.LeagueStandings.Franchise.OrderBy(tm => Int32.Parse(tm.vp))
+                .ThenBy(tm => Decimal.Parse(tm.pf)).Select(_ => new
+                {
+                    Id = Int32.Parse(_.id),
+                    Name = _owners[Int32.Parse(_.id)]
+                }).ToList();
+            
+            //go through standings twice. write a message on each one 
+
+            for (int rd = 1; rd < 3; rd++)
+            {
+                var botStr = $"Round {rd} Projection\n";
+                var pickNum = 1;
+                standings.ForEach(tm =>
+                {
+                    var origSlot = tm.Id;
+                    var currentPickOwner = draftPicks
+                        .First(d => d.Year == year && d.Round == rd && d.OriginalOwner == origSlot).CurrentOwner;
+                    botStr += $"{pickNum}) {_owners[currentPickOwner]}";
+                    botStr += origSlot == currentPickOwner ? "\n" : $" (via {_owners[origSlot]})\n";
+
+
+                    //{tm.Id == _.OriginalOwner ? }
+
+                    pickNum++;
+                });
+                await BotPost(botStr);
+            }
+            
+        }
+
         private string InvertNameString(string commaName)
         {
             if (string.IsNullOrEmpty(commaName)) return "";
@@ -513,6 +565,7 @@ namespace DeadCapTracker.Services
                       $"Check standings with \"#standings\"\n" +
                       $"Check player contract with \"#contract playername\"\n" +
                       $"Check if lineups are valid with \"#lineups\"\n" +
+                      $"See projected rookie draft picks with \"#draft\"\n" +
                       $"See team cap space with \"#cap\"";
             await BotPost(str);
         }

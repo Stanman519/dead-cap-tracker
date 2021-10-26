@@ -68,13 +68,13 @@ namespace DeadCapTracker.Controllers
             var isLineupChecker = request.StartsWith("#lineups");
             var isStandings = request.StartsWith("#standings");
             var isCapSpace = request.StartsWith("#cap");
+            var isDraftPickReq = request.StartsWith("#draft");
             var isHelp = request.StartsWith("#help");
             var strayTag = request.StartsWith("@cap");
             
             
-            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace)
+            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq)
                 return null;
-            
             
             if (isContractRequest)
             {
@@ -95,6 +95,8 @@ namespace DeadCapTracker.Controllers
             if (isCapSpace) await _groupMeRequestService.PostCapSpace();
 
             if (strayTag) await _groupMeRequestService.StrayTag();
+
+            if (isDraftPickReq) await _groupMeRequestService.PostDraftProjections(2021 + 1);
 
             //TODO: dead cap per team!
 
