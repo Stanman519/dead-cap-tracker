@@ -69,11 +69,12 @@ namespace DeadCapTracker.Controllers
             var isStandings = request.StartsWith("#standings");
             var isCapSpace = request.StartsWith("#cap");
             var isDraftPickReq = request.StartsWith("#draft");
+            var isFreeAgentRequest = request.StartsWith("#free");
             var isHelp = request.StartsWith("#help");
-            var strayTag = request.StartsWith("@cap");
+            var strayTag = request.Contains("@cap") || request.Contains("@the cap");
             
             
-            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq)
+            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest)
                 return null;
             
             if (isContractRequest)
@@ -94,11 +95,14 @@ namespace DeadCapTracker.Controllers
 
             if (isCapSpace) await _groupMeRequestService.PostCapSpace();
 
+            if (isFreeAgentRequest) await _groupMeRequestService.PostTopUpcomingFreeAgents(request.Split(" ")[1]);
+            
             if (strayTag) await _groupMeRequestService.StrayTag();
 
-            if (isDraftPickReq) await _groupMeRequestService.PostDraftProjections(2021 + 1);
+            if (isDraftPickReq) await _groupMeRequestService.PostDraftProjections(Utils.ThisYear + 1);
 
             //TODO: dead cap per team!
+            //TODO: do i have a franchise tag projection?
 
             return null;
         }

@@ -9,7 +9,7 @@ namespace DeadCapTracker.Repositories
 {
     public interface IMflApi
     {
-        
+
         // TODO: add API key to UTILs
         [Get("{year}/export?TYPE=salaryAdjustments&L=13894&APIKEY=&JSON=1")]
         Task<ParentTransaction> GetTransactions([Path] int year);
@@ -64,6 +64,9 @@ namespace DeadCapTracker.Repositories
 
         [Get("2021/export?TYPE=assets&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&JSON=1")]
         Task<MflAssetsRoot> GetFranchiseAssets();
+
+        [Get("2021/export?TYPE=playerScores&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&W=AVG&YEAR=&PLAYERS=&POSITION=&STATUS=&RULES=&COUNT=&JSON=1")]
+        Task<MflAverageScoreRoot> GetAveragePlayerScores();
     }
     
 }

@@ -25,6 +25,7 @@ namespace DeadCapTracker.Services
         Task PostCapSpace();
         Task PostDraftProjections(int year);
         Task StrayTag();
+        Task PostTopUpcomingFreeAgents(string positionRequested);
     }
     
     public class GroupMeRequestRequestService : IGroupMeRequestService
@@ -500,9 +501,43 @@ namespace DeadCapTracker.Services
             return botText;
         }
 
+        public async Task PostTopUpcomingFreeAgents(string positionRequest)
+        {
+            var pos = positionRequest.ToUpper().Trim();
+            if (pos != "QB" && pos != "RB" && pos != "WR" && pos != "TE") return;
+
+            var strForBot = $"Top Upcoming {pos} Free Agents\n";
+            var avgPtsTask = _mfl.GetAveragePlayerScores();
+            var salariesTask = _mfl.GetSalaries();
+            var playerTask = _mfl.GetAllMflPlayers();
+            await Task.WhenAll(avgPtsTask, playerTask, salariesTask);
+
+            var playerInfos =
+                playerTask.Result.players.player.Where(p =>
+                    p.position == "QB" || p.position == "RB" || p.position == "WR" || p.position == "TE").ToList();
+            var scores = avgPtsTask.Result.playerScores.playerScore;
+            var relevantPlayers =
+                salariesTask.Result.Salaries.LeagueUnit.Player.Where(_ => _.ContractYear == "1" && _.Salary != "");
+
+            var topScores = relevantPlayers.Select(_ => new
+            {
+                Id = _.Id,
+                Salary = _.Salary,
+                Name = playerInfos.FirstOrDefault(p => p.id == _.Id)?.name,
+                Position = playerInfos.FirstOrDefault(p => p.id == _.Id)?.position,
+                Score = Decimal.TryParse(scores.FirstOrDefault(p => p.id == _.Id)?.score, out var x) ? x : 0
+            }).OrderByDescending(_ => _.Score).ToList();
+
+            topScores.Where(_ => _.Position == pos).Take(8).ToList().ForEach(p =>
+            {
+                strForBot += $"{p.Name} - {p.Score} PPG\n";
+            });
+            await BotPost(strForBot);
+        }
+
         public async Task PostDraftProjections(int year)
         {
-            var standingsTask = _mfl.GetStandings(2021);
+            var standingsTask = _mfl.GetStandings(Utils.ThisYear);
             var draftPicksTask = _mfl.GetFranchiseAssets();
             await Task.WhenAll(standingsTask, draftPicksTask);
             
@@ -565,6 +600,7 @@ namespace DeadCapTracker.Services
                       $"Check standings with \"#standings\"\n" +
                       $"Check player contract with \"#contract playername\"\n" +
                       $"Check if lineups are valid with \"#lineups\"\n" +
+                      $"See upcoming free agents at a position with \"#freeagents qb/wr/rb/te\"\n" +
                       $"See projected rookie draft picks with \"#draft\"\n" +
                       $"See team cap space with \"#cap\"";
             await BotPost(str);
