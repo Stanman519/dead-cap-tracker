@@ -343,6 +343,7 @@ namespace DeadCapTracker.Services
                         return success && score == 0.0;
                     }).Select(_ => _.id).ToList();
             var bustedTeams = 0;
+            var brokenTeams = new List<string>();
             onlyStarters.ForEach(async t =>
             {
                 var botStr = "";
@@ -360,10 +361,15 @@ namespace DeadCapTracker.Services
                     if (hasBye || isOut || isZeroPoints)
                     {
                         bustedTeams++;
-                        var tagName = memberList.Find(m => m.user_id == _memberIds[Int32.Parse(t.id)]);
-                        var tagString = $"@{tagName?.nickname}";
-                        botStr = ", your lineup is invalid";
-                        await BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
+                        if (!brokenTeams.Contains(t.id))
+                        {
+                            var tagName = memberList.Find(m => m.user_id == _memberIds[Int32.Parse(t.id)]);
+                            var tagString = $"@{tagName?.nickname}";
+                            botStr = ", your lineup is invalid";
+                            await BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
+                            brokenTeams.Add(t.id);
+                        }
+
                     }
                     hasBye = false;
                     isOut = false;
