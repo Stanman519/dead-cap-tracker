@@ -26,6 +26,7 @@ namespace DeadCapTracker.Services
         Task PostDraftProjections(int year);
         Task StrayTag();
         Task PostTopUpcomingFreeAgents(string positionRequested);
+        Task PostFranchiseTagAmounts();
     }
     
     public class GroupMeRequestRequestService : IGroupMeRequestService
@@ -507,6 +508,58 @@ namespace DeadCapTracker.Services
             return botText;
         }
 
+        public async Task PostFranchiseTagAmounts()
+        {
+            var salariesTask = _mfl.GetSalaries();
+            var positionTask = _mfl.GetAllMflPlayers();
+            await Task.WhenAll(salariesTask, positionTask);
+
+            var positionIds = positionTask.Result.players.player.Where(p =>
+                p.position == "WR" || p.position == "QB" || p.position == "RB" || p.position == "TE").ToList();
+            var playerSalaries = salariesTask.Result.Salaries.LeagueUnit.Player.Select(_ => new
+            {
+                Salary = Decimal.TryParse(_.Salary, out var sal) ? sal : 0,
+                Id = _.Id
+            }).ToList();
+            
+            // var x = from p in positionIds
+            //         join s in playerSalaries on p.id equals s.Id into ps
+            //         from s in ps.DefaultIfEmpty()
+            //         select new
+            //         {
+            //             Id
+            //         }
+
+
+            var tagAmounts = positionIds.GroupJoin(playerSalaries, pos => pos.id, salary => salary.Id, (pos, salaryRows) => new
+                {
+                    pos,
+                    salaryRows = salaryRows.DefaultIfEmpty()
+                }).SelectMany(p => p.salaryRows.Select(sal => new
+                {
+                    Id = p.pos.id,
+                    Name = p.pos.name,
+                    Position = p.pos.position,
+                    Salary = sal?.Salary ?? 0
+                }).ToList())
+                .OrderByDescending(p => p.Salary)
+                .GroupBy(p => p.Position)
+                .Select(pos => new
+                {
+                    Position = pos.Key,
+                    Salary = pos.Take(6).Average(_ => _.Salary)
+                })
+                .ToList();
+
+            var strForBot = "Average salary of top 6 at each position:\n";
+            tagAmounts.ForEach(t =>
+            {
+                strForBot += $"{t.Position}: ${Decimal.Round(t.Salary)}\n";
+            });
+
+            await BotPost(strForBot);
+        }
+
         public async Task PostTopUpcomingFreeAgents(string positionRequest)
         {
             var pos = positionRequest.ToUpper().Trim();
@@ -608,7 +661,8 @@ namespace DeadCapTracker.Services
                       $"Check if lineups are valid with \"#lineups\"\n" +
                       $"See upcoming free agents at a position with \"#freeagents qb/wr/rb/te\"\n" +
                       $"See projected rookie draft picks with \"#draft\"\n" +
-                      $"See team cap space with \"#cap\"";
+                      $"See team cap space with \"#cap\"\n " +
+                      $"Get franchise tag projections with \"#tag\"";
             await BotPost(str);
         }
 

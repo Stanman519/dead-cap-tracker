@@ -70,11 +70,12 @@ namespace DeadCapTracker.Controllers
             var isCapSpace = request.StartsWith("#cap");
             var isDraftPickReq = request.StartsWith("#draft");
             var isFreeAgentRequest = request.StartsWith("#free");
+            var isFranchiseTag = request.StartsWith("#tag");
             var isHelp = request.StartsWith("#help");
-            var strayTag = request.Contains("@cap") || request.Contains("@the cap");
+            var strayTag = request.Contains("@cap") || request.Contains("@the cap") || request.Contains("@thec");
             
             
-            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest)
+            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag)
                 return null;
             
             if (isContractRequest)
@@ -83,6 +84,8 @@ namespace DeadCapTracker.Controllers
                 var searchText = message.text.Remove(capIndex, 10);
                 return await _groupMeRequestService.FindAndPostContract(year, searchText.ToLower());
             }
+
+            if (isFranchiseTag) await _groupMeRequestService.PostFranchiseTagAmounts();
 
             if (isScoresRequest)
                 return await _groupMeRequestService.FindAndPostLiveScores();
@@ -102,7 +105,6 @@ namespace DeadCapTracker.Controllers
             if (isDraftPickReq) await _groupMeRequestService.PostDraftProjections(Utils.ThisYear + 1);
 
             //TODO: dead cap per team!
-            //TODO: do i have a franchise tag projection?
 
             return null;
         }
