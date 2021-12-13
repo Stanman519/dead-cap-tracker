@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using DeadCapTracker.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -49,6 +50,8 @@ namespace DeadCapTracker
             services.AddScoped<ILeagueService, LeagueService>();
             services.AddScoped<IGroupMeRequestService, GroupMeRequestRequestService>();
             services.AddScoped<IRumorService, RumorService>();
+            services.AddScoped<IMflTranslationService, MflTranslationService>();
+            services.AddScoped<IDataSetHelperService, DataSetHelperService>();
             //I dont know if i need this.
             // services.AddOptions();
             // services.Configure<DatabaseOptions>(Configuration.GetSection("DatabaseOptions"));
@@ -98,7 +101,7 @@ namespace DeadCapTracker
             app.UseCors("AllowSpecificOrigin");
 
             app.UseSwagger();
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Dead Cap Tracker"); });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "swagger"); });
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });

@@ -17,15 +17,20 @@ namespace DeadCapTracker.Services
         bool CheckForMultiplePlayers(string idArray);
         Task<string> ListTradeInfoWithMultiplePlayers(string assets);
         Task<string> ListTradeInfoWithSinglePlayer(string asset);
+        Task<string> GetCompletedTradeString(TradeSingle trade);
+        Task<string> GetTradeBaitString(TradeBait post);
+
     }
 
     public class RumorService : IRumorService
     {
         private readonly IMflApi _mflApi;
         Random rnd = new Random();
+        private static Dictionary<int, string> _owners;
 
         public RumorService(IMflApi mflApi)
         {
+            _owners = Utils.owners;
             _mflApi = mflApi;
         }
 
@@ -150,7 +155,45 @@ namespace DeadCapTracker.Services
                 ret += pickString;
             }
             return ret;
-        }       
+        }
+        public async Task<string> GetCompletedTradeString(TradeSingle trade)
+        {
+            _owners.TryGetValue(Int32.Parse(trade.franchise), out var owner1);
+            _owners.TryGetValue(Int32.Parse(trade.franchise2), out var owner2);
+            var strForBot = $"{GetSources()}{owner1} and {owner2} have completed a trade.\n";
+           
+            var assets1 = CheckForMultiplePlayers(trade.franchise1_gave_up)
+                ? await ListTradeInfoWithMultiplePlayers(trade.franchise1_gave_up)
+                : await ListTradeInfoWithSinglePlayer(trade.franchise1_gave_up);
+            
+            var assets2 = CheckForMultiplePlayers(trade.franchise2_gave_up)
+                ? await ListTradeInfoWithMultiplePlayers(trade.franchise2_gave_up)
+                : await ListTradeInfoWithSinglePlayer(trade.franchise2_gave_up);
+
+            strForBot += $"{owner1} sends:\n{assets1}\n{owner2} sends:\n{assets2}";
+            return strForBot;
+        }
+
+        public async Task<string> GetTradeBaitString(TradeBait post)
+        {
+            var strForBot = GetSources();
+            _owners.TryGetValue(Int32.Parse(post.franchise_id), out var ownerName);
+            strForBot += $"{ownerName} ";
+            strForBot += AddBaitAction(); // add verbage
+            var hasEarlyPicks = CheckForFirstRounders(post.willGiveUp);
+            if (CheckForMultiplePlayers(post.willGiveUp))
+            {
+                var players = (await _mflApi.GetBotPlayersDetails(post.willGiveUp)).players.player;
+                strForBot += ListPlayers(players, hasEarlyPicks);
+            }
+            else
+            {
+                var player = (await _mflApi.GetBotPlayerDetails(post.willGiveUp)).players.player;
+                strForBot += ListPlayer(player, hasEarlyPicks);
+            }
+            return strForBot;
+        }
+        
         public async Task<string> ListTradeInfoWithSinglePlayer(string assets)
         {
             var ret = "";

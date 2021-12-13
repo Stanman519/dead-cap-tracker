@@ -37,7 +37,7 @@ namespace DeadCapTracker.Repositories
         
         [Get("2021/export?TYPE=transactions&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&W=&TRANS_TYPE=TRADE&FRANCHISE=&DAYS=1&COUNT=&JSON=1")]
         Task<HttpResponseMessage> GetRecentTrade();
-        
+
         [Get("2021/export?TYPE=tradeBait&L=13894&APIKEY=ahBv1sGSvuWux1OmOVrJaDYeFLox&INCLUDE_DRAFT_PICKS=true&JSON=1")]
         Task<HttpResponseMessage> GetTradeBait();
         

@@ -8,7 +8,7 @@ namespace DeadCapTracker.Services
         public static Dictionary<int, string> owners = new Dictionary<int, string>()
         {
             {1, "Ryan"},
-            {2, "Tyler W"},
+            {2, "Tyler"},
             {3, "Caleb"},
             {4, "Trent"},
             {5, "Taylor"},
@@ -18,7 +18,7 @@ namespace DeadCapTracker.Services
             {9, "Levi"},
             {10, "Aaron"},
             {11, "Juan"},
-            {12, "Tyler S"}
+            {12, "Drew"}
         };
         
         public static Dictionary<int, string> memberIds = new Dictionary<int, string>()
@@ -34,7 +34,7 @@ namespace DeadCapTracker.Services
             {9, "30472260"},
             {10, "11902182"},
             {11, "36740"},
-            {12, "2513725"}
+            {12, "63384702"}
         };
     }
 }
