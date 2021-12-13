@@ -431,7 +431,7 @@ namespace DeadCapTracker.Services
                 botStr += $"{_owners[franchise.FranchiseId]}\n";
                 foreach (var year in relevantYears)
                 {
-                    botStr += $"('{year.Key.Substring(2)}  git ${year.Value}) ";
+                    botStr += $"('{year.Key.Substring(2)}  ${year.Value}) ";
                 }
 
                 botStr += "\n";
