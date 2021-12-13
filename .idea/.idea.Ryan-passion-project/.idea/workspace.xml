@@ -20,6 +20,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -447,7 +448,7 @@
       <workItem from="1635426158989" duration="26000" />
       <workItem from="1636120192893" duration="1538000" />
       <workItem from="1638798710522" duration="12543000" />
-      <workItem from="1638978786928" duration="28376000" />
+      <workItem from="1638978786928" duration="29239000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
