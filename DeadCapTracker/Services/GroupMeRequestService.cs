@@ -427,11 +427,11 @@ namespace DeadCapTracker.Services
             var botStr = "";
             deadCapInfo.ForEach(franchise =>
             {
-                var relevantYears = franchise.Amount.AsQueryable().Where(_ => _.Value != 0);
+                var relevantYears = franchise.Amount.AsQueryable().Where(_ => _.Value != 0 && int.Parse(_.Key) >= _thisYear);
                 botStr += $"{_owners[franchise.FranchiseId]}\n";
                 foreach (var year in relevantYears)
                 {
-                    botStr += $"({year.Key}-${year.Value}) ";
+                    botStr += $"('{year.Key.Substring(2)}-${year.Value}) ";
                 }
 
                 botStr += "\n";
