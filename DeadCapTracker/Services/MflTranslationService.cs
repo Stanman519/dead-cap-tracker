@@ -154,7 +154,8 @@ namespace DeadCapTracker.Services
 
         public async Task<List<string>> GetByesThisWeek(string thisWeek)
         {
-            return (await _globalMflApi.GetByesForWeek(thisWeek)).nflByeWeeks.team.Select(t => t.id).ToList();
+            return (await _globalMflApi.GetByesForWeek(thisWeek)).nflByeWeeks.team?
+                .Select(t => t.id).ToList() ?? new List<string>();
         }
 
         public async Task<List<string>> GetInjurredPlayerIdsThisWeek(string thisWeek)
