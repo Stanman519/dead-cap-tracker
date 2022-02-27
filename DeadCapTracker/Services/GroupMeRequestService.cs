@@ -25,8 +25,8 @@ namespace DeadCapTracker.Services
         Task PostCapSpace();
         Task PostDraftProjections(int year);
         Task StrayTag();
-        Task PostTopUpcomingFreeAgents(string positionRequested);
-        Task PostFranchiseTagAmounts();
+        Task PostTopUpcomingFreeAgents(string positionRequested, int year = Utils.ThisYear);
+        Task PostFranchiseTagAmounts(int year = Utils.ThisYear);
         Task PostFutureDeadCap();
     }
     
@@ -226,7 +226,6 @@ namespace DeadCapTracker.Services
                     var tagString = $"@{tagName?.nickname}";
                     await BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
                     brokenTeams.Add(t.id);
-                    //TODO: see if not starting TEN!
                 }
             });
             //TODO: mark if tankin'?
@@ -309,10 +308,10 @@ namespace DeadCapTracker.Services
             return botText;
         }
 
-        public async Task PostFranchiseTagAmounts()
+        public async Task PostFranchiseTagAmounts(int year = Utils.ThisYear)
         {
-            var salariesTask = _mfl.GetSalaries();
-            var positionTask = _mfl.GetAllMflPlayers();
+            var salariesTask = _mfl.GetSalaries(year);
+            var positionTask = _mfl.GetAllMflPlayers(year);
             await Task.WhenAll(salariesTask, positionTask);
 
             var positionIds = positionTask.Result.players.player.Where(p =>
@@ -352,15 +351,15 @@ namespace DeadCapTracker.Services
             await BotPost(strForBot);
         }
 
-        public async Task PostTopUpcomingFreeAgents(string positionRequest)
+        public async Task PostTopUpcomingFreeAgents(string positionRequest, int year = Utils.ThisYear)
         {
             var pos = positionRequest.ToUpper().Trim();
             if (pos != "QB" && pos != "RB" && pos != "WR" && pos != "TE") return;
 
             var strForBot = $"Top Upcoming {pos} Free Agents\n";
-            var avgPtsTask = _mfl.GetAveragePlayerScores();
-            var salariesTask = _mfl.GetSalaries();
-            var playerTask = _mfl.GetAllMflPlayers();
+            var avgPtsTask = _mfl.GetAveragePlayerScores(year);
+            var salariesTask = _mfl.GetSalaries(year);
+            var playerTask = _mfl.GetAllMflPlayers(year);
             await Task.WhenAll(avgPtsTask, playerTask, salariesTask);
 
             var playerInfos =

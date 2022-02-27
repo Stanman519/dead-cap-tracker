@@ -4,7 +4,7 @@ namespace DeadCapTracker.Services
 {
     public static class Utils
     {
-        public static readonly int ThisYear = 2021;
+        public const int ThisYear = 2022;
         public static Dictionary<int, string> owners = new Dictionary<int, string>()
         {
             {1, "Ryan"},

@@ -19,9 +19,10 @@ namespace DeadCapTracker.Profiles
                     opts => opts.MapFrom(source => source.Franchise_Id))
                 .ForMember(dest => dest.Position,
                     opts => opts.MapFrom(source => SpaceSplit(CommaSplitDescription(source.Description)[1])[3]))
-                .ForMember(dest => dest.Salary, opts => 
-                    opts.MapFrom(src => 
-                        moneySplit(SpaceSplit(CommaSplitDescription(src.Description)[1])[SpaceSplit(CommaSplitDescription(src.Description)[1]).Length - 1])))
+                // .ForMember(dest => dest.Salary, opts => 
+                //     opts.MapFrom(src => 
+                //         //commsplit[1] has first name, team, position, salary
+                //         moneySplit(SpaceSplit(CommaSplitDescription(src.Description)[1])[SpaceSplit(CommaSplitDescription(src.Description)[1]).Length - 1])))
                 .ForMember(dest => dest.PlayerName, opts => 
                     opts.MapFrom(src => parseName(src.Description)))
                 .ForMember(dest => dest.Team, opts => 

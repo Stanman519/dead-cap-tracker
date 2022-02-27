@@ -150,7 +150,7 @@ namespace DeadCapTracker.Services
             for (int i = 2; i < 13; i++)
             {
                 string franchiseNum = i.ToString("D4");
-                responses.Add(_api.GetPendingTrades(year, franchiseNum));
+                responses.Add(_api.GetPendingTrades(franchiseNum));
             }
             await Task.WhenAll(responses);
             var deserializer = new JsonResponseDeserializer();
@@ -190,7 +190,7 @@ namespace DeadCapTracker.Services
         
         public async Task<List<FranchiseDTO>> UpdateFranchises(int year)
         {
-            var leagueInfo = await _api.GetLeagueInfo(year);
+            var leagueInfo = await _api.GetLeagueInfo();
             var allFranchises = leagueInfo.League.Franchises.Franchise;
             var DTOs = _mapper.Map<List<MflFranchise>, List<FranchiseDTO>>(allFranchises);
 
@@ -216,7 +216,7 @@ namespace DeadCapTracker.Services
 
             oneYearPlayers.ForEach(p => queryParam = $"{queryParam}{p.Id},");
 
-            var playerDetails = await _globalApi.GetPlayerDetails(year, queryParam);
+            var playerDetails = await _globalApi.GetPlayerDetails(queryParam);
 
             var playerDetailsList = playerDetails.playerProfiles.playerProfile.ToList();
             //map to DTO
@@ -250,8 +250,8 @@ namespace DeadCapTracker.Services
             freeAgents2.ForEach(p => queryParam2 = $"{queryParam2}{p.Id},");
 
 
-            var playerDetails1 = await _globalApi.GetPlayerDetails(year, queryParam1);
-            var playerDetails2 = await _globalApi.GetPlayerDetails(year, queryParam2);
+            var playerDetails1 = await _globalApi.GetPlayerDetails(queryParam1, year);
+            var playerDetails2 = await _globalApi.GetPlayerDetails(queryParam2, year);
 
 
             var playerDetailsList = playerDetails1.playerProfiles.playerProfile.ToList();
