@@ -20,13 +20,8 @@
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker.Tests/obj/Debug/netcoreapp3.1/DeadCapTracker.Tests.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionDTOProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionDTOProfile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/Utils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/Utils.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,10 +81,8 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflTeamByes.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflInjuries.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflLiveScoring.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IGlobalMflApi.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/MFLController.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/ChildTransaction.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflTransaction.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/ParentTransaction.cs" />
@@ -119,17 +112,19 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/DraftPickTranslation.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflAverageScoreRoot.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeTransaction.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeBait.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/RumorService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/TeamAdjustedSalaryCap.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/DataSetHelperService.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Startup.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/Utils.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/MflTranslationService.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionDTOProfile.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Startup.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IGlobalMflApi.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/Utils.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1ieUkti08otyBrGHDmGodxyNyTf" />
@@ -460,6 +455,8 @@
       <workItem from="1642180652870" duration="141000" />
       <workItem from="1643485681141" duration="1042000" />
       <workItem from="1645902068192" duration="2742000" />
+      <workItem from="1645977187763" duration="1603000" />
+      <workItem from="1646082168831" duration="502000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
@@ -859,10 +856,10 @@
           <line>252</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" initialLine="250" containingFunctionPresentation="method 'GetCurrentFreeAgents'">
             <startOffsets>
-              <option value="11126" />
+              <option value="11110" />
             </startOffsets>
             <endOffsets>
-              <option value="11200" />
+              <option value="11184" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="14" />
@@ -898,10 +895,10 @@
           <line>190</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="190" containingFunctionPresentation="method 'CheckLineupsForHoles'">
             <startOffsets>
-              <option value="8079" />
+              <option value="8131" />
             </startOffsets>
             <endOffsets>
-              <option value="8117" />
+              <option value="8169" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="38" />
@@ -911,10 +908,10 @@
           <line>198</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="198" containingFunctionPresentation="method 'CheckLineupsForHoles'">
             <startOffsets>
-              <option value="8322" />
+              <option value="8374" />
             </startOffsets>
             <endOffsets>
-              <option value="8379" />
+              <option value="8431" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="39" />
@@ -924,10 +921,10 @@
           <line>226</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="226" containingFunctionPresentation="lambda expression inside method 'CheckLineupsForHoles'">
             <startOffsets>
-              <option value="9769" />
+              <option value="9821" />
             </startOffsets>
             <endOffsets>
-              <option value="9833" />
+              <option value="9885" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="41" />

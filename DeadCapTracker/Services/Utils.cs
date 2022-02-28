@@ -5,6 +5,7 @@ namespace DeadCapTracker.Services
     public static class Utils
     {
         public const int ThisYear = 2022;
+        public const string ApiKey = "ahBv1sGSvuWtx12mOVrJaDYeFLox";
         public static Dictionary<int, string> owners = new Dictionary<int, string>()
         {
             {1, "Ryan"},
