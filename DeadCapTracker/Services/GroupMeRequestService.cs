@@ -148,12 +148,15 @@ namespace DeadCapTracker.Services
 
             foreach (var post in baitList)
             {
-                var strForBot = "";
-                var postDate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(post.timestamp));
-                if (postDate > DateTime.Now.AddMinutes(-11))
+                if (post?.timestamp != null)
                 {
-                    strForBot = await _rumor.GetTradeBaitString(post);
-                    await BotPost(strForBot);
+                    var strForBot = "";
+                    var postDate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(post.timestamp));
+                    if (postDate > DateTime.Now.AddMinutes(-11))
+                    {
+                        strForBot = await _rumor.GetTradeBaitString(post);
+                        await BotPost(strForBot);
+                    }
                 }
             }
         }
