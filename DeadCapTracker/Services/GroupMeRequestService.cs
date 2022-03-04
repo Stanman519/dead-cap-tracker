@@ -130,12 +130,15 @@ namespace DeadCapTracker.Services
             
             foreach (var trade in tradeInfoList)
             {
-                var strForBot = "";
-                var tradeTime = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(trade.timestamp));
-                // check if trade was not in the last 10 minutes to bail early
-                if (tradeTime <= tenMinAgo) continue;
-                strForBot = await _rumor.GetCompletedTradeString(trade);
-                await BotPost(strForBot);
+                if (trade != null && !string.IsNullOrEmpty(trade.franchise2))
+                {
+                    var strForBot = "";
+                    var tradeTime = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(trade.timestamp));
+                    // check if trade was not in the last 10 minutes to bail early
+                    if (tradeTime <= tenMinAgo) continue;
+                    strForBot = await _rumor.GetCompletedTradeString(trade);
+                    await BotPost(strForBot);
+                }
             }
         }
 

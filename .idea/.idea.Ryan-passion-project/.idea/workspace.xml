@@ -120,9 +120,9 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IGlobalMflApi.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/Utils.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/Utils.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1ieUkti08otyBrGHDmGodxyNyTf" />
@@ -455,6 +455,8 @@
       <workItem from="1645902068192" duration="2742000" />
       <workItem from="1645977187763" duration="1603000" />
       <workItem from="1646082168831" duration="1521000" />
+      <workItem from="1646254000931" duration="3537000" />
+      <workItem from="1646399666085" duration="358000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
@@ -890,39 +892,39 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs</url>
-          <line>190</line>
+          <line>193</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="190" containingFunctionPresentation="method 'CheckLineupsForHoles'">
             <startOffsets>
-              <option value="8131" />
+              <option value="8240" />
             </startOffsets>
             <endOffsets>
-              <option value="8169" />
+              <option value="8278" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="38" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs</url>
-          <line>198</line>
+          <line>201</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="198" containingFunctionPresentation="method 'CheckLineupsForHoles'">
             <startOffsets>
-              <option value="8374" />
+              <option value="8483" />
             </startOffsets>
             <endOffsets>
-              <option value="8431" />
+              <option value="8540" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="39" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs</url>
-          <line>226</line>
+          <line>229</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="226" containingFunctionPresentation="lambda expression inside method 'CheckLineupsForHoles'">
             <startOffsets>
-              <option value="9821" />
+              <option value="9930" />
             </startOffsets>
             <endOffsets>
-              <option value="9885" />
+              <option value="9994" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="41" />
