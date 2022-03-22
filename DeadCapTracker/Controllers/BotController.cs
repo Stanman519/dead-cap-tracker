@@ -83,7 +83,7 @@ namespace DeadCapTracker.Controllers
             {
                 var capIndex = message.text.ToLower().IndexOf("#contract", StringComparison.Ordinal);
                 var searchText = message.text.Remove(capIndex, 10);
-                return await _groupMeRequestService.FindAndPostContract(year, searchText.ToLower());
+                return await _groupMeRequestService.FindAndPostContract(Utils.ThisYear, searchText.ToLower());
             }
 
             if (isFranchiseTag) await _groupMeRequestService.PostFranchiseTagAmounts(Utils.ThisYear - 1);
