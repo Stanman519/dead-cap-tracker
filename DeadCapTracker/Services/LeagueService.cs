@@ -146,44 +146,20 @@ namespace DeadCapTracker.Services
         public async Task<List<PendingTradeDTO>> FindPendingTrades(int year)
         {
             var DTOs = new List<PendingTradeDTO>();
-            var responses = new List<Task<HttpResponseMessage>>();
+            var responses = new List<Task<MflPendingTradesListRoot>>();
             for (int i = 2; i < 13; i++)
             {
                 string franchiseNum = i.ToString("D4");
                 responses.Add(_api.GetPendingTrades(franchiseNum));
             }
             await Task.WhenAll(responses);
-            var deserializer = new JsonResponseDeserializer();
-            var info = new ResponseDeserializerInfo();
 
             foreach (var task in responses)
             {
                 var response = task.Result;
-                var resString = string.Empty;
-                var bodyContent = response.Content.ReadAsStreamAsync().ContinueWith(t =>
-                {
-                    var streamRes = t.Result;
-                    using (var reader = new StreamReader(streamRes))
-                    {
-                        resString = reader.ReadToEnd();
-                    }
-                }); //response.StringContent;
-                bodyContent.Wait();
-                if (resString.Contains("pendingTrade\":["))
-                {
-                    //TODO: parse response as JObject instead?? newtonsoft.json
-                    var tradesList = deserializer.Deserialize<MflPendingTradesListRoot>(resString, response, info);
-                    var multiTrades = _mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(tradesList.pendingTrades.PendingTrade);
-                    DTOs.AddRange(multiTrades);
-                } 
-                else if (resString.Contains("pendingTrade\":{"))
-                {
-                    var singleTrade = deserializer.Deserialize<MflPendingSingleTradeRoot>(resString, response, info);
-                    var singleDTO = _mapper.Map<MflPendingTrade, PendingTradeDTO>(singleTrade.pendingTrades.PendingTrade);
-                    DTOs.Add(singleDTO);
-                }
+                var multiTrades = _mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(response.pendingTrades.PendingTrade);
+                DTOs.AddRange(multiTrades);
             }
-
             //select only unique trade ids
             return DTOs.GroupBy(t => t.tradeId).Select(t => t.First()).ToList();
         }

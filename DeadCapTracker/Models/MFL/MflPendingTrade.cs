@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using DeadCapTracker.Services;
 
 namespace DeadCapTracker.Models.MFL
 {
@@ -12,6 +13,7 @@ namespace DeadCapTracker.Models.MFL
     public class MflPendingTradesListParent
     {
         [JsonPropertyName("pendingTrade")]
+        [JsonConverter(typeof(SingleOrArrayConverter<MflPendingTrade>))]
         public List<MflPendingTrade> PendingTrade { get; set; }
         // [JsonPropertyName("pendingTrade")]
         // public MflPendingTrade pendingTrade { get; set; }

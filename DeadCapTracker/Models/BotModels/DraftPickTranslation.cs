@@ -6,5 +6,6 @@ namespace DeadCapTracker.Models.BotModels
         public int OriginalOwner { get; set; }
         public int Year { get; set; }
         public int Round { get; set; }
+        public int Pick { get; set; }
     }
 }

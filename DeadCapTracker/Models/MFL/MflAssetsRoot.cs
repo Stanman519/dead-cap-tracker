@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using DeadCapTracker.Models.BotModels;
+using DeadCapTracker.Services;
+using Newtonsoft.Json;
 
 namespace DeadCapTracker.Models.MFL
 {
@@ -12,6 +14,7 @@ namespace DeadCapTracker.Models.MFL
 
     public class FutureYearDraftPicks
     {
+        [JsonConverter(typeof(SingleOrArrayConverter<DraftPick>))]
         public List<DraftPick> draftPick { get; set; }
     }
     
@@ -24,6 +27,7 @@ namespace DeadCapTracker.Models.MFL
     public class MflAssetsFranchise
     {
         public FutureYearDraftPicks futureYearDraftPicks { get; set; }
+        public FutureYearDraftPicks currentYearDraftPicks { get; set; }
         public Players players { get; set; }
         public string id { get; set; }
     }

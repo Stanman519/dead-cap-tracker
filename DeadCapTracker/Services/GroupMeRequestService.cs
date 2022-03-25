@@ -393,37 +393,56 @@ namespace DeadCapTracker.Services
 
         public async Task PostDraftProjections(int year)
         {
+            //TODO: need to check if we are predraft in the offseason, just get this year's order from that 
             var standingsTask = _mflTranslationService.GetFranchiseStandings();
-            var draftPicksTask = _mflTranslationService.GetFranchiseDraftPicks();
+            var draftPicksTask = _mfl.GetFranchiseAssets();
             await Task.WhenAll(standingsTask, draftPicksTask);
-            
-            var standings = standingsTask.Result
-                .Select(_ => new
-                {
-                    Id = Int32.Parse(_.id),
-                    Name = _owners[Int32.Parse(_.id)]
-                }).ToList();
-            
-            //go through standings twice. write a message on each one 
 
-            for (var rd = 1; rd < 3; rd++)
+            if (standingsTask.Result.All(tm => tm.h2hw == "0" && tm.h2hl == "0")) //preseason
             {
-                var botStr = $"Round {rd} Projection\n";
-                var pickNum = 1;
-                standings.ForEach(tm =>
+                var draftPicks =
+                    _mflTranslationService.GetCurrentFranchiseDraftPicks(draftPicksTask.Result.assets.franchise)
+                        .Where(pk => pk.Round == 1 || pk.Round == 2)
+                        .OrderBy(pk => pk.Round).ThenBy(pk => pk.Pick).ToList();
+                var botStr = "";
+                draftPicks.ForEach(pick =>
                 {
-                    var origSlot = tm.Id;
-                    var currentPickOwner = draftPicksTask.Result
-                        .First(d => d.Year == year && d.Round == rd && d.OriginalOwner == origSlot).CurrentOwner;
-                    botStr += $"{pickNum}) {_owners[currentPickOwner]}";
-                    botStr += origSlot == currentPickOwner ? "\n" : $" (via {_owners[origSlot]})\n";
-
-
-                    pickNum++;
+                    var pickNum = $"{pick.Round}.{pick.Pick.ToString("D2")}";
+                    botStr += $"{pickNum}) {_owners[pick.CurrentOwner]}\n";
                 });
                 await BotPost(botStr);
             }
-            
+            else
+            {
+                var draftPicks =
+                    _mflTranslationService.GetFutureFranchiseDraftPicks(draftPicksTask.Result.assets.franchise);
+                var standings = standingsTask.Result
+                    .Select(_ => new
+                    {
+                        Id = Int32.Parse(_.id),
+                        Name = _owners[Int32.Parse(_.id)]
+                    }).ToList();
+
+                //go through standings twice. write a message on each one 
+
+                for (var rd = 1; rd < 3; rd++)
+                {
+                    var botStr = $"Round {rd} Projection\n";
+                    var pickNum = 1;
+                    standings.ForEach(tm =>
+                    {
+                        var origSlot = tm.Id;
+                        var currentPickOwner = draftPicks
+                            .First(d => d.Year == year && d.Round == rd && d.OriginalOwner == origSlot).CurrentOwner;
+                        botStr += $"{pickNum}) {_owners[currentPickOwner]}";
+                        botStr += origSlot == currentPickOwner ? "\n" : $" (via {_owners[origSlot]})\n";
+
+
+                        pickNum++;
+                    });
+                    await BotPost(botStr);
+                }
+            }
         }
 
         public async Task PostFutureDeadCap()

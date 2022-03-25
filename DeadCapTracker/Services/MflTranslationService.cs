@@ -22,8 +22,9 @@ namespace DeadCapTracker.Services
         Task<List<string>> GetInjurredPlayerIdsThisWeek(string thisWeek);
         Task<List<FranchiseRoster>> GetFranchiseSalaries();
         Task<List<TeamAdjustedSalaryCap>> GetTeamAdjustedSalaryCaps();
-        Task<List<DraftPickTranslation>> GetFranchiseDraftPicks();
+        List<DraftPickTranslation> GetFutureFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
         Task<List<MflFranchiseStandings>> GetFranchiseStandings();
+        List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
     }
 
     public class MflTranslationService : IMflTranslationService
@@ -49,23 +50,9 @@ namespace DeadCapTracker.Services
 
         public async Task<List<TradeSingle>> GetCompletedTrades()
         {
-            var deserializer = new JsonResponseDeserializer();
-            var info = new ResponseDeserializerInfo();
-            var tradeRes = await _mfl.GetRecentTrade();
-            var jsonString = await tradeRes.Content.ReadAsStringAsync();
-
-            try //Single
+            try 
             {
-                var tradeSingle = deserializer.Deserialize<TradeTransactionSingle>(jsonString, tradeRes, info)
-                    .transactions.transaction;
-                return new List<TradeSingle> {tradeSingle};
-            }
-            catch (Exception) { Console.WriteLine("not a single trade"); }
-
-            try //multi
-            {
-                return deserializer.Deserialize<TradeTransactionMulti>(jsonString, tradeRes, info)
-                    .transactions.transaction;
+                return (await _mfl.GetRecentTrade()).transactions.transaction;
             }
             catch (Exception) { return null; }
         }
@@ -73,22 +60,9 @@ namespace DeadCapTracker.Services
         public async Task<List<TradeBait>> GetNewTradeBait()
         {
             // TODO: maybe instead of this process, just post a message saying there has been new trade bait and that you can message to see what it is
-            
-            var deserializer = new JsonResponseDeserializer();
-            var info = new ResponseDeserializerInfo();
-            var res = await _mfl.GetTradeBait();
-            var jsonString = await res.Content.ReadAsStringAsync();
-            
-            try //Single
-            {
-                var tradeSingle = deserializer.Deserialize<TradeBaitParent>(jsonString, res, info).TradeBaits.tradeBait;
-                return new List<TradeBait> { tradeSingle };
-            }
-            catch (Exception) { Console.WriteLine("not a single trade"); }
-
             try //multi
             {
-                return deserializer.Deserialize<TradeBaitsParent>(jsonString, res, info).tradeBaits.tradeBait;
+                return (await _mfl.GetTradeBait()).tradeBaits.tradeBait;
             }
             catch (Exception) { return null; }
             
@@ -180,11 +154,11 @@ namespace DeadCapTracker.Services
             }).ToList();
         }
 
-        public async Task<List<DraftPickTranslation>> GetFranchiseDraftPicks()
+        public List<DraftPickTranslation> GetFutureFranchiseDraftPicks(List<MflAssetsFranchise> franchises)
         {
-            var franchises = (await _mfl.GetFranchiseAssets()).assets.franchise.Select(_ => new
+            var franchisePicks = franchises.Select(_ => new
             {
-                DraftPicks = _.futureYearDraftPicks.draftPick.Select(x =>
+                FuturePicks = _.futureYearDraftPicks.draftPick.Select(x =>
                 {
                     var arr = x.pick.Split("_");
                     return new DraftPickTranslation
@@ -196,7 +170,26 @@ namespace DeadCapTracker.Services
                     };
                 })
             }).ToList();
-            return franchises.SelectMany(_ => _.DraftPicks).ToList();
+            return franchisePicks.SelectMany(_ => _.FuturePicks).ToList();
+        }
+        
+        public List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises)
+        {
+            var franchisePicks = franchises.Select(_ => new
+            {
+                CurrentPicks = _.futureYearDraftPicks.draftPick.Select(x =>
+                {
+                    var arr = x.pick.Split("_");
+                    return new DraftPickTranslation
+                    {
+                        Year = _thisYear,
+                        Round = Int32.Parse(arr[1]) + 1,
+                        Pick = Int32.Parse(arr[2]) + 1,
+                        CurrentOwner = Int32.Parse(_.id)
+                    };
+                })
+            }).ToList();
+            return franchisePicks.SelectMany(_ => _.CurrentPicks).ToList();
         }
 
         public async Task<List<MflFranchiseStandings>> GetFranchiseStandings()

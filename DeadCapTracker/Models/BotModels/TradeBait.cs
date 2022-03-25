@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using DeadCapTracker.Services;
+using Newtonsoft.Json;
 
 namespace DeadCapTracker.Models.BotModels
 {
@@ -8,25 +10,24 @@ namespace DeadCapTracker.Models.BotModels
         public string encoding { get; set; }
     }
 
-    public class TradeBaitParent : MFLResponseParent
-    {
-        public TradeBaitSingle TradeBaits { get; set; }
-    }
+    // public class TradeBaitParent : MFLResponseParent
+    // {
+    //     public TradeBaitSingle TradeBaits { get; set; }
+    // }
     public class TradeBaitsParent : MFLResponseParent
     {
         public TradeBaitsMulti tradeBaits { get; set; }
     }
-    
+    //
+    // public class TradeBaitSingle
+    // {
+    //     public TradeBait tradeBait { get; set; }
+    // }
     public class TradeBaitsMulti 
     {
+        [JsonConverter(typeof(SingleOrArrayConverter<TradeBait>))]
         public List<TradeBait> tradeBait { get; set; }
     }
-
-    public class TradeBaitSingle
-    {
-        public TradeBait tradeBait { get; set; }
-    }
-    
     public class TradeBait
     {
         public string timestamp { get; set; }
@@ -34,9 +35,5 @@ namespace DeadCapTracker.Models.BotModels
         public string willGiveUp { get; set; }
         public string inExchangeFor { get; set; }
     }
-    
-
-
-    
 
 }

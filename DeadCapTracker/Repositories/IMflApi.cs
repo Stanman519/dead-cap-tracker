@@ -23,7 +23,7 @@ namespace DeadCapTracker.Repositories
         Task<MflStandingsParent> GetStandings([Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
         
         [Get("{year}/export?TYPE=pendingTrades&L=13894&APIKEY={ApiKey}&FRANCHISE_ID={franchiseNum}&JSON=1")]
-        Task<HttpResponseMessage> GetPendingTrades( [Path] string franchiseNum, [Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
+        Task<MflPendingTradesListRoot> GetPendingTrades( [Path] string franchiseNum, [Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
 
         [Get("{year}/export?TYPE=freeAgents&L=13894&APIKEY={ApiKey}&JSON=1")]
         Task<MflAgentsParent> GetFreeAgents([Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
@@ -35,10 +35,10 @@ namespace DeadCapTracker.Repositories
         Task<MflPlayerProfilesRoot> GetPlayerDetails([Path] string ids, [Path] int year = Utils.ThisYear);
         
         [Get("{year}/export?TYPE=transactions&L=13894&APIKEY={ApiKey}&W=&TRANS_TYPE=TRADE&FRANCHISE=&DAYS=1&COUNT=&JSON=1")]
-        Task<HttpResponseMessage> GetRecentTrade([Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
+        Task<TradeTransactionMulti> GetRecentTrade([Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
 
         [Get("{year}/export?TYPE=tradeBait&L=13894&APIKEY={ApiKey}&INCLUDE_DRAFT_PICKS=true&JSON=1")]
-        Task<HttpResponseMessage> GetTradeBait([Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
+        Task<TradeBaitsParent> GetTradeBait([Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
         
         [Get("{year}/export?TYPE=players&L=13894&APIKEY={ApiKey}&DETAILS=&SINCE=&PLAYERS={player}&JSON=1")]
         Task<PlayerParent> GetBotPlayerDetails([Path] string player, [Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
