@@ -14,7 +14,7 @@ namespace DeadCapTracker.Models.MFL
     {
         [JsonPropertyName("pendingTrade")]
         [JsonConverter(typeof(SingleOrArrayConverter<MflPendingTrade>))]
-        public List<MflPendingTrade> PendingTrade { get; set; }
+        public List<MflPendingTrade> PendingTrade { get; set; } = new List<MflPendingTrade>();
         // [JsonPropertyName("pendingTrade")]
         // public MflPendingTrade pendingTrade { get; set; }
     }

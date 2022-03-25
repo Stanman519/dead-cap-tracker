@@ -15,7 +15,7 @@ namespace DeadCapTracker.Models.MFL
     public class FutureYearDraftPicks
     {
         [JsonConverter(typeof(SingleOrArrayConverter<DraftPick>))]
-        public List<DraftPick> draftPick { get; set; }
+        public List<DraftPick> draftPick { get; set; } = new List<DraftPick>();
     }
     
 

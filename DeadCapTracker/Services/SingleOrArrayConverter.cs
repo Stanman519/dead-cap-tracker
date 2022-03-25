@@ -19,6 +19,8 @@ namespace DeadCapTracker.Services
             {
                 return token.ToObject<List<T>>();
             }
+            
+            
             return new List<T> { token.ToObject<T>() };
         }
 

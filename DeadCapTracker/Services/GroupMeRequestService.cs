@@ -408,7 +408,7 @@ namespace DeadCapTracker.Services
                 draftPicks.ForEach(pick =>
                 {
                     var pickNum = $"{pick.Round}.{pick.Pick.ToString("D2")}";
-                    botStr += $"{pickNum}) {_owners[pick.CurrentOwner]}\n";
+                    botStr += $"{pickNum} {_owners[pick.CurrentOwner]}\n";
                 });
                 await BotPost(botStr);
             }

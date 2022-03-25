@@ -175,11 +175,9 @@ namespace DeadCapTracker.Services
         
         public List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises)
         {
-            var franchisePicks = franchises.Select(_ => new
-            {
-                CurrentPicks = _.futureYearDraftPicks.draftPick.Select(x =>
+            var franchisePicks = franchises.SelectMany(_ => _?.currentYearDraftPicks?.draftPick?.Select(pick =>
                 {
-                    var arr = x.pick.Split("_");
+                    var arr = pick.pick.Split("_");
                     return new DraftPickTranslation
                     {
                         Year = _thisYear,
@@ -188,8 +186,9 @@ namespace DeadCapTracker.Services
                         CurrentOwner = Int32.Parse(_.id)
                     };
                 })
-            }).ToList();
-            return franchisePicks.SelectMany(_ => _.CurrentPicks).ToList();
+            ).ToList();
+
+            return franchisePicks;
         }
 
         public async Task<List<MflFranchiseStandings>> GetFranchiseStandings()

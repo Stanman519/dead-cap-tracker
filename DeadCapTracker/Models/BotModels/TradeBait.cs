@@ -9,24 +9,16 @@ namespace DeadCapTracker.Models.BotModels
         public string version { get; set; }
         public string encoding { get; set; }
     }
-
-    // public class TradeBaitParent : MFLResponseParent
-    // {
-    //     public TradeBaitSingle TradeBaits { get; set; }
-    // }
+    
     public class TradeBaitsParent : MFLResponseParent
     {
         public TradeBaitsMulti tradeBaits { get; set; }
     }
-    //
-    // public class TradeBaitSingle
-    // {
-    //     public TradeBait tradeBait { get; set; }
-    // }
-    public class TradeBaitsMulti 
+
+    public class TradeBaitsMulti
     {
         [JsonConverter(typeof(SingleOrArrayConverter<TradeBait>))]
-        public List<TradeBait> tradeBait { get; set; }
+        public List<TradeBait> tradeBait { get; set; } = new List<TradeBait>();
     }
     public class TradeBait
     {

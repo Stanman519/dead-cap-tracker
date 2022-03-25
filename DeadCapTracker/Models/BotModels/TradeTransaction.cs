@@ -34,7 +34,7 @@ namespace DeadCapTracker.Models.BotModels
     public class TransactionsMulti
     {
         [JsonConverter(typeof(SingleOrArrayConverter<TradeSingle>))]
-        public List<TradeSingle> transaction { get; set; }
+        public List<TradeSingle> transaction { get; set; } = new List<TradeSingle>();
     }
     
 }

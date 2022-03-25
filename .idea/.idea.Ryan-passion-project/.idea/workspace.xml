@@ -19,20 +19,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/DeadCapTracker/Services/SingleOrArrayConverter.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/DraftPickTranslation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/DraftPickTranslation.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeBait.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeBait.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeTransaction.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeTransaction.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflAssetsRoot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflAssetsRoot.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflPendingSingleTradeRoot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflPendingSingleTradeRoot.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflPendingTrade.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflPendingTrade.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/MflTranslationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/MflTranslationService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/SingleOrArrayConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/SingleOrArrayConverter.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.csproj.CoreCompileInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
     </list>
@@ -67,6 +60,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/18D5A60D-361A-4AFD-A431-F772FA87FCC3/cc/4877d99a/ExecutionTimer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/EB067793-5C3F-4219-AEF1-3AB117C20649/160/Future.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/DeadCapTracker/TransactionDAO.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D035A668-64A8-42DE-9EC4-C9E5B4B8C188/a0/17afac91/JsonSerializerInternalReader.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/AE604AFE-B657-4617-A94D-F2A743C6288E/95/IMapper.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/7D4EC089-175C-434C-89DB-7DCF04F93318/96/99e3f652/RestClient.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/DeadCapTracker.Tests/Services/TransactionServiceTests.cs" root0="FORCE_HIGHLIGHTING" />
@@ -127,8 +121,6 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IGlobalMflApi.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/Utils.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/SingleOrArrayConverter.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflAssetsRoot.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflPendingSingleTradeRoot.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflPendingTrade.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
@@ -136,8 +128,10 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeBait.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/DraftPickTranslation.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/MflTranslationService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/SingleOrArrayConverter.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/MflTranslationService.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflAssetsRoot.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1ieUkti08otyBrGHDmGodxyNyTf" />
@@ -150,7 +144,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="DatabaseDriversLRU" value="postgresql" />
-    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.2652296" />
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.26533523" />
     <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
@@ -473,7 +467,7 @@
       <workItem from="1646254000931" duration="3537000" />
       <workItem from="1646399666085" duration="621000" />
       <workItem from="1647913729070" duration="579000" />
-      <workItem from="1648227935326" duration="8120000" />
+      <workItem from="1648227935326" duration="13029000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
@@ -971,6 +965,34 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs</url>
+          <line>412</line>
+          <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="412" containingFunctionPresentation="method 'PostDraftProjections'">
+            <startOffsets>
+              <option value="19322" />
+            </startOffsets>
+            <endOffsets>
+              <option value="19344" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/DeadCapTracker/Services/MflTranslationService.cs</url>
+          <line>177</line>
+          <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/MflTranslationService.cs" initialLine="177" containingFunctionPresentation="method 'GetCurrentFranchiseDraftPicks'">
+            <startOffsets>
+              <option value="7400" />
+              <option value="7921" />
+            </startOffsets>
+            <endOffsets>
+              <option value="7922" />
+              <option value="7922" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="48" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
