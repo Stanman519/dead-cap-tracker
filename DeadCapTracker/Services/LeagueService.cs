@@ -157,7 +157,7 @@ namespace DeadCapTracker.Services
             foreach (var task in responses)
             {
                 var response = task.Result;
-                var multiTrades = _mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(response.pendingTrades.PendingTrade);
+                var multiTrades = _mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(response.pendingTrades.pendingTrade);
                 DTOs.AddRange(multiTrades);
             }
             //select only unique trade ids

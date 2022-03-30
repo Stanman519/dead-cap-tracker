@@ -4,16 +4,6 @@ using Newtonsoft.Json;
 
 namespace DeadCapTracker.Models.BotModels
 {
-    // public class TradeTransactionSingle
-    // {
-    //     public string version { get; set; }
-    //     public string encoding { get; set; }
-    //     public TransactionsSingle transactions { get; set; }
-    // }
-    // public class TransactionsSingle
-    // {
-    //     public TradeSingle transaction { get; set; }
-    // }
     public class TradeSingle
     {
         public string franchise1_gave_up { get; set; }

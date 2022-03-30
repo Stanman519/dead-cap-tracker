@@ -9,14 +9,6 @@ namespace DeadCapTracker.Services
 {
     public interface IRumorService
     {
-        public string GetSources();
-        string ListPlayers(List<Player> players, bool hasEarlyPicks);
-        string AddBaitAction();
-        string ListPlayer(Player player, bool hasEarlyPicks);
-        bool CheckForFirstRounders(string offeringIds);
-        bool CheckForMultiplePlayers(string idArray);
-        Task<string> ListTradeInfoWithMultiplePlayers(string assets);
-        Task<string> ListTradeInfoWithSinglePlayer(string asset);
         Task<string> GetCompletedTradeString(TradeSingle trade);
         Task<string> GetTradeBaitString(TradeBait post);
 
