@@ -43,7 +43,7 @@ namespace DeadCapTracker
             services.AddControllers();
             services.AddSwaggerGen();
             services.AddSingleton(RestClient.For<IGlobalMflApi>("https://api.myfantasyleague.com"));
-            services.AddSingleton(RestClient.For<IMflApi>("https://www64.myfantasyleague.com"));
+            services.AddSingleton(RestClient.For<IMflApi>("https://www49.myfantasyleague.com"));
             services.AddSingleton(RestClient.For<IGroupMeApi>("https://api.groupme.com"));
             services.AddSingleton(RestClient.For<IInsultApi>("https://evilinsult.com/"));
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
