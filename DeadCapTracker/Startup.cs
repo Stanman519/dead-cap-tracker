@@ -52,11 +52,8 @@ namespace DeadCapTracker
             services.AddScoped<IRumorService, RumorService>();
             services.AddScoped<IMflTranslationService, MflTranslationService>();
             services.AddScoped<IDataSetHelperService, DataSetHelperService>();
-            //I dont know if i need this.
-            // services.AddOptions();
-            // services.Configure<DatabaseOptions>(Configuration.GetSection("DatabaseOptions"));
-            //TODO : use config for value instead of hardcoding
 
+            //TODO : use config for value instead of hardcoding
             services.AddAutoMapper(typeof(Startup));
             services.AddHttpClient();
             
