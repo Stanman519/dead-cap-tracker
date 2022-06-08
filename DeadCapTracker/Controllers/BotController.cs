@@ -86,7 +86,7 @@ namespace DeadCapTracker.Controllers
                 return await _groupMeRequestService.FindAndPostContract(Utils.ThisYear, searchText.ToLower());
             }
 
-            if (isFranchiseTag) await _groupMeRequestService.PostFranchiseTagAmounts(Utils.ThisYear - 1);
+            if (isFranchiseTag) await _groupMeRequestService.PostFranchiseTagAmounts();
 
             if (isScoresRequest)
                 return await _groupMeRequestService.FindAndPostLiveScores();
@@ -95,11 +95,12 @@ namespace DeadCapTracker.Controllers
 
             if (isHelp) await _groupMeRequestService.PostHelpMessage();
 
-            if (isStandings) await _groupMeRequestService.PostStandingsToGroup(year);
+            if (isStandings) await _groupMeRequestService.PostStandingsToGroup(Utils.ThisYear);
 
             if (isCapSpace) await _groupMeRequestService.PostCapSpace();
 
-            if (isFreeAgentRequest) await _groupMeRequestService.PostTopUpcomingFreeAgents(request.Split(" ")[1], Utils.ThisYear - 1);
+            if (isFreeAgentRequest) await _groupMeRequestService.PostTopUpcomingFreeAgents(request.Split(" ")[1]);
+            // add available free agents
             
             if (strayTag) await _groupMeRequestService.StrayTag();
 

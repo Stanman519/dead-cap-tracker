@@ -20,10 +20,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,10 +110,8 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/DTOs/TeamAdjustedSalaryCap.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/DataSetHelperService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Profiles/TransactionDTOProfile.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Startup.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IGlobalMflApi.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/Utils.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflPendingSingleTradeRoot.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Repositories/IMflApi.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/DraftPickTranslation.cs" />
@@ -129,6 +124,8 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeTransaction.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflPendingTrade.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Startup.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1ieUkti08otyBrGHDmGodxyNyTf" />
@@ -466,6 +463,8 @@
       <workItem from="1647913729070" duration="579000" />
       <workItem from="1648227935326" duration="15258000" />
       <workItem from="1648594055960" duration="6239000" />
+      <workItem from="1653421432921" duration="3709000" />
+      <workItem from="1654707976480" duration="1067000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
