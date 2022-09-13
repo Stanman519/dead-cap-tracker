@@ -20,7 +20,11 @@
   <component name="ChangeListManager">
     <list default="true" id="6a10da22-2094-460d-ad84-c61881fd3e47" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Ryan-passion-project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/bin/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/DeadCapTracker/obj/Debug/netcoreapp3.1/DeadCapTracker.pdb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +79,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflProjectedScores.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflMatchupSchedule.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflRostersRoot.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflTeamByes.cs" />
@@ -118,7 +121,6 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/SingleOrArrayConverter.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/MflTranslationService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflAssetsRoot.cs" />
-      <option value="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeBait.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/RumorService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Models/BotModels/TradeTransaction.cs" />
@@ -126,6 +128,8 @@
       <option value="$PROJECT_DIR$/DeadCapTracker/Services/LeagueService.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Startup.cs" />
       <option value="$PROJECT_DIR$/DeadCapTracker/Controllers/BotController.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Models/MFL/MflSalaryAdjustments.cs" />
+      <option value="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1ieUkti08otyBrGHDmGodxyNyTf" />
@@ -138,7 +142,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="DatabaseDriversLRU" value="postgresql" />
-    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.27384076" />
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.2738021" />
     <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
@@ -464,7 +468,7 @@
       <workItem from="1648227935326" duration="15258000" />
       <workItem from="1648594055960" duration="6239000" />
       <workItem from="1653421432921" duration="3709000" />
-      <workItem from="1654707976480" duration="1067000" />
+      <workItem from="1654707976480" duration="3787000" />
     </task>
     <task id="LOCAL-00001" summary="added database connection &amp; franchises">
       <created>1603139721808</created>
@@ -965,13 +969,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs</url>
-          <line>412</line>
+          <line>416</line>
           <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="412" containingFunctionPresentation="method 'PostDraftProjections'">
             <startOffsets>
-              <option value="19321" />
+              <option value="19579" />
             </startOffsets>
             <endOffsets>
-              <option value="19343" />
+              <option value="19601" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="44" />
@@ -990,6 +994,19 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs</url>
+          <line>264</line>
+          <properties documentPath="$PROJECT_DIR$/DeadCapTracker/Services/GroupMeRequestService.cs" initialLine="260" containingFunctionPresentation="method 'PostCapSpace'">
+            <startOffsets>
+              <option value="11909" />
+            </startOffsets>
+            <endOffsets>
+              <option value="11931" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="49" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
