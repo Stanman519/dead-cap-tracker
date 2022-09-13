@@ -62,16 +62,18 @@ namespace DeadCapTracker.Services
         public async Task<List<TeamStandings>> PostStandingsToGroup(int year)
         {
             var standings = (await _leagueService.GetStandings(year))
-                .OrderByDescending(_ => _.VictoryPoints2)
-                .ThenByDescending(_ => _.H2hWins2)
-                .ThenByDescending(_ => _.PointsFor2)
+                .OrderByDescending(_ => _.VictoryPoints3)
+                .ThenByDescending(_ => _.H2hWins3)
+                .ThenByDescending(_ => _.PointsFor3)
                 .ToList();
             var strForBot = "STANDINGS \n";
             var tytString = "Tri-Year Trophy Presented by Taco Bell\nTOP 5\n";
             standings.ForEach(s =>
             {
-                strForBot = $"{strForBot}{_owners[s.FranchiseId]}  ({s.VictoryPoints2} VP)  {s.H2hWins2}-{s.H2hLosses2}    {s.PointsFor2} pts\n";
+                //TODO: this needs to be fixed for future seasons.
+                strForBot = $"{strForBot}{_owners[s.FranchiseId]}  ({s.VictoryPoints3} VP)  {s.H2hWins3}-{s.H2hLosses3}    {s.PointsFor3} pts\n";
             });
+            // TODO: add guard to check if this is year one of cycle - not worth posting if so
             var tytScores = standings.Select(t => new TYTScore
                 {
                     Owner = _owners[t.FranchiseId],

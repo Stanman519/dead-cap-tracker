@@ -71,7 +71,7 @@ namespace DeadCapTracker.Profiles
                     FranchiseId = Int32.Parse(o.id),
                     H2hLosses1 = Int32.Parse(o.h2hl),
                     H2hWins1 = Int32.Parse(o.h2hw),
-                    VictoryPoints1 = Int32.Parse(o.vp),
+                    VictoryPoints1 = Int32.TryParse(o.vp, out var x) ? x : 0,
                     // AllPlayLosses1 = Int32.Parse(o.all_play_l),
                     // AllPlayTies1 = Int32.Parse(o.all_play_t),
                     // AllPlayWins1 = Int32.Parse(o.all_play_w),
