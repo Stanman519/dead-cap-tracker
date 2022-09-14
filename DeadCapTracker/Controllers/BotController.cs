@@ -75,7 +75,6 @@ namespace DeadCapTracker.Controllers
             var isDeadCap = request.StartsWith("#dead");
             var strayTag = request.Contains("@cap") || request.Contains("@the cap") || request.Contains("@thec");
             
-            
             if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag && !isDeadCap)
                 return null;
             
