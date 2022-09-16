@@ -480,7 +480,8 @@ namespace DeadCapTracker.Services
                       $"See projected rookie draft picks with \"#draft\"\n" +
                       $"See team cap space with \"#cap\"\n " +
                       $"See future dead cap with \"#dead\"\n " +
-                      $"Get franchise tag projections with \"#tag\"";
+                      $"Get franchise tag projections with \"#tag\"\n" +
+                      $"Rules: http://tinyurl.com/m8y37433";
             await BotPost(str);
         }
 
