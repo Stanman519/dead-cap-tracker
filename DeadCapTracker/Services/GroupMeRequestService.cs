@@ -472,15 +472,15 @@ namespace DeadCapTracker.Services
 
         public async Task PostHelpMessage()
         {
-            var str = $"Check live scores with \"#scores\"\n" +
-                      $"Check standings with \"#standings\"\n" +
-                      $"Check player contract with \"#contract playername\"\n" +
-                      $"Check if lineups are valid with \"#lineups\"\n" +
-                      $"See upcoming free agents at a position with \"#freeagents qb/wr/rb/te\"\n" +
-                      $"See projected rookie draft picks with \"#draft\"\n" +
-                      $"See team cap space with \"#cap\"\n " +
-                      $"See future dead cap with \"#dead\"\n " +
-                      $"Get franchise tag projections with \"#tag\"\n" +
+            var str = $"Live scores: \"#scores\"\n" +
+                      $"Standings: \"#standings\"\n" +
+                      $"Player contract: \"#contract playername\"\n" +
+                      $"Illegal lineups: \"#lineups\"\n" +
+                      $"Upcoming free agents: \"#freeagents qb/wr/rb/te\"\n" +
+                      $"Projected draft picks: \"#draft\"\n" +
+                      $"Team cap space: \"#cap\"\n" +
+                      $"Future dead cap: \"#dead\"\n" +
+                      $"Franchise Tag projections: \"#tag\"\n" +
                       $"Rules: http://tinyurl.com/m8y37433";
             await BotPost(str);
         }
