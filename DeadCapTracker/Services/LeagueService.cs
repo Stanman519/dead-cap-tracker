@@ -24,6 +24,7 @@ namespace DeadCapTracker.Services
         List<DeadCapData> GetDeadCapData();
         Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year);
         List<TransactionDTO> GetAllTransactions();
+        Task<List<StandingsV2>> GetStandingsV2(int year);
     }
     
     public class LeagueService : ILeagueService
@@ -86,6 +87,50 @@ namespace DeadCapTracker.Services
             var res = _context.Transactions.ToList();
             return _mapper.Map<List<Transaction>, List<TransactionDTO>>(res);
         }
+
+        public async Task<List<StandingsV2>> GetStandingsV2(int year)
+        {
+            var modYear = year % 3;
+            var yearArr = GetThreeYearArray(modYear, year);
+            var dict = new Dictionary<int, MflStandingsParent>();
+            var apiTasks = yearArr.Select(y => _api.GetStandings(y));
+            var mflStandings = await Task.WhenAll(apiTasks);
+
+            for (int i = 0; i < yearArr.Count; i++)
+            {
+                dict[yearArr[i]] = mflStandings[i];
+            }
+
+            var ret = new List<StandingsV2>();
+
+            foreach (KeyValuePair<int, MflStandingsParent> standings in dict)
+            {
+                var aYearOfScoringData = standings.Value.LeagueStandings.Franchise.Select(f => new AnnualScoringData
+                {
+                    FranchiseId = Int32.Parse(f.id),
+                    Year = standings.Key,
+                    PointsFor = Decimal.Parse(f.pf),
+                    H2hWins = Int32.Parse(f.h2hw),
+                    H2hLosses = Int32.Parse(f.h2hl),
+                    VictoryPoints = Int32.Parse(f.vp ?? "0")
+                });
+                foreach (var tm in aYearOfScoringData)
+                {
+                    if (!ret.Any(i => i.FranchiseId == tm.FranchiseId))
+                    {
+                        ret.Add(new StandingsV2
+                        {
+                            FranchiseId = tm.FranchiseId,
+                            TeamStandings = new List<AnnualScoringData>()
+                        });
+                    }
+                    var foundTeam = ret.First(i => i.FranchiseId == tm.FranchiseId);
+                    foundTeam.TeamStandings.Add(tm);
+                }
+            }
+            return ret;
+        }
+
         public async Task<List<TeamStandings>> GetStandings(int year)
         {
             var manualMapper = new ManualMapService();
@@ -250,26 +295,27 @@ namespace DeadCapTracker.Services
             return sorted;
         }
 
-        private int[] GetThreeYearArray(int modYear, int year)
+        private List<int> GetThreeYearArray(int modYear, int year)
         {
-            var yearArr = new int[3];
+            var yearArr = new List<int>();
+            //year 1 is a 1
+            //year 2 is a 2
+            //year 3 is a 0
+
             if (modYear == 1)
             {
-                yearArr[0] = year;
-                yearArr[1] = year + 1;
-                yearArr[2] = year + 2;
+                yearArr.Add(year);
             }
             else if (modYear == 2)
             {
-                yearArr[0] = year - 1;
-                yearArr[1] = year;
-                yearArr[2] = year + 1;
+                yearArr.Add(year - 1);
+                yearArr.Add(year);
             }
             else
             {
-                yearArr[0] = year - 2;
-                yearArr[1] = year - 1;
-                yearArr[2] = year;
+                yearArr.Add(year - 2);
+                yearArr.Add(year - 1);
+                yearArr.Add(year);
             }
             return yearArr;
         }

@@ -1,5 +1,24 @@
+using System.Collections.Generic;
+
 namespace DeadCapTracker.Models.BotModels
 {
+    public class StandingsV2
+    {
+        public int FranchiseId { get; set; }
+        public List<AnnualScoringData> TeamStandings { get; set; }
+    }
+
+    public class AnnualScoringData
+    {
+        public int FranchiseId { get; set; }
+        public int Year { get; set; }
+        public decimal PointsFor { get; set; }
+        public int H2hWins { get; set; }
+        public int H2hLosses { get; set; }
+        public int VictoryPoints { get; set; }
+
+    }
+
     public class TeamStandings
     {
         public int FranchiseId { get; set; }

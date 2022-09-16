@@ -37,9 +37,9 @@ namespace DeadCapTracker.Controllers
         }
         
         [HttpGet("standings/{year}")]
-        public async Task<List<TeamStandings>> GetStandings(int year)
+        public async Task<List<StandingsV2>> GetStandings(int year)
         {
-            return await _leagueService.GetStandings(year);
+            return await _leagueService.GetStandingsV2(year);
         }
 
         [HttpGet("pendingTrades/{year}")]
