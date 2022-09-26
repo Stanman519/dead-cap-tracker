@@ -33,13 +33,15 @@ namespace DeadCapTracker.Services
         private IGlobalMflApi _globalApi;
         private readonly IMapper _mapper;
         private DeadCapTrackerContext _context;
+        private readonly IBotPostBandaidService _bot;
 
-        public LeagueService(IMflApi api, IMapper mapper, IGlobalMflApi globalApi, DeadCapTrackerContext context)
+        public LeagueService(IMflApi api, IMapper mapper, IGlobalMflApi globalApi, DeadCapTrackerContext context, IBotPostBandaidService bot)
         {
             _api = api;
             _mapper = mapper;
             _globalApi = globalApi;
             _context = context;
+            _bot = bot;
         }
 
         public List<DeadCapData> GetDeadCapData()
@@ -172,19 +174,32 @@ namespace DeadCapTracker.Services
 
         public async Task<List<TransactionDTO>> GetTransactions(int year)
         {
-            var transactionList = (await _api.GetTransactions(year)).salaryAdjustments.salaryAdjustment;
-            transactionList = SortTransactions(transactionList);
-            var DTOs = _mapper.Map<List<MflTransaction>, List<TransactionDTO>>(transactionList);
+            var salaryAdjList = (await _api.GetSalaryAdjustments(year)).salaryAdjustments.salaryAdjustment;
+            var transactionsList = (await _api.GetMflTransactions(year)).transactions.transaction.Where(t => t.type == "BBID_WAIVER").ToList();
+            var playerLookups = transactionsList.Select(t => t.transaction.Split(',')[0]).ToList();
+            salaryAdjList = SortTransactions(salaryAdjList);
+            var DTOs = _mapper.Map<List<MflSalaryAdjustment>, List<TransactionDTO>>(salaryAdjList);
             DTOs.ForEach(d => d.YearOfTransaction = d.Timestamp.Year);
             DTOs.ForEach(d => d.TransactionId = (year * 1000) + d.TransactionId);
             var latestTransId = _context.Transactions.OrderByDescending(t => t.Transactionid).Take(1).FirstOrDefault()?.Transactionid ?? 0;
             //this filter should be in a service.  keep each layer simpler
-
+         
             var newEntities = _mapper.Map<List<TransactionDTO>, List<Transaction>>(DTOs).Where(t => t.Transactionid > latestTransId);
             //these should live in the repository layer
             await _context.Transactions.AddRangeAsync(newEntities);
             await _context.SaveChangesAsync();
-
+            if (!playerLookups.Any()) return DTOs;
+            var playerIds = string.Join(",", playerLookups);
+            playerIds += $",{Utils.LongTermPlayerHack}";
+            var playerInfos = (await _api.GetBotPlayersDetails(playerIds)).players.player;
+            var botStr = "Waiver Wire Report:\n";
+            transactionsList.ForEach(t =>
+            {
+                var thisId = t.transaction.Split(',')[0];
+                var salary = t.transaction.Split(',')[1].Split('|')[1];
+                botStr += $"{Utils.owners[int.Parse(t.franchise)]}: {playerInfos.FirstOrDefault(p => p.id == thisId)?.name ?? ""} ${salary}\n";
+            });
+            await _bot.BotPostPassThrough(botStr);
             return DTOs;
         }
         //TODO: Needs Testing!
@@ -289,7 +304,7 @@ namespace DeadCapTracker.Services
             return DTOs;
         }
 
-        public List<MflTransaction> SortTransactions(List<MflTransaction> transactions)
+        public List<MflSalaryAdjustment> SortTransactions(List<MflSalaryAdjustment> transactions)
         {
             var sorted = transactions.OrderBy(t => int.Parse(t.Id)).ToList();
             return sorted;

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace DeadCapTracker.Models.MFL
 {
-    public class ParentTransaction
+    public class MflSalaryAdjParent
     {
         public string version { get; set; }
         public ChildTransaction salaryAdjustments { get; set; }
@@ -10,9 +10,9 @@ namespace DeadCapTracker.Models.MFL
     }
     public class ChildTransaction
     {
-        public List<MflTransaction> salaryAdjustment { get; set; }
+        public List<MflSalaryAdjustment> salaryAdjustment { get; set; }
     }
-    public class MflTransaction
+    public class MflSalaryAdjustment
     {
         
         public string Timestamp { get; set; }

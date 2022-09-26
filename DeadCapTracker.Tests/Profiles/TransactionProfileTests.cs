@@ -93,9 +93,9 @@ namespace DeadCapTracker.Tests.Profiles
         }
         
 
-        private MflTransaction CreateTransaction()
+        private MflSalaryAdjustment CreateTransaction()
         {
-            MflTransaction testMflTransaction = new MflTransaction();
+            MflSalaryAdjustment testMflTransaction = new MflSalaryAdjustment();
             testMflTransaction.Timestamp = "1601470800";
             testMflTransaction.Id = "12";
             testMflTransaction.Franchise_Id = "0011";

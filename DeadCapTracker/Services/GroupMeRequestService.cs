@@ -245,7 +245,7 @@ namespace DeadCapTracker.Services
             var botStr = "Current Cap Space (Next Year)\n";
            
             //get total salaries this season + adjustments, subtract from team budget
-            var salaryAdjustmentsTask = _mfl.GetTransactions();
+            var salaryAdjustmentsTask = _mfl.GetSalaryAdjustments();
             var salariesTask = _mflTranslationService.GetFranchiseSalaries();
             var leagueTask = _mflTranslationService.GetTeamAdjustedSalaryCaps();
             await Task.WhenAll(salariesTask, leagueTask, salaryAdjustmentsTask);
@@ -409,7 +409,8 @@ namespace DeadCapTracker.Services
                 var draftPicks =
                     _mflTranslationService.GetCurrentFranchiseDraftPicks(draftPicksTask.Result.assets.franchise)
                         .Where(pk => pk.Round == 1 || pk.Round == 2)
-                        .OrderBy(pk => pk.Round).ThenBy(pk => pk.Pick).ToList();
+                        .OrderBy(pk => pk.Round)
+                        .ThenBy(pk => pk.Pick).ToList();
                 var botStr = "";
                 draftPicks.ForEach(pick =>
                 {

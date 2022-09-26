@@ -11,7 +11,7 @@ namespace DeadCapTracker.Profiles
     {
         public TransactionDTOProfile()
         {
-            CreateMap<MflTransaction, TransactionDTO>()
+            CreateMap<MflSalaryAdjustment, TransactionDTO>()
                 
                 .ForMember(destination => destination.TransactionId,
                     opts => opts.MapFrom(source => source.Id))
