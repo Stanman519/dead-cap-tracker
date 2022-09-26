@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
@@ -25,6 +26,15 @@ namespace DeadCapTracker.Services
         List<DraftPickTranslation> GetFutureFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
         Task<List<MflFranchiseStandings>> GetFranchiseStandings();
         List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
+        Task<List<StandingsV2>> GetStandings(int year);
+        Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int year);
+        Task<List<MflTransaction>> GetMflTransactionsByType(int year, string type);
+        Task<List<PendingTradeDTO>> FindPendingTrades(int year);
+        Task<List<Player>> GetMultiMflPlayers(string playerIds);
+        Task<List<FranchiseDTO>> GetAllFranchises();
+        Task<List<MflPlayer>> GetPlayersOnLastYearOfContract();
+        Task<List<MflPlayerProfile>> GetMultiMflPlayerDetails(string playerIds);
+        Task<List<MflPlayer>> GetFreeAgents(int year);
     }
 
     public class MflTranslationService : IMflTranslationService
@@ -38,11 +48,13 @@ namespace DeadCapTracker.Services
         private static Dictionary<int, string> _memberIds;
         private static int _thisYear;
 
+        public IMapper Mapper { get; }
 
-        public MflTranslationService(IMflApi mfl, IGlobalMflApi globalMflApi, IRumorService rumor)
+        public MflTranslationService(IMflApi mfl, IGlobalMflApi globalMflApi, IRumorService rumor, IMapper mapper)
         {
             _mfl = mfl;
             _globalMflApi = globalMflApi;
+            Mapper = mapper;
             _owners = Utils.owners;
             _memberIds = Utils.memberIds;
             _thisYear = Utils.ThisYear;
@@ -154,6 +166,49 @@ namespace DeadCapTracker.Services
             }).ToList();
         }
 
+        public async Task<List<StandingsV2>> GetStandings(int year)
+        {
+            var modYear = year % 3;
+            var yearArr = GetThreeYearArray(modYear, year);
+            var dict = new Dictionary<int, MflStandingsParent>();
+            var apiTasks = yearArr.Select(y => _mfl.GetStandings(y));
+            var mflStandings = await Task.WhenAll(apiTasks);
+
+            for (int i = 0; i < yearArr.Count; i++)
+            {
+                dict[yearArr[i]] = mflStandings[i];
+            }
+
+            var ret = new List<StandingsV2>();
+
+            foreach (KeyValuePair<int, MflStandingsParent> standings in dict)
+            {
+                var aYearOfScoringData = standings.Value.LeagueStandings.Franchise.Select(f => new AnnualScoringData
+                {
+                    FranchiseId = Int32.Parse(f.id),
+                    Year = standings.Key,
+                    PointsFor = Decimal.Parse(f.pf),
+                    H2hWins = Int32.Parse(f.h2hw),
+                    H2hLosses = Int32.Parse(f.h2hl),
+                    VictoryPoints = Int32.Parse(f.vp ?? "0")
+                });
+                foreach (var tm in aYearOfScoringData)
+                {
+                    if (!ret.Any(i => i.FranchiseId == tm.FranchiseId))
+                    {
+                        ret.Add(new StandingsV2
+                        {
+                            FranchiseId = tm.FranchiseId,
+                            TeamStandings = new List<AnnualScoringData>()
+                        });
+                    }
+                    var foundTeam = ret.First(i => i.FranchiseId == tm.FranchiseId);
+                    foundTeam.TeamStandings.Add(tm);
+                }
+            }
+            return ret;
+        }
+
         public List<DraftPickTranslation> GetFutureFranchiseDraftPicks(List<MflAssetsFranchise> franchises)
         {
             var franchisePicks = franchises.Select(_ => new
@@ -198,21 +253,102 @@ namespace DeadCapTracker.Services
                 .ThenBy(tm => Decimal.Parse(tm.pf)).ToList();
         }
         
+        public async Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int year)
+        {
+            return (await _mfl.GetSalaryAdjustments(year)).salaryAdjustments.salaryAdjustment;
+        }
         
+        public async Task<List<MflTransaction>> GetMflTransactionsByType(int year, string type = "")
+        {
+            var ret = (await _mfl.GetMflTransactions(year)).transactions.transaction;  
+            if (type != string.Empty)
+            {
+                return ret.Where(t => t.type == type).ToList();
+            }
+            return ret;
+        }
         
-        
-        
-        
-        
-        
-        
-        
-        
+        public async Task<List<PendingTradeDTO>> FindPendingTrades(int year)
+        {
+            var DTOs = new List<PendingTradeDTO>();
+            var responses = new List<Task<MflPendingTradesListRoot>>();
+            for (int i = 2; i < 13; i++)
+            {
+                string franchiseNum = i.ToString("D4");
+                responses.Add(_mfl.GetPendingTrades(franchiseNum));
+            }
+            await Task.WhenAll(responses);
+
+            foreach (var task in responses)
+            {
+                var response = task.Result;
+                var multiTrades = Mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(response.pendingTrades.pendingTrade);
+                DTOs.AddRange(multiTrades);
+            }
+            //select only unique trade ids
+            return DTOs.GroupBy(t => t.tradeId).Select(t => t.First()).ToList();
+        }
+
+        public async Task<List<Player>> GetMultiMflPlayers(string playerIds)
+        {
+            return (await _mfl.GetBotPlayersDetails(playerIds)).players.player;
+        }
+
+        public async Task<List<FranchiseDTO>> GetAllFranchises()
+        {
+            var leagueInfo = await _mfl.GetLeagueInfo();
+            var allFranchises = leagueInfo.League.Franchises.Franchise;
+            return Mapper.Map<List<MflFranchise>, List<FranchiseDTO>>(allFranchises);
+        }
+
+        public async Task<List<MflPlayer>> GetPlayersOnLastYearOfContract()
+        {
+            var salaries = await _mfl.GetSalaries();
+            return salaries.Salaries.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
+        }
+
+        public async Task<List<MflPlayerProfile>> GetMultiMflPlayerDetails(string playerIds)
+        {
+            var playerDetails = await _globalMflApi.GetPlayerDetails(playerIds);
+
+            return playerDetails.playerProfiles.playerProfile.ToList();
+        }
+        public async Task<List<MflPlayer>> GetFreeAgents(int year)
+        {
+            var rawMfl = await _mfl.GetFreeAgents(year);
+            return rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
+        }
+
         public string InvertNameString(string commaName)
         {
             if (string.IsNullOrEmpty(commaName)) return "";
             var nameArr = commaName.Split(",");
             return $"{nameArr[1]} {nameArr[0]}".ToLower();
+        }
+
+        private List<int> GetThreeYearArray(int modYear, int year)
+        {
+            var yearArr = new List<int>();
+            //year 1 is a 1
+            //year 2 is a 2
+            //year 3 is a 0
+
+            if (modYear == 1)
+            {
+                yearArr.Add(year);
+            }
+            else if (modYear == 2)
+            {
+                yearArr.Add(year - 1);
+                yearArr.Add(year);
+            }
+            else
+            {
+                yearArr.Add(year - 2);
+                yearArr.Add(year - 1);
+                yearArr.Add(year);
+            }
+            return yearArr;
         }
 
     }

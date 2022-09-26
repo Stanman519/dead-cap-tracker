@@ -13,11 +13,10 @@ namespace DeadCapTracker.Services
 {
     public interface IGroupMeRequestService
     {
-        public Task<List<TeamStandings>> PostStandingsToGroup(int year);
+        public Task<List<AnnualScoringData>> PostStandingsToGroup(int year);
         public Task<List<PendingTradeDTO>> PostTradeOffersToGroup(int year);
         public Task PostTradeRumor();
         public Task PostCompletedTradeToGroup();
-        Task BotPost(string text);
         public Task<string> FindAndPostContract(int year, string nameSearch);
         Task<string> FindAndPostLiveScores();
         Task CheckLineupsForHoles();
@@ -28,13 +27,14 @@ namespace DeadCapTracker.Services
         Task PostTopUpcomingFreeAgents(string positionRequested, int year = Utils.ThisYear);
         Task PostFranchiseTagAmounts(int year = Utils.ThisYear);
         Task PostFutureDeadCap();
+        Task BotPost(string post);
     }
     
     public class GroupMeRequestRequestService : IGroupMeRequestService
     {
         private readonly IMflTranslationService _mflTranslationService;
         private readonly IDataSetHelperService _dataHelper;
-        private IGroupMeApi _gmApi;
+        private IGroupMePostRepo _gm;
         private readonly IMflApi _mfl;
         private readonly IGlobalMflApi _globalMflApi;
         private readonly ILeagueService _leagueService;
@@ -44,13 +44,12 @@ namespace DeadCapTracker.Services
         private static Dictionary<int, string> _memberIds;
         private static int _thisYear;
         
-        public GroupMeRequestRequestService(IMflTranslationService mflTranslationService, IDataSetHelperService dataHelper, IGroupMeApi gmApi, IMflApi mfl, IGlobalMflApi globalMflApi, ILeagueService leagueService, IRumorService rumor, IInsultApi insult)
+        public GroupMeRequestRequestService(IMflTranslationService mflTranslationService, IDataSetHelperService dataHelper, IGroupMePostRepo gm, ILeagueService leagueService, IRumorService rumor, IInsultApi insult)
         {
             _mflTranslationService = mflTranslationService;
             _dataHelper = dataHelper;
-            _gmApi = gmApi;
-            _mfl = mfl;
-            _globalMflApi = globalMflApi;
+            _gm = gm;
+
             _leagueService = leagueService;
             _rumor = rumor;
             _insult = insult;
@@ -59,27 +58,23 @@ namespace DeadCapTracker.Services
             _thisYear = Utils.ThisYear;
         }
 
-        public async Task<List<TeamStandings>> PostStandingsToGroup(int year)
+        public async Task<List<AnnualScoringData>> PostStandingsToGroup(int year)
         {
-            var standings = (await _leagueService.GetStandings(year))
-                .OrderByDescending(_ => _.VictoryPoints3)
-                .ThenByDescending(_ => _.H2hWins3)
-                .ThenByDescending(_ => _.PointsFor3)
-                .ToList();
-            var strForBot = "STANDINGS \n";
+            var standingsData = (await _leagueService.GetStandingsV2(year));
+
+            var standings = standingsData.SelectMany(s => s.TeamStandings).Where(s => s.Year == year).ToList();
+            var strForBot = "STANDINGS\n";
             var tytString = "Tri-Year Trophy Presented by Taco Bell\nTOP 5\n";
             standings.ForEach(s =>
             {
-                //TODO: this needs to be fixed for future seasons.
-                strForBot = $"{strForBot}{_owners[s.FranchiseId]}  ({s.VictoryPoints3} VP)  {s.H2hWins3}-{s.H2hLosses3}    {s.PointsFor3} pts\n";
+                strForBot = $"{strForBot}{_owners[s.FranchiseId]}  ({s.VictoryPoints} VP)  {s.H2hWins}-{s.H2hLosses}    {s.PointsFor} pts\n";
             });
             // TODO: add guard to check if this is year one of cycle - not worth posting if so
-            var tytScores = standings.Select(t => new TYTScore
-                {
-                    Owner = _owners[t.FranchiseId],
-                    Score = (t.H2hWins1 * 5 + t.PointsFor1) + ((GetAdjustedWins(t.H2hWins2, t.VictoryPoints2) * 5) + t.PointsFor2)
-                                                            + ((GetAdjustedWins(t.H2hWins3, t.VictoryPoints3) * 5) + t.PointsFor3)
-                }).OrderByDescending(t => t.Score)
+            var tytScores = standingsData.Select(t => new TYTScore
+            {
+                Owner = _owners[t.FranchiseId],
+                Score = t.TeamStandings.Sum(s => s.PointsFor) + t.TeamStandings.Select(s => s.H2hWins * (s.Year == 2020 ? 5 : 10)).Sum()
+            }).OrderByDescending(t => t.Score)
                 .Take(5)
                 .ToList();
 
@@ -87,21 +82,22 @@ namespace DeadCapTracker.Services
             {
                 tytString = $"{tytString}{s.Owner} - {s.Score}\n";
             });
-            await BotPost(strForBot);
-            await BotPost(tytString);
+            await _gm.BotPost(strForBot);
+            await _gm.BotPost(tytString);
             return standings;
         }
 
-        public int GetAdjustedWins(int h2hWins, int vp)
+        // I dont know what i was doing here?
+/*        public int GetAdjustedWins(int h2hWins, int vp)
         {
             return h2hWins + vp - (h2hWins * 2);
-        }
+        }*/
 
         public async Task<List<PendingTradeDTO>> PostTradeOffersToGroup(int year)
         {
             var tenMinDuration = new TimeSpan(0, 0, 10, 0);
             var trades = await _leagueService.FindPendingTrades(year);
-            var memberList = (await _gmApi.GetMemberIds()).response.members;
+            var memberList = (await _gm.GetMemberIds()).response.members;
 
             string strForBot = "";
            
@@ -116,7 +112,7 @@ namespace DeadCapTracker.Services
                         var tagName = memberList.Find(m => m.user_id == _memberIds[t.offeredTo]);
                         var tagString = $"@{tagName.nickname}";
                         strForBot = ", you have a pending trade offer!";
-                        await BotPostWithTag(strForBot, tagString, tagName.user_id);
+                        await _gm.BotPostWithTag(strForBot, tagString, tagName.user_id);
                     }
                 });
             }
@@ -134,12 +130,11 @@ namespace DeadCapTracker.Services
             {
                 if (trade != null && !string.IsNullOrEmpty(trade.franchise2))
                 {
-                    var strForBot = "";
                     var tradeTime = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(trade.timestamp));
                     // check if trade was not in the last 10 minutes to bail early
                     if (tradeTime <= tenMinAgo) continue;
-                    strForBot = await _rumor.GetCompletedTradeString(trade);
-                    await BotPost(strForBot);
+                    var strForBot = await _rumor.GetCompletedTradeString(trade);
+                    await _gm.BotPost(strForBot);
                 }
             }
         }
@@ -160,7 +155,7 @@ namespace DeadCapTracker.Services
                     if (postDate > DateTime.Now.AddMinutes(-11))
                     {
                         strForBot = await _rumor.GetTradeBaitString(post);
-                        await BotPost(strForBot);
+                        await _gm.BotPost(strForBot);
                     }
                 }
             }
@@ -183,7 +178,7 @@ namespace DeadCapTracker.Services
                     stringForBot = $"{stringForBot}{p.name} - ${p.salary}/{p.contractYear} ({p.owner})\n";
                 });
             }
-            await BotPost(stringForBot);
+            await _gm.BotPost(stringForBot);
             return stringForBot;
         }
 
@@ -196,7 +191,7 @@ namespace DeadCapTracker.Services
             var byesTask = _mflTranslationService.GetByesThisWeek(thisWeek);
             var injuriesTask = _mflTranslationService.GetInjurredPlayerIdsThisWeek(thisWeek);
             var allPlayersTask = _mflTranslationService.GetAllRelevantPlayers();
-            var groupTask = _gmApi.GetMemberIds();
+            var groupTask = _gm.GetMemberIds();
 
             try
             {
@@ -204,7 +199,7 @@ namespace DeadCapTracker.Services
             }
             catch (Exception)
             {
-                await BotPost("There was an issue retrieving the data.");
+                await _gm.BotPost("There was an issue retrieving the data.");
                 return;
             }
             
@@ -220,24 +215,25 @@ namespace DeadCapTracker.Services
                 }
             }).ToList();
             var brokenTeams = new List<string>();
-            onlyStarters.ForEach(async t =>
+
+            foreach (var franch in onlyStarters)
             {
                 var botStr = ", your lineup is invalid";
-                foreach (var player in t.players.player)
+                foreach (var player in franch.players.player)
                 {
                     player.nflTeam = allPlayersTask.Result.FirstOrDefault(allPlayer => allPlayer.id == player.id)?.team;
                     var hasBye = byesTask.Result.Contains(player.nflTeam);
                     var isOut = injuriesTask.Result.Contains(player.id);
                     if (!hasBye && !isOut) continue;
-                    if (brokenTeams.Contains(t.id)) continue;
-                    var tagName = memberList.Find(m => m.user_id == _memberIds[Int32.Parse(t.id)]);
+                    if (brokenTeams.Contains(franch.id)) continue;
+                    var tagName = memberList.Find(m => m.user_id == _memberIds[Int32.Parse(franch.id)]);
                     var tagString = $"@{tagName?.nickname}";
-                    await BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
-                    brokenTeams.Add(t.id);
+                    await _gm.BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
+                    brokenTeams.Add(franch.id);
                 }
-            });
+            }
             //TODO: mark if tankin'?
-            if (!brokenTeams.Any()) await BotPost("Lineups are all straight, mate.");
+            if (!brokenTeams.Any()) await _gm.BotPost("Lineups are all straight, mate.");
         }
 
         public async Task PostCapSpace()
@@ -264,7 +260,7 @@ namespace DeadCapTracker.Services
                           $"${leagueTask.Result.First(_ => _.Id == tm.Id).SalaryCapAmount - (tm.CurrentRosterSalary + tm.CurrentTaxiSalary + tm.CurrentIRSalary) - teamAdj} " +
                           $"(${500 - (tm.NextYearRosterSalary + (tm.DeadCapData.ContainsKey((_thisYear + 1).ToString()) ? tm.DeadCapData[(_thisYear + 1).ToString()] : 0))})\n";
             });
-            await BotPost(botStr);
+            await _gm.BotPost(botStr);
         }
 
         public async Task<string> FindAndPostLiveScores()
@@ -316,7 +312,7 @@ namespace DeadCapTracker.Services
                 
                 
             });
-            await BotPost(botText);
+            await _gm.BotPost(botText);
             return botText;
         }
 
@@ -360,7 +356,7 @@ namespace DeadCapTracker.Services
                 strForBot += $"{t.Position}: ${Decimal.Round(t.Salary)}\n";
             });
 
-            await BotPost(strForBot);
+            await _gm.BotPost(strForBot);
         }
 
         public async Task PostTopUpcomingFreeAgents(string positionRequest, int year = Utils.ThisYear)
@@ -394,7 +390,7 @@ namespace DeadCapTracker.Services
             {
                 strForBot += $"{p.Name} - {p.Score} PPG\n";
             });
-            await BotPost(strForBot);
+            await _gm.BotPost(strForBot);
         }
 
         public async Task PostDraftProjections(int year)
@@ -417,7 +413,7 @@ namespace DeadCapTracker.Services
                     var pickNum = $"{pick.Round}.{pick.Pick.ToString("D2")}";
                     botStr += $"{pickNum} {_owners[pick.CurrentOwner]}\n";
                 });
-                await BotPost(botStr);
+                await _gm.BotPost(botStr);
             }
             else
             {
@@ -447,7 +443,7 @@ namespace DeadCapTracker.Services
 
                         pickNum++;
                     });
-                    await BotPost(botStr);
+                    await _gm.BotPost(botStr);
                 }
             }
         }
@@ -467,7 +463,7 @@ namespace DeadCapTracker.Services
 
                 botStr += "\n";
             });
-            await BotPost(botStr);
+            await _gm.BotPost(botStr);
         }
 
 
@@ -483,7 +479,7 @@ namespace DeadCapTracker.Services
                       $"Future dead cap: \"#dead\"\n" +
                       $"Franchise Tag projections: \"#tag\"\n" +
                       $"Rules: http://tinyurl.com/m8y37433";
-            await BotPost(str);
+            await _gm.BotPost(str);
         }
 
         public async Task StrayTag()
@@ -496,27 +492,12 @@ namespace DeadCapTracker.Services
             }
             catch (Exception ) {/*ignore*/}
             var insultString = string.IsNullOrEmpty(insult) ? "" : $"Otherwise...\n\n{insult}";
-            await BotPost($"If you need something from me, type \"#help\". {insultString}");
+            await _gm.BotPost($"If you need something from me, type \"#help\". {insultString}");
         }
 
-        public async Task BotPost(string text)
+        public async Task BotPost(string post)
         {
-            var message = new Message(text);
-            await _gmApi.SendMessage(message);
-        }
-
-        public async Task BotPostWithTag(string text, string nickname, string memberId)
-        {
-            var rawText = $"{nickname}{text}";
-            var message = new Message(rawText);
-            var mention = new Mention {type = "mentions"};
-            int[][] locis = new int[1][] {new[] {0, nickname.Length}};
-            var mentionIds = new[] {memberId};
-            mention.loci = locis;
-            mention.user_ids = mentionIds;
-            var mentionList = new List<Mention> {mention};
-            message.attachments = mentionList;
-            await _gmApi.SendMessage(message);
+            await _gm.BotPost(post);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace DeadCapTracker.Services
     {
         Task<List<TransactionDTO>> GetTransactions(int year);
         Task<List<FranchiseDTO>> UpdateFranchises(int year);
-        Task<List<TeamStandings>> GetStandings(int year);
+        //Task<List<TeamStandings>> GetStandings(int year);
         Task<List<PendingTradeDTO>> FindPendingTrades(int year);
         Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year);
         List<DeadCapData> GetDeadCapData();
@@ -29,19 +29,20 @@ namespace DeadCapTracker.Services
     
     public class LeagueService : ILeagueService
     {
-        private IMflApi _api;
-        private IGlobalMflApi _globalApi;
         private readonly IMapper _mapper;
         private DeadCapTrackerContext _context;
+        private readonly IGroupMePostRepo _gm;
+
+        public IMflTranslationService _mflSvc { get; }
+
         //private readonly IBotPostBandaidService _bot;
 
-        public LeagueService(IMflApi api, IMapper mapper, IGlobalMflApi globalApi, DeadCapTrackerContext context) //, IBotPostBandaidService bot)
+        public LeagueService(IMapper mapper, DeadCapTrackerContext context, IMflTranslationService mfl, IGroupMePostRepo gm)
         {
-            _api = api;
             _mapper = mapper;
-            _globalApi = globalApi;
             _context = context;
-            //_bot = bot;
+            _mflSvc = mfl;
+            _gm = gm;
         }
 
         public List<DeadCapData> GetDeadCapData()
@@ -92,92 +93,17 @@ namespace DeadCapTracker.Services
 
         public async Task<List<StandingsV2>> GetStandingsV2(int year)
         {
-            var modYear = year % 3;
-            var yearArr = GetThreeYearArray(modYear, year);
-            var dict = new Dictionary<int, MflStandingsParent>();
-            var apiTasks = yearArr.Select(y => _api.GetStandings(y));
-            var mflStandings = await Task.WhenAll(apiTasks);
 
-            for (int i = 0; i < yearArr.Count; i++)
-            {
-                dict[yearArr[i]] = mflStandings[i];
-            }
-
-            var ret = new List<StandingsV2>();
-
-            foreach (KeyValuePair<int, MflStandingsParent> standings in dict)
-            {
-                var aYearOfScoringData = standings.Value.LeagueStandings.Franchise.Select(f => new AnnualScoringData
-                {
-                    FranchiseId = Int32.Parse(f.id),
-                    Year = standings.Key,
-                    PointsFor = Decimal.Parse(f.pf),
-                    H2hWins = Int32.Parse(f.h2hw),
-                    H2hLosses = Int32.Parse(f.h2hl),
-                    VictoryPoints = Int32.Parse(f.vp ?? "0")
-                });
-                foreach (var tm in aYearOfScoringData)
-                {
-                    if (!ret.Any(i => i.FranchiseId == tm.FranchiseId))
-                    {
-                        ret.Add(new StandingsV2
-                        {
-                            FranchiseId = tm.FranchiseId,
-                            TeamStandings = new List<AnnualScoringData>()
-                        });
-                    }
-                    var foundTeam = ret.First(i => i.FranchiseId == tm.FranchiseId);
-                    foundTeam.TeamStandings.Add(tm);
-                }
-            }
-            return ret;
-        }
-
-        public async Task<List<TeamStandings>> GetStandings(int year)
-        {
-            var manualMapper = new ManualMapService();
-            //figure out what year of the 3 year group we are in then make api calls based on that
-            //year 1 is a 1 year 2 is a 2 year 3 is a 0
-            var modYear = year % 3;
-            var yearArr = GetThreeYearArray(modYear, year);
-            
-            var res1 = await _api.GetStandings(yearArr[0]);
-            MflStandingsParent res2 = null;
-            MflStandingsParent res3 = null;
-            List<MflFranchiseStandings> franchiseListYr2 = null;
-            List<MflFranchiseStandings> franchiseListYr3 = null;
-            try
-            {
-                res2 = await _api.GetStandings(yearArr[1]);
-            }
-            catch (Exception)
-            { /* ignore */ }
-
-            try
-            {
-                res3 = await _api.GetStandings(yearArr[2]);
-            }
-            catch (Exception) { }
-
-            var franchiseListYr1 = res1.LeagueStandings.Franchise;
-            if (res2?.LeagueStandings != null) 
-                franchiseListYr2 = res2.LeagueStandings.Franchise;
-            if (res3?.LeagueStandings != null) 
-                franchiseListYr3 = res3.LeagueStandings.Franchise;
-            if (res2?.LeagueStandings == null)
-                return manualMapper.MapOneYearStandings(franchiseListYr1);
-            if(res3?.LeagueStandings == null)
-                return manualMapper.MapTwoYearStandings(franchiseListYr1, franchiseListYr2);
-
-            return manualMapper.MapThreeYearStandings(franchiseListYr1, franchiseListYr2, franchiseListYr3);
+            return await _mflSvc.GetStandings(year);
         }
 
         public async Task<List<TransactionDTO>> GetTransactions(int year)
         {
-            var salaryAdjList = (await _api.GetSalaryAdjustments(year)).salaryAdjustments.salaryAdjustment;
-            var transactionsList = (await _api.GetMflTransactions(year)).transactions.transaction.Where(t => t.type == "BBID_WAIVER").ToList();
-            var playerLookups = transactionsList.Select(t => t.transaction.Split(',')[0]).ToList();
-            salaryAdjList = SortTransactions(salaryAdjList);
+            var salaryAdjListTask = _mflSvc.GetSalaryAdjustments(year);
+            var transactionsListTask = _mflSvc.GetMflTransactionsByType(year, "BBID_WAIVER");
+            await Task.WhenAll(salaryAdjListTask, transactionsListTask);
+            var playerLookups = transactionsListTask.Result.Select(t => t.transaction.Split(',')[0]).ToList();
+            var salaryAdjList = SortTransactions(salaryAdjListTask.Result);
             var DTOs = _mapper.Map<List<MflSalaryAdjustment>, List<TransactionDTO>>(salaryAdjList);
             DTOs.ForEach(d => d.YearOfTransaction = d.Timestamp.Year);
             DTOs.ForEach(d => d.TransactionId = (year * 1000) + d.TransactionId);
@@ -191,47 +117,26 @@ namespace DeadCapTracker.Services
             if (!playerLookups.Any()) return DTOs;
             var playerIds = string.Join(",", playerLookups);
             playerIds += $",{Utils.LongTermPlayerHack}";
-            var playerInfos = (await _api.GetBotPlayersDetails(playerIds)).players.player;
+            var playerInfos = await _mflSvc.GetMultiMflPlayers(playerIds);
             var botStr = "Waiver Wire Report:\n";
-            transactionsList.ForEach(t =>
+            transactionsListTask.Result.ForEach(t =>
             {
                 var thisId = t.transaction.Split(',')[0];
                 var salary = t.transaction.Split(',')[1].Split('|')[1];
                 botStr += $"{Utils.owners[int.Parse(t.franchise)]}: {playerInfos.FirstOrDefault(p => p.id == thisId)?.name ?? ""} ${salary}\n";
             });
-
-            //TODO: bot post transactions!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //await _bot.BotPostPassThrough(botStr);
+            await _gm.BotPost(botStr);
             return DTOs;
         }
         //TODO: Needs Testing!
         public async Task<List<PendingTradeDTO>> FindPendingTrades(int year)
         {
-            var DTOs = new List<PendingTradeDTO>();
-            var responses = new List<Task<MflPendingTradesListRoot>>();
-            for (int i = 2; i < 13; i++)
-            {
-                string franchiseNum = i.ToString("D4");
-                responses.Add(_api.GetPendingTrades(franchiseNum));
-            }
-            await Task.WhenAll(responses);
-
-            foreach (var task in responses)
-            {
-                var response = task.Result;
-                var multiTrades = _mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(response.pendingTrades.pendingTrade);
-                DTOs.AddRange(multiTrades);
-            }
-            //select only unique trade ids
-            return DTOs.GroupBy(t => t.tradeId).Select(t => t.First()).ToList();
+            return await _mflSvc.FindPendingTrades(year);
         }
         
         public async Task<List<FranchiseDTO>> UpdateFranchises(int year)
         {
-            var leagueInfo = await _api.GetLeagueInfo();
-            var allFranchises = leagueInfo.League.Franchises.Franchise;
-            var DTOs = _mapper.Map<List<MflFranchise>, List<FranchiseDTO>>(allFranchises);
-
+            var DTOs = await _mflSvc.GetAllFranchises();
             var existingFranchiseIds = _context.Franchises
                                                 .OrderBy(f => f.Franchiseid)
                                                 .Select(f => f.Franchiseid)
@@ -246,19 +151,11 @@ namespace DeadCapTracker.Services
 
         public async Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year)
         {
-            var salaries = await _api.GetSalaries();
-            var oneYearPlayers = salaries.Salaries.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
-            
-            // get names via other get call
+            var oneYearPlayers = await _mflSvc.GetPlayersOnLastYearOfContract();
+
             string queryParam = "";
-
             oneYearPlayers.ForEach(p => queryParam = $"{queryParam}{p.Id},");
-
-            var playerDetails = await _globalApi.GetPlayerDetails(queryParam);
-
-            var playerDetailsList = playerDetails.playerProfiles.playerProfile.ToList();
-            //map to DTO
-
+            var playerDetailsList = await _mflSvc.GetMultiMflPlayerDetails(queryParam);
             var DTOs = _mapper.Map<List<MflPlayerProfile>, List<PlayerDetailsDTO>>(playerDetailsList);
             foreach (var d in DTOs)
             {
@@ -270,16 +167,12 @@ namespace DeadCapTracker.Services
         }
         public async Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year)
         {
-            
-            var rawMfl = await _api.GetFreeAgents(year);
-            var freeAgents = rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
+            var freeAgents = await _mflSvc.GetFreeAgents(year);
             var freeAgents1 = new List<MflPlayer>();
             var freeAgents2 = new List<MflPlayer>();
 
-            // get names via other get call
             string queryParam1 = "";
             string queryParam2 = "";
-
 
             freeAgents1 = freeAgents.GetRange(0, (int) Math.Floor(((decimal) freeAgents.Count) / 2));
             freeAgents2 = freeAgents.GetRange((int) Math.Floor(((decimal) freeAgents.Count) / 2), (freeAgents.Count) - (int) Math.Floor(((decimal) freeAgents.Count) / 2));
@@ -287,13 +180,12 @@ namespace DeadCapTracker.Services
             freeAgents1.ForEach(p => queryParam1 = $"{queryParam1}{p.Id},");
             freeAgents2.ForEach(p => queryParam2 = $"{queryParam2}{p.Id},");
 
+            var playerDetails1Task = _mflSvc.GetMultiMflPlayerDetails(queryParam1);
+            var playerDetails2Task = _mflSvc.GetMultiMflPlayerDetails(queryParam2);
+            await Task.WhenAll(playerDetails1Task, playerDetails2Task);
 
-            var playerDetails1 = await _globalApi.GetPlayerDetails(queryParam1, year);
-            var playerDetails2 = await _globalApi.GetPlayerDetails(queryParam2, year);
-
-
-            var playerDetailsList = playerDetails1.playerProfiles.playerProfile.ToList();
-            playerDetailsList.AddRange(playerDetails2.playerProfiles.playerProfile.ToList());
+            var playerDetailsList = playerDetails1Task.Result;
+            playerDetailsList.AddRange(playerDetails2Task.Result);
             //map to DTO
 
             var DTOs = _mapper.Map<List<MflPlayerProfile>, List<PlayerDetailsDTO>>(playerDetailsList);
@@ -312,30 +204,7 @@ namespace DeadCapTracker.Services
             return sorted;
         }
 
-        private List<int> GetThreeYearArray(int modYear, int year)
-        {
-            var yearArr = new List<int>();
-            //year 1 is a 1
-            //year 2 is a 2
-            //year 3 is a 0
-
-            if (modYear == 1)
-            {
-                yearArr.Add(year);
-            }
-            else if (modYear == 2)
-            {
-                yearArr.Add(year - 1);
-                yearArr.Add(year);
-            }
-            else
-            {
-                yearArr.Add(year - 2);
-                yearArr.Add(year - 1);
-                yearArr.Add(year);
-            }
-            return yearArr;
-        }
+        
         
     }
 }

@@ -21,7 +21,7 @@ namespace DeadCapTracker.Controllers
         }
 
         [HttpGet("standings/{year}")]
-        public async Task<List<TeamStandings>> PostStandings(int year)
+        public async Task<List<AnnualScoringData>> PostStandings(int year)
         {
             try
             {
@@ -54,7 +54,7 @@ namespace DeadCapTracker.Controllers
         }
 
         [HttpPost("auctionError")]
-        public async Task PostCompletedTrades([FromBody] ErrorMessage error)
+        public async Task PostAuctionError([FromBody] ErrorMessage error)
         {
             await _groupMeRequestService.BotPost(error.Message);
         }
