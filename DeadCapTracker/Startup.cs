@@ -52,6 +52,7 @@ namespace DeadCapTracker
             services.AddScoped<IRumorService, RumorService>();
             services.AddScoped<IMflTranslationService, MflTranslationService>();
             services.AddScoped<IDataSetHelperService, DataSetHelperService>();
+            //services.AddScoped<IBotPostBandaidService, BotPostBandaidService>();
 
             //TODO : use config for value instead of hardcoding
             services.AddAutoMapper(typeof(Startup));

@@ -33,15 +33,15 @@ namespace DeadCapTracker.Services
         private IGlobalMflApi _globalApi;
         private readonly IMapper _mapper;
         private DeadCapTrackerContext _context;
-        private readonly IBotPostBandaidService _bot;
+        //private readonly IBotPostBandaidService _bot;
 
-        public LeagueService(IMflApi api, IMapper mapper, IGlobalMflApi globalApi, DeadCapTrackerContext context, IBotPostBandaidService bot)
+        public LeagueService(IMflApi api, IMapper mapper, IGlobalMflApi globalApi, DeadCapTrackerContext context) //, IBotPostBandaidService bot)
         {
             _api = api;
             _mapper = mapper;
             _globalApi = globalApi;
             _context = context;
-            _bot = bot;
+            //_bot = bot;
         }
 
         public List<DeadCapData> GetDeadCapData()
@@ -199,7 +199,9 @@ namespace DeadCapTracker.Services
                 var salary = t.transaction.Split(',')[1].Split('|')[1];
                 botStr += $"{Utils.owners[int.Parse(t.franchise)]}: {playerInfos.FirstOrDefault(p => p.id == thisId)?.name ?? ""} ${salary}\n";
             });
-            await _bot.BotPostPassThrough(botStr);
+
+            //TODO: bot post transactions!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //await _bot.BotPostPassThrough(botStr);
             return DTOs;
         }
         //TODO: Needs Testing!
