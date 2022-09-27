@@ -32,10 +32,7 @@ namespace DeadCapTracker.Services
         private readonly IMapper _mapper;
         private DeadCapTrackerContext _context;
         private readonly IGroupMePostRepo _gm;
-
         public IMflTranslationService _mflSvc { get; }
-
-        //private readonly IBotPostBandaidService _bot;
 
         public LeagueService(IMapper mapper, DeadCapTrackerContext context, IMflTranslationService mfl, IGroupMePostRepo gm)
         {

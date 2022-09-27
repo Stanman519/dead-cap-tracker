@@ -28,6 +28,7 @@ namespace DeadCapTracker.Services
         List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
         Task<List<StandingsV2>> GetStandings(int year);
         Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int year);
+        Task<List<MflPlayer>> GetAllSalaries();
         Task<List<MflTransaction>> GetMflTransactionsByType(int year, string type);
         Task<List<PendingTradeDTO>> FindPendingTrades(int year);
         Task<List<Player>> GetMultiMflPlayers(string playerIds);
@@ -35,6 +36,10 @@ namespace DeadCapTracker.Services
         Task<List<MflPlayer>> GetPlayersOnLastYearOfContract();
         Task<List<MflPlayerProfile>> GetMultiMflPlayerDetails(string playerIds);
         Task<List<MflPlayer>> GetFreeAgents(int year);
+        Task<List<Matchup>> GetLiveScoresForMatchups(string thisWeek);
+        Task<List<ProjectedPlayerScore>> GetProjections(string thisWeek);
+        Task<List<PlayerAvgScore>> GetAveragePlayerScores(int year);
+        Task<List<MflAssetsFranchise>> GetFranchiseAssets();
     }
 
     public class MflTranslationService : IMflTranslationService
@@ -125,6 +130,8 @@ namespace DeadCapTracker.Services
                 _.matchup.All(gm => gm.franchise.Any(tm => tm.result == "T" && tm.score == null))).week;
         }
 
+
+
         public async Task<List<Player>> GetAllRelevantPlayers()
         {
             return (await _mfl.GetAllMflPlayers()).players.player
@@ -136,6 +143,17 @@ namespace DeadCapTracker.Services
             return (await _mfl.GetLiveScores(thisWeek)).liveScoring.matchup
                 .SelectMany(game => game.franchise)
                 .ToList();
+        }
+
+        public async Task<List<Matchup>> GetLiveScoresForMatchups(string thisWeek)
+        {
+            return (await _mfl.GetLiveScores(thisWeek)).liveScoring.matchup
+                .ToList();
+        }
+
+        public async Task<List<ProjectedPlayerScore>> GetProjections(string thisWeek)
+        {
+            return (await _mfl.GetProjections(thisWeek)).projectedScores.playerScore;
         }
 
         public async Task<List<string>> GetByesThisWeek(string thisWeek)
@@ -307,6 +325,17 @@ namespace DeadCapTracker.Services
             return salaries.Salaries.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
         }
 
+        public async Task<List<MflPlayer>> GetAllSalaries()
+        {
+            var salaries = await _mfl.GetSalaries();
+            return salaries.Salaries.LeagueUnit.Player;
+        }
+
+        public async Task<List<MflAssetsFranchise>> GetFranchiseAssets()
+        {
+            return (await _mfl.GetFranchiseAssets()).assets.franchise;
+        }
+
         public async Task<List<MflPlayerProfile>> GetMultiMflPlayerDetails(string playerIds)
         {
             var playerDetails = await _globalMflApi.GetPlayerDetails(playerIds);
@@ -317,6 +346,10 @@ namespace DeadCapTracker.Services
         {
             var rawMfl = await _mfl.GetFreeAgents(year);
             return rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
+        }
+        public async Task<List<PlayerAvgScore>> GetAveragePlayerScores(int year)
+        {
+            return (await _mfl.GetAveragePlayerScores(year)).playerScores.playerScore;
         }
 
         public string InvertNameString(string commaName)

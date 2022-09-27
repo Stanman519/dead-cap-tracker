@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
-using RestEase;
 
 namespace DeadCapTracker.Services
 {
@@ -35,8 +33,6 @@ namespace DeadCapTracker.Services
         private readonly IMflTranslationService _mflTranslationService;
         private readonly IDataSetHelperService _dataHelper;
         private IGroupMePostRepo _gm;
-        private readonly IMflApi _mfl;
-        private readonly IGlobalMflApi _globalMflApi;
         private readonly ILeagueService _leagueService;
         private readonly IRumorService _rumor;
         private readonly IInsultApi _insult;
@@ -44,12 +40,16 @@ namespace DeadCapTracker.Services
         private static Dictionary<int, string> _memberIds;
         private static int _thisYear;
         
-        public GroupMeRequestRequestService(IMflTranslationService mflTranslationService, IDataSetHelperService dataHelper, IGroupMePostRepo gm, ILeagueService leagueService, IRumorService rumor, IInsultApi insult)
+        public GroupMeRequestRequestService(IMflTranslationService mflTranslationService, 
+            IDataSetHelperService dataHelper, 
+            IGroupMePostRepo gm, 
+            ILeagueService leagueService, 
+            IRumorService rumor, 
+            IInsultApi insult)
         {
             _mflTranslationService = mflTranslationService;
             _dataHelper = dataHelper;
             _gm = gm;
-
             _leagueService = leagueService;
             _rumor = rumor;
             _insult = insult;
@@ -62,7 +62,12 @@ namespace DeadCapTracker.Services
         {
             var standingsData = (await _leagueService.GetStandingsV2(year));
 
-            var standings = standingsData.SelectMany(s => s.TeamStandings).Where(s => s.Year == year).ToList();
+            var standings = standingsData.SelectMany(s => s.TeamStandings)
+                .Where(s => s.Year == year)
+                .OrderByDescending(s => s.VictoryPoints)
+                .ThenByDescending(s => s.H2hWins)
+                .ThenByDescending(s => s.PointsFor)
+                .ToList();
             var strForBot = "STANDINGS\n";
             var tytString = "Tri-Year Trophy Presented by Taco Bell\nTOP 5\n";
             standings.ForEach(s =>
@@ -141,7 +146,6 @@ namespace DeadCapTracker.Services
 
         public async Task PostTradeRumor()
         {
-            // TODO: MAKE A SERVICE THAT only TALKS TO MFL API AND RETURNS a friendly model. so bait list or single returns the same obj with list.
             // TODO: make the rumor service a string builder service.
 
             var baitList = await _mflTranslationService.GetNewTradeBait();
@@ -164,7 +168,6 @@ namespace DeadCapTracker.Services
         public async Task<string> FindAndPostContract(int year, string nameSearch)
         {
             if (nameSearch.EndsWith(" ")) nameSearch = nameSearch.Trim();
-            // get list of players on rosters
             var hits = await _mflTranslationService.GetRosteredPlayersByName(year, nameSearch);
             // bot post those names and contracts
             var stringForBot = "";
@@ -241,12 +244,12 @@ namespace DeadCapTracker.Services
             var botStr = "Current Cap Space (Next Year)\n";
            
             //get total salaries this season + adjustments, subtract from team budget
-            var salaryAdjustmentsTask = _mfl.GetSalaryAdjustments();
+            var salaryAdjustmentsTask = _mflTranslationService.GetSalaryAdjustments(_thisYear);
             var salariesTask = _mflTranslationService.GetFranchiseSalaries();
             var leagueTask = _mflTranslationService.GetTeamAdjustedSalaryCaps();
             await Task.WhenAll(salariesTask, leagueTask, salaryAdjustmentsTask);
 
-            var thisSznAdj = salaryAdjustmentsTask.Result.salaryAdjustments.salaryAdjustment;
+            var thisSznAdj = salaryAdjustmentsTask.Result;
             var adjustments = _leagueService.GetDeadCapData();
             // add up salaries for this year - but dont forget to * .5  and .4 for taxi and IR
             
@@ -265,14 +268,13 @@ namespace DeadCapTracker.Services
 
         public async Task<string> FindAndPostLiveScores()
         {
-            var thisWeek = (await _mfl.GetMatchupSchedule()).schedule.weeklySchedule.First(_ =>
-                _.matchup.All(gm => gm.franchise.Any(tm => tm.result == "T" && tm.score == null))).week;
+            var thisWeek = await _mflTranslationService.GetThisLeagueWeek();
             var botText = "Live Scores (Live Projections)\n";
-            var matchupScoresTask = _mfl.GetLiveScores(thisWeek);
-            var scoreProjectionsTask = _mfl.GetProjections(thisWeek);
-            await Task.WhenAll(new List<Task> {matchupScoresTask, scoreProjectionsTask});
-            var matchups = matchupScoresTask.Result.liveScoring.matchup;
-            var projections = scoreProjectionsTask.Result.projectedScores.playerScore;
+            var matchupScoresTask = _mflTranslationService.GetLiveScoresForMatchups(thisWeek);
+            var scoreProjectionsTask = _mflTranslationService.GetProjections(thisWeek);
+            await Task.WhenAll(matchupScoresTask, scoreProjectionsTask);
+            var matchups = matchupScoresTask.Result;
+            var projections = scoreProjectionsTask.Result;
             matchups.ForEach(_ =>
             {
                 _owners.TryGetValue(Int32.Parse(_.franchise.First().id), out var tm1);
@@ -318,13 +320,12 @@ namespace DeadCapTracker.Services
 
         public async Task PostFranchiseTagAmounts(int year = Utils.ThisYear)
         {
-            var salariesTask = _mfl.GetSalaries(year);
-            var positionTask = _mfl.GetAllMflPlayers(year);
+            var salariesTask = _mflTranslationService.GetAllSalaries();
+            var positionTask = _mflTranslationService.GetAllRelevantPlayers();
             await Task.WhenAll(salariesTask, positionTask);
 
-            var positionIds = positionTask.Result.players.player.Where(p =>
-                p.position == "WR" || p.position == "QB" || p.position == "RB" || p.position == "TE").ToList();
-            var playerSalaries = salariesTask.Result.Salaries.LeagueUnit.Player.Select(_ => new
+            var positionIds = positionTask.Result;
+            var playerSalaries = salariesTask.Result.Select(_ => new
             {
                 Salary = Decimal.TryParse(_.Salary, out var sal) ? sal : 0,
                 Id = _.Id
@@ -365,17 +366,14 @@ namespace DeadCapTracker.Services
             if (pos != "QB" && pos != "RB" && pos != "WR" && pos != "TE") return;
 
             var strForBot = $"Top Upcoming {pos} Free Agents\n";
-            var avgPtsTask = _mfl.GetAveragePlayerScores(year);
-            var salariesTask = _mfl.GetSalaries(year);
-            var playerTask = _mfl.GetAllMflPlayers(year);
+            var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(year);
+            var salariesTask = _mflTranslationService.GetAllSalaries();
+            var playerTask = _mflTranslationService.GetAllRelevantPlayers();
             await Task.WhenAll(avgPtsTask, playerTask, salariesTask);
 
-            var playerInfos =
-                playerTask.Result.players.player.Where(p =>
-                    p.position == "QB" || p.position == "RB" || p.position == "WR" || p.position == "TE").ToList();
-            var scores = avgPtsTask.Result.playerScores.playerScore;
-            var relevantPlayers =
-                salariesTask.Result.Salaries.LeagueUnit.Player.Where(_ => _.ContractYear == "1" && _.Salary != "");
+            var playerInfos = playerTask.Result;
+            var scores = avgPtsTask.Result;
+            var relevantPlayers = salariesTask.Result.Where(_ => _.ContractYear == "1" && _.Salary != "");
 
             var topScores = relevantPlayers.Select(_ => new
             {
@@ -397,13 +395,13 @@ namespace DeadCapTracker.Services
         {
             //TODO: need to check if we are predraft in the offseason, just get this year's order from that 
             var standingsTask = _mflTranslationService.GetFranchiseStandings();
-            var draftPicksTask = _mfl.GetFranchiseAssets();
+            var draftPicksTask = _mflTranslationService.GetFranchiseAssets();
             await Task.WhenAll(standingsTask, draftPicksTask);
 
             if (standingsTask.Result.All(tm => tm.h2hw == "0" && tm.h2hl == "0")) //preseason
             {
                 var draftPicks =
-                    _mflTranslationService.GetCurrentFranchiseDraftPicks(draftPicksTask.Result.assets.franchise)
+                    _mflTranslationService.GetCurrentFranchiseDraftPicks(draftPicksTask.Result)
                         .Where(pk => pk.Round == 1 || pk.Round == 2)
                         .OrderBy(pk => pk.Round)
                         .ThenBy(pk => pk.Pick).ToList();
@@ -418,7 +416,7 @@ namespace DeadCapTracker.Services
             else
             {
                 var draftPicks =
-                    _mflTranslationService.GetFutureFranchiseDraftPicks(draftPicksTask.Result.assets.franchise);
+                    _mflTranslationService.GetFutureFranchiseDraftPicks(draftPicksTask.Result);
                 var standings = standingsTask.Result
                     .Select(_ => new
                     {
