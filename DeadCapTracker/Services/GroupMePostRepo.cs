@@ -1,6 +1,9 @@
 ﻿using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Repositories;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace DeadCapTracker.Services
@@ -25,7 +28,17 @@ namespace DeadCapTracker.Services
         public async Task BotPost(string text)
         {
             var message = new Message(text);
-            await _gmApi.SendMessage(message);
+            try
+            {
+                await _gmApi.SendMessage(message);
+            }
+            catch (HttpRequestException e)
+            {
+
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.InnerException);
+            }
+            
         }
 
         public async Task BotPostWithTag(string text, string nickname, string memberId)
