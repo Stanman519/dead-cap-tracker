@@ -279,7 +279,7 @@ namespace DeadCapTracker.Services
         public async Task<List<MflTransaction>> GetMflTransactionsByType(int year, string type = "")
         {
             var ret = (await _mfl.GetMflTransactions(year)).transactions.transaction;  
-            if (type != string.Empty)
+            if (!string.IsNullOrEmpty(type))
             {
                 return ret.Where(t => t.type == type).ToList();
             }
