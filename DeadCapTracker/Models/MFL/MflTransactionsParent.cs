@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using DeadCapTracker.Models.BotModels;
+using DeadCapTracker.Services;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DeadCapTracker.Models.MFL
 {
@@ -28,6 +31,7 @@ namespace DeadCapTracker.Models.MFL
 
     public class MflTransactionsList
     {
+        [JsonConverter(typeof(SingleOrArrayConverter<MflTransaction>))]
         public List<MflTransaction> transaction { get; set; }
     }
 
