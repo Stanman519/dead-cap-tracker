@@ -32,7 +32,7 @@ namespace DeadCapTracker.Models.MFL
     public class MflTransactionsList
     {
         [JsonConverter(typeof(SingleOrArrayConverter<MflTransaction>))]
-        public List<MflTransaction> transaction { get; set; }
+        public List<MflTransaction> transaction { get; set; } = new List<MflTransaction>();
     }
 
 
