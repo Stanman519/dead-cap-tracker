@@ -415,6 +415,7 @@ namespace DeadCapTracker.Services
             }
             else
             {
+                year++;
                 var draftPicks =
                     _mflTranslationService.GetFutureFranchiseDraftPicks(draftPicksTask.Result);
                 var standings = standingsTask.Result
@@ -434,9 +435,13 @@ namespace DeadCapTracker.Services
                     {
                         var origSlot = tm.Id;
                         var currentPickOwner = draftPicks
-                            .First(d => d.Year == year && d.Round == rd && d.OriginalOwner == origSlot).CurrentOwner;
-                        botStr += $"{pickNum}) {_owners[currentPickOwner]}";
-                        botStr += origSlot == currentPickOwner ? "\n" : $" (via {_owners[origSlot]})\n";
+                            .FirstOrDefault(d => d.Year == year && d.Round == rd && d.OriginalOwner == origSlot)?.CurrentOwner;
+                        if (currentPickOwner != null)
+                        {
+                            botStr += $"{pickNum}) {_owners[currentPickOwner ?? 0]}";
+                            botStr += origSlot == currentPickOwner ? "\n" : $" (via {_owners[origSlot]})\n";
+                        }
+
 
 
                         pickNum++;
