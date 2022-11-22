@@ -6,6 +6,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.Local.json
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)
@@ -70,6 +71,7 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+
 
 # Chutzpah Test files
 _Chutzpah*
@@ -163,6 +165,9 @@ PublishScripts/
 # NuGet v3's project.json files produces more ignoreable files
 *.nuget.props
 *.nuget.targets
+*.nuget.*.targets
+*.nuget.g.props
+*.nuget.g.json
 
 # Microsoft Azure Build Output
 csx/
