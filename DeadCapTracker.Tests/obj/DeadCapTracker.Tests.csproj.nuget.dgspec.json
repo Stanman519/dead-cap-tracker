@@ -52,21 +52,29 @@
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[6.0.9, )"
+              "version": "[7.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[6.0.9, )"
+              "version": "[7.0.0, )"
             },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[16.7.1, )"
             },
-            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+            "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[6.0.6, )"
+              "version": "[6.4.0, )"
+            },
+            "Swashbuckle.AspNetCore.Swagger": {
+              "target": "Package",
+              "version": "[6.4.0, )"
+            },
+            "Swashbuckle.AspNetCore.SwaggerUI": {
+              "target": "Package",
+              "version": "[6.4.0, )"
             },
             "coverlet.collector": {
               "target": "Package",
@@ -97,7 +105,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -149,7 +157,11 @@
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[6.0.9, )"
+              "version": "[7.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[7.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
@@ -165,33 +177,21 @@
               "target": "Package",
               "version": "[11.0.1, )"
             },
-            "Npgsql.EntityFrameworkCore.PostgreSQL": {
-              "target": "Package",
-              "version": "[6.0.6, )"
-            },
             "RestEase": {
               "target": "Package",
               "version": "[1.5.0, )"
             },
-            "Steeltoe.CloudFoundry.Connector.EFCore": {
-              "target": "Package",
-              "version": "[3.0.0-m1, )"
-            },
-            "Steeltoe.CloudFoundry.ConnectorCore": {
-              "target": "Package",
-              "version": "[3.0.0-m1, )"
-            },
-            "Steeltoe.Extensions.Configuration.ConfigServer": {
-              "target": "Package",
-              "version": "[1.0.0-rc1, )"
-            },
-            "Steeltoe.Management.CloudFoundryCore": {
-              "target": "Package",
-              "version": "[3.0.2, )"
-            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[5.5.0, )"
+              "version": "[6.4.0, )"
+            },
+            "Swashbuckle.AspNetCore.Swagger": {
+              "target": "Package",
+              "version": "[6.4.0, )"
+            },
+            "Swashbuckle.AspNetCore.SwaggerUI": {
+              "target": "Package",
+              "version": "[6.4.0, )"
             }
           },
           "imports": [
@@ -213,7 +213,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
         }
       }
     }
