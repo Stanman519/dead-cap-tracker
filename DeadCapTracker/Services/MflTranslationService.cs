@@ -7,6 +7,7 @@ using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
+using Microsoft.Extensions.Logging;
 using RestEase;
 
 namespace DeadCapTracker.Services
@@ -54,12 +55,14 @@ namespace DeadCapTracker.Services
         private static int _thisYear;
 
         public IMapper Mapper { get; }
+        public ILogger<MflTranslationService> _logger { get; }
 
-        public MflTranslationService(IMflApi mfl, IGlobalMflApi globalMflApi, IRumorService rumor, IMapper mapper)
+        public MflTranslationService(IMflApi mfl, IGlobalMflApi globalMflApi, IRumorService rumor, IMapper mapper, ILogger<MflTranslationService> logger)
         {
             _mfl = mfl;
             _globalMflApi = globalMflApi;
             Mapper = mapper;
+            _logger = logger;
             _owners = Utils.owners;
             _memberIds = Utils.memberIds;
             _thisYear = Utils.ThisYear;
@@ -71,7 +74,10 @@ namespace DeadCapTracker.Services
             {
                 return (await _mfl.GetRecentTrade()).transactions.transaction;
             }
-            catch (Exception) { return null; }
+            catch (Exception e) {
+                _logger.LogError(e, "MFL Request Error");
+                return null; 
+            }
         }
 
         public async Task<List<TradeBait>> GetNewTradeBait()
@@ -81,8 +87,12 @@ namespace DeadCapTracker.Services
             {
                 return (await _mfl.GetTradeBait()).tradeBaits.tradeBait;
             }
-            catch (Exception) { return null; }
-            
+            catch (Exception e)
+            {
+                _logger.LogError(e, "MFL Request Error");
+                return null;
+            }
+
         }
 
         public async Task<List<RosterPlayer>> GetRosteredPlayersByName(int year, string name)
