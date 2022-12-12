@@ -73,9 +73,10 @@ namespace DeadCapTracker.Controllers
             var isFranchiseTag = request.StartsWith("#tag");
             var isHelp = request.StartsWith("#help");
             var isDeadCap = request.StartsWith("#dead");
+            var isDraftCost = request.StartsWith("#budget");
             var strayTag = request.Contains("@cap") || request.Contains("@the cap") || request.Contains("@thec");
             
-            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag && !isDeadCap)
+            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag && !isDeadCap && !isDraftCost)
                 return null;
             
             if (isContractRequest)
@@ -106,6 +107,8 @@ namespace DeadCapTracker.Controllers
             if (isDraftPickReq) await _groupMeRequestService.PostDraftProjections(Utils.ThisYear);
 
             if (isDeadCap) await _groupMeRequestService.PostFutureDeadCap();
+
+            if (isDraftCost) await _groupMeRequestService.PostDraftBudgets();
 
             return null;
         }

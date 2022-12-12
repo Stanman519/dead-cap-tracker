@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using AutoMapper;
+using DeadCapTracker.Models;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
-using DeadCapTracker.Profiles;
 using DeadCapTracker.Repositories;
-using RestEase;
+using Microsoft.Extensions.Logging;
 
 namespace DeadCapTracker.Services
 {
@@ -25,6 +23,7 @@ namespace DeadCapTracker.Services
         Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year);
         List<TransactionDTO> GetAllTransactions();
         Task<List<StandingsV2>> GetStandingsV2(int year);
+        Task MapPickBudgetToOwners();
     }
     
     public class LeagueService : ILeagueService
@@ -40,6 +39,8 @@ namespace DeadCapTracker.Services
             _context = context;
             _mflSvc = mfl;
             _gm = gm;
+
+
         }
 
         public List<DeadCapData> GetDeadCapData()
@@ -145,6 +146,52 @@ namespace DeadCapTracker.Services
             
             return DTOs;
         }
+
+        public async Task MapPickBudgetToOwners()
+        {
+            // guard clause for off-season? too much unknown 
+            var standingsTask = _mflSvc.GetFranchiseStandings();
+            var draftPicksTask = _mflSvc.GetFranchiseAssets();
+            await Task.WhenAll(standingsTask, draftPicksTask);
+            var draftPicks = new List<DraftPickTranslation>();
+            var standings = standingsTask.Result.ToList();
+            if (draftPicksTask.Result.All(tm => tm.currentYearDraftPicks == null)) //we are in-season or offseason postdraft
+            {
+                var year = Utils.ThisYear + 1;
+                draftPicks = _mflSvc.GetFutureFranchiseDraftPicks(draftPicksTask.Result).Where(_ => _.Year == year)
+                       .OrderBy(pk => pk.Round)
+                       .ThenBy(pk => pk.Pick).ToList();
+
+                for (var rd = 1; rd < 5; rd++)
+                {
+                    var pickNum = 1;
+
+                    standings.ForEach(tm =>
+                    {
+                        // loop through standings and assign pick values to original owner pick
+                        var relevantPick = draftPicks
+                            .FirstOrDefault(d => d.Year == year && d.Round == rd && d.OriginalOwner == int.Parse(tm.id));
+                        relevantPick.Pick = pickNum;
+                        relevantPick.SlotCost = _mflSvc.GetDraftPickPrice(rd, pickNum);
+                        pickNum++;
+                    });
+                }
+            } else
+            {
+                draftPicks = _mflSvc.GetCurrentFranchiseDraftPicks(draftPicksTask.Result)
+                   .OrderBy(pk => pk.Round)
+                   .ThenBy(pk => pk.Pick).ToList();
+            }
+            var ownerIds = draftPicks.Select(d => d.CurrentOwner).Distinct().ToList();
+            var picksByOwner = ownerIds.Select(o => new DraftBudgetProjection(o, draftPicks.Where(d => d.CurrentOwner == o).ToList())).OrderByDescending(_ => _.RawBudget).ToList();
+            var strBot = $"Projected cap for upcoming draft picks\n(max savings via taxi squad)\n-----------\n";
+            picksByOwner.ForEach(o =>
+            {
+                strBot += $"{Utils.owners[o.OwnerId]}: ${o.RawBudget} (${o.PotentialSavings})\n";
+            });
+            await _gm.BotPost(strBot);
+        }
+
 
         public async Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year)
         {

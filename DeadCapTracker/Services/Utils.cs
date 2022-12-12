@@ -7,6 +7,11 @@ namespace DeadCapTracker.Services
         public const int ThisYear = 2022;
         public const string ApiKey = "ahBv1sGSvuWtx0emOVrJaDYeFbox";
         public const string LongTermPlayerHack = "14777"; // Joe Burrow, used to add to mfl player lookups so you always get array rather than obj
+        public const int TaxiSquadSlots = 5;
+        public const double TaxiSquadCapHit = 0.2;
+        public const double InjuredReserveCapHit = 0.5;
+        public const double CutCapHit = 0.5;
+
         public static Dictionary<int, string> owners = new Dictionary<int, string>()
         {
             {1, "Ryan"},
@@ -37,6 +42,46 @@ namespace DeadCapTracker.Services
             {10, "11902182"},
             {11, "36740"},
             {12, "63384702"}
+        };
+        public static Dictionary<int, int> draftPicks = new Dictionary<int, int>
+        {
+            {1, 30},
+            {2, 28},
+            {3, 26},
+            {4, 24},
+            {5, 22},
+            {6, 22},
+            {7, 22},
+            {8, 22},
+            {9, 20},
+            {10, 20},
+            {11, 20},
+            {12, 20},
+            {13, 18},
+            {14, 18},
+            {15, 18},
+            {16, 18},
+            {17, 16},
+            {18, 16},
+            {19, 16},
+            {20, 16},
+            {21, 14},
+            {22, 14},
+            {23, 14},
+            {24, 14},
+            {25, 12},
+            {26, 12},
+            {27, 12},
+            {28, 12},
+            {29, 10},
+            {30, 10},
+            {31, 10},
+            {32, 10},
+            {33, 8},
+            {34, 8},
+            {35, 8},
+            {36, 8},
+            {37,  6}
         };
     }
 }

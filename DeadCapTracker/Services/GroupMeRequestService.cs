@@ -26,6 +26,7 @@ namespace DeadCapTracker.Services
         Task PostFranchiseTagAmounts(int year = Utils.ThisYear);
         Task PostFutureDeadCap();
         Task BotPost(string post);
+        Task PostDraftBudgets();
     }
     
     public class GroupMeRequestRequestService : IGroupMeRequestService
@@ -413,6 +414,7 @@ namespace DeadCapTracker.Services
                 });
                 await _gm.BotPost(botStr);
             }
+
             else
             {
                 year++;
@@ -469,6 +471,10 @@ namespace DeadCapTracker.Services
             await _gm.BotPost(botStr);
         }
 
+        public async Task PostDraftBudgets()
+        {
+             await _leagueService.MapPickBudgetToOwners();
+        }
 
         public async Task PostHelpMessage()
         {
@@ -480,6 +486,7 @@ namespace DeadCapTracker.Services
                       $"Projected draft picks: \"#draft\"\n" +
                       $"Team cap space: \"#cap\"\n" +
                       $"Future dead cap: \"#dead\"\n" +
+                      $"Draft pick budget: \"#budget\"\n" +
                       $"Franchise Tag projections: \"#tag\"\n" +
                       $"Rules: http://tinyurl.com/m8y37433";
             await _gm.BotPost(str);

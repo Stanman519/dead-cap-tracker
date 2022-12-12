@@ -54,7 +54,7 @@ namespace DeadCapTracker
             services.AddScoped<IGroupMePostRepo, GroupMePostRepo>();
 
             //TODO : use config for value instead of hardcoding
-            services.AddAutoMapper(typeof(Startup));
+            services.AddAutoMapper(typeof(Program).Assembly);
             services.AddHttpClient();
             
             //pull in connection string

@@ -41,6 +41,7 @@ namespace DeadCapTracker.Services
         Task<List<ProjectedPlayerScore>> GetProjections(string thisWeek);
         Task<List<PlayerAvgScore>> GetAveragePlayerScores(int year);
         Task<List<MflAssetsFranchise>> GetFranchiseAssets();
+        int GetDraftPickPrice(int round, int pick);
     }
 
     public class MflTranslationService : IMflTranslationService
@@ -266,7 +267,9 @@ namespace DeadCapTracker.Services
                         Year = _thisYear,
                         Round = Int32.Parse(arr[1]) + 1,
                         Pick = Int32.Parse(arr[2]) + 1,
-                        CurrentOwner = Int32.Parse(_.id)
+                        CurrentOwner = Int32.Parse(_.id),
+                        SlotCost = GetDraftPickPrice(Int32.Parse(arr[1]) + 1, Int32.Parse(arr[2]) + 1)
+                        
                     };
                 })
             ).ToList();
@@ -274,10 +277,19 @@ namespace DeadCapTracker.Services
             return franchisePicks;
         }
 
+        public int GetDraftPickPrice(int round, int pick)
+        {   
+            var slot = (round - 1) * 12 + pick;
+            if (slot > 36) slot = 37;
+            return Utils.draftPicks[slot];
+
+        }
+
         public async Task<List<MflFranchiseStandings>> GetFranchiseStandings()
         {
             return (await _mfl.GetStandings(_thisYear)).LeagueStandings.Franchise
                 .OrderBy(tm => Int32.Parse(tm.vp))
+                .ThenBy(tm => int.Parse(tm.h2hw))
                 .ThenBy(tm => Decimal.Parse(tm.pf)).ToList();
         }
         
