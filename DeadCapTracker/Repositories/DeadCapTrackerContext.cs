@@ -24,33 +24,6 @@ namespace DeadCapTracker.Repositories
         public virtual DbSet<Franchise> Franchises { get; set; }
         public virtual DbSet<Transaction> Transactions { get; set; }
 
-        // public void GetTransactionsJoinedWithFranchises()
-        // {
-        //     var transactions =  Transactions.ToList();
-        //     var franchises = Franchises.ToList();
-        //     var allTransactions = (
-        //             from t in transactions
-        //             join f in franchises on t.Franchiseid equals f.Franchiseid into penalties
-        //             from p in penalties.DefaultIfEmpty()
-        //             select new
-        //             {
-        //                 FranchiseId = t.Franchiseid,
-        //                 TeamName = p.Teamname,
-        //                 DeadAmount = t.Amount,
-        //                 PlayerName = t.Playername,
-        //                 TransactionYear = t.Yearoftransaction,
-        //                 NumOfYears = t.Years
-        //             })
-        //         .GroupBy(t => t.FranchiseId)
-        //         .ToList();
-        // }
-        //
-        
-        
-        
-        
-        
-        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

@@ -54,6 +54,7 @@ namespace DeadCapTracker.Services
         private static Dictionary<int, string> _owners;
         private static Dictionary<int, string> _memberIds;
         private static int _thisYear;
+        
 
         public IMapper Mapper { get; }
         public ILogger<MflTranslationService> _logger { get; }
@@ -77,7 +78,7 @@ namespace DeadCapTracker.Services
             }
             catch (Exception e) {
                 _logger.LogError(e, "MFL Request Error");
-                return null; 
+                return new List<TradeSingle>(); 
             }
         }
 
@@ -91,21 +92,41 @@ namespace DeadCapTracker.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "MFL Request Error");
-                return null;
+                return new List<TradeBait>();
             }
 
         }
 
         public async Task<List<RosterPlayer>> GetRosteredPlayersByName(int year, string name)
         {
-          var rosters = (await _mfl.GetRostersWithContracts(year)).rosters.franchise;
+            var rosters = new List<FranchiseRoster>();
+            try
+            {
+                rosters = (await _mfl.GetRostersWithContracts(year)).rosters.franchise;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "MFL Request Error");
+                return null;
+            }
+
             var rosteredPlayers = rosters.SelectMany(_ => _.player).ToList();
             // build query string with all player ids in that list 
             var queryIds = "";
             rosteredPlayers.ForEach(player => queryIds = $"{queryIds}{player.id},");
 
             // get player details for that query
-            var playerDetails = (await _mfl.GetBotPlayersDetails(queryIds)).players.player;
+            var playerDetails = new List<Player>();
+            try
+            {
+                playerDetails = (await _mfl.GetBotPlayersDetails(queryIds)).players.player;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "MFL Request Error");
+                return null;
+            }
+
             // match the list of players with the list of contracts
 
             var withNames = rosteredPlayers.GroupJoin(playerDetails,
@@ -145,54 +166,124 @@ namespace DeadCapTracker.Services
 
         public async Task<List<Player>> GetAllRelevantPlayers()
         {
-            return (await _mfl.GetAllMflPlayers()).players.player
-                .Where(p => p.position == "WR" || p.position == "QB" || p.position == "TE" || p.position == "RB").ToList();
+            try
+            {
+                return (await _mfl.GetAllMflPlayers()).players.player
+                    .Where(p => p.position == "WR" || p.position == "QB" || p.position == "TE" || p.position == "RB").ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<Player>();
+            }
         }
 
         public async Task<List<LiveScoreFranchise>> GetLiveScoresForFranchises(string thisWeek)
         {
-            return (await _mfl.GetLiveScores(thisWeek)).liveScoring.matchup
-                .SelectMany(game => game.franchise)
-                .ToList();
+            try
+            {
+                return (await _mfl.GetLiveScores(thisWeek)).liveScoring.matchup
+                    .SelectMany(game => game.franchise)
+                    .ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                throw;
+            }
+
         }
 
         public async Task<List<Matchup>> GetLiveScoresForMatchups(string thisWeek)
         {
-            return (await _mfl.GetLiveScores(thisWeek)).liveScoring.matchup
-                .ToList();
+            try
+            {
+                return (await _mfl.GetLiveScores(thisWeek)).liveScoring.matchup
+                    .ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                throw;
+            }
+
         }
 
         public async Task<List<ProjectedPlayerScore>> GetProjections(string thisWeek)
         {
-            return (await _mfl.GetProjections(thisWeek)).projectedScores.playerScore;
+            try
+            {
+                return (await _mfl.GetProjections(thisWeek)).projectedScores.playerScore;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                throw;
+            }
         }
 
         public async Task<List<string>> GetByesThisWeek(string thisWeek)
         {
-            return (await _globalMflApi.GetByesForWeek(thisWeek)).nflByeWeeks.team?
-                .Select(t => t.id).ToList() ?? new List<string>();
+            try
+            {
+                return (await _globalMflApi.GetByesForWeek(thisWeek)).nflByeWeeks.team?
+                    .Select(t => t.id).ToList() ?? new List<string>();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                throw;
+            }
+
         }
 
         public async Task<List<string>> GetInjurredPlayerIdsThisWeek(string thisWeek)
         {
-            return (await _globalMflApi.GetInjuries(thisWeek)).injuries.injury
-                .Where(p => p.status.ToLower() != "questionable" && p.status.ToLower() != "doubtful")
-                .Select(_ => _.id).ToList();
+            try
+            {
+                return (await _globalMflApi.GetInjuries(thisWeek)).injuries.injury
+                    .Where(p => p.status.ToLower() != "questionable" && p.status.ToLower() != "doubtful")
+                    .Select(_ => _.id).ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                throw;
+            }
+
         }
 
         public async Task<List<FranchiseRoster>> GetFranchiseSalaries()
         {
-            return (await _mfl.GetRostersWithContracts(_thisYear)).rosters.franchise;
+            try
+            {
+                return (await _mfl.GetRostersWithContracts(_thisYear)).rosters.franchise;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                throw;
+            }
+
         }
 
         public async Task<List<TeamAdjustedSalaryCap>> GetTeamAdjustedSalaryCaps()
         {
-            return (await _mfl.GetFullLeagueDetails(_thisYear)).league.franchises.franchise
-                .Select(tm => new TeamAdjustedSalaryCap()
+            try
             {
-                Id = int.Parse(tm.id),
-                SalaryCapAmount = string.IsNullOrEmpty(tm.salaryCapAmount) ? 500 : decimal.Parse(tm.salaryCapAmount)
-            }).ToList();
+                return (await _mfl.GetFullLeagueDetails(_thisYear)).league.franchises.franchise
+                    .Select(tm => new TeamAdjustedSalaryCap()
+                    {
+                        Id = int.Parse(tm.id),
+                        SalaryCapAmount = string.IsNullOrEmpty(tm.salaryCapAmount) ? 500 : decimal.Parse(tm.salaryCapAmount)
+                    }).ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                throw;
+            }
+
         }
 
         public async Task<List<StandingsV2>> GetStandings(int year)
@@ -201,7 +292,17 @@ namespace DeadCapTracker.Services
             var yearArr = GetThreeYearArray(modYear, year);
             var dict = new Dictionary<int, MflStandingsParent>();
             var apiTasks = yearArr.Select(y => _mfl.GetStandings(y));
-            var mflStandings = await Task.WhenAll(apiTasks);
+            var mflStandings = new List<MflStandingsParent>();
+            try
+            {
+                mflStandings = (await Task.WhenAll(apiTasks)).ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<StandingsV2>();
+            }
+
 
             for (int i = 0; i < yearArr.Count; i++)
             {
@@ -287,26 +388,53 @@ namespace DeadCapTracker.Services
 
         public async Task<List<MflFranchiseStandings>> GetFranchiseStandings()
         {
-            return (await _mfl.GetStandings(_thisYear)).LeagueStandings.Franchise
-                .OrderBy(tm => Int32.Parse(tm.vp))
-                .ThenBy(tm => int.Parse(tm.h2hw))
-                .ThenBy(tm => Decimal.Parse(tm.pf)).ToList();
+            try
+            {
+                return (await _mfl.GetStandings(_thisYear)).LeagueStandings.Franchise
+                    .OrderBy(tm => Int32.Parse(tm.vp))
+                    .ThenBy(tm => int.Parse(tm.h2hw))
+                    .ThenBy(tm => Decimal.Parse(tm.pf)).ToList();
+            }
+            catch (Exception e )
+            {
+                _logger.LogError("mfl error", e);
+                return new List<MflFranchiseStandings>();
+            }
+
         }
         
         public async Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int year)
         {
-            return (await _mfl.GetSalaryAdjustments(year)).salaryAdjustments.salaryAdjustment;
+            try
+            {
+                return (await _mfl.GetSalaryAdjustments(year)).salaryAdjustments.salaryAdjustment;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<MflSalaryAdjustment>();
+            }
         }
         
         public async Task<List<MflTransaction>> GetMflTransactionsByType(int year, string type = "")
         {
-            var ret = (await _mfl.GetMflTransactions(year)).transactions.transaction;
-
-            if (!string.IsNullOrEmpty(type))
+            try
             {
-                return ret.Where(t => t.type == type).ToList();
+                var ret = (await _mfl.GetMflTransactions(year)).transactions.transaction;
+                if (!string.IsNullOrEmpty(type))
+                {
+                    return ret.Where(t => t.type == type).ToList();
+                }
+                return ret;
             }
-            return ret;
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<MflTransaction>();
+            }
+
+
+
         }
         
         public async Task<List<PendingTradeDTO>> FindPendingTrades(int year)
@@ -318,7 +446,16 @@ namespace DeadCapTracker.Services
                 string franchiseNum = i.ToString("D4");
                 responses.Add(_mfl.GetPendingTrades(franchiseNum));
             }
-            await Task.WhenAll(responses);
+            try
+            {
+                await Task.WhenAll(responses);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<PendingTradeDTO>();
+            }
+
 
             foreach (var task in responses)
             {
@@ -332,47 +469,118 @@ namespace DeadCapTracker.Services
 
         public async Task<List<Player>> GetMultiMflPlayers(string playerIds)
         {
-            return (await _mfl.GetBotPlayersDetails(playerIds)).players.player;
+            try
+            {
+                return (await _mfl.GetBotPlayersDetails(playerIds)).players.player;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<Player>();
+            }
+
         }
 
         public async Task<List<FranchiseDTO>> GetAllFranchises()
         {
-            var leagueInfo = await _mfl.GetLeagueInfo();
-            var allFranchises = leagueInfo.League.Franchises.Franchise;
-            return Mapper.Map<List<MflFranchise>, List<FranchiseDTO>>(allFranchises);
+            try
+            {
+                var leagueInfo = await _mfl.GetLeagueInfo();
+                var allFranchises = leagueInfo.League.Franchises.Franchise;
+                return Mapper.Map<List<MflFranchise>, List<FranchiseDTO>>(allFranchises);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<FranchiseDTO>();
+            }
+
         }
 
         public async Task<List<MflPlayer>> GetPlayersOnLastYearOfContract()
         {
-            var salaries = await _mfl.GetSalaries();
-            return salaries.Salaries.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
+            try
+            {
+                var salaries = await _mfl.GetSalaries();
+                return salaries.Salaries.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<MflPlayer>();
+            }
+
         }
 
         public async Task<List<MflPlayer>> GetAllSalaries()
         {
+            try
+            {
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<MflPlayer>();
+            }
             var salaries = await _mfl.GetSalaries();
             return salaries.Salaries.LeagueUnit.Player;
         }
 
         public async Task<List<MflAssetsFranchise>> GetFranchiseAssets()
         {
-            return (await _mfl.GetFranchiseAssets()).assets.franchise;
+            try
+            {
+                return (await _mfl.GetFranchiseAssets()).assets.franchise;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<MflAssetsFranchise>();
+            }
+
         }
 
         public async Task<List<MflPlayerProfile>> GetMultiMflPlayerDetails(string playerIds)
         {
-            var playerDetails = await _globalMflApi.GetPlayerDetails(playerIds);
+            try
+            {
+                var playerDetails = await _globalMflApi.GetPlayerDetails(playerIds);
+                return playerDetails.playerProfiles.playerProfile.ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<MflPlayerProfile>();
+            }
 
-            return playerDetails.playerProfiles.playerProfile.ToList();
         }
         public async Task<List<MflPlayer>> GetFreeAgents(int year)
         {
-            var rawMfl = await _mfl.GetFreeAgents(year);
-            return rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
+            try
+            {
+                var rawMfl = await _mfl.GetFreeAgents(year);
+                return rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<MflPlayer>();
+            }
+
         }
         public async Task<List<PlayerAvgScore>> GetAveragePlayerScores(int year)
         {
-            return (await _mfl.GetAveragePlayerScores(year)).playerScores.playerScore;
+            try
+            {
+                return (await _mfl.GetAveragePlayerScores(year)).playerScores.playerScore;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<PlayerAvgScore>();
+            }
+
         }
 
         public string InvertNameString(string commaName)

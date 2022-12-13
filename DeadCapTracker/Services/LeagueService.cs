@@ -31,24 +31,37 @@ namespace DeadCapTracker.Services
         private readonly IMapper _mapper;
         private DeadCapTrackerContext _context;
         private readonly IGroupMePostRepo _gm;
+        private readonly Logger<LeagueService> _logger;
+
         public IMflTranslationService _mflSvc { get; }
 
-        public LeagueService(IMapper mapper, DeadCapTrackerContext context, IMflTranslationService mfl, IGroupMePostRepo gm)
+        public LeagueService(IMapper mapper, DeadCapTrackerContext context, IMflTranslationService mfl, IGroupMePostRepo gm, Logger<LeagueService> logger)
         {
             _mapper = mapper;
             _context = context;
             _mflSvc = mfl;
             _gm = gm;
-
-
+            _logger = logger;
         }
 
         public List<DeadCapData> GetDeadCapData()
         {
             var returnData = new List<DeadCapData>();
             //get all transactions from table and join with franchise to have team names
-            var transactions =  _context.Transactions.ToList();
-            var franchises = _context.Franchises.ToList();
+            var transactions = new List<Transaction>();
+            var franchises = new List<Franchise>();
+
+            try
+            {
+                transactions = _context.Transactions.ToList();
+                franchises = _context.Franchises.ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("entity framework error", e);
+                return new List<DeadCapData>();
+            }
+
             var allTransactions = (
                 from t in transactions
                 join f in franchises on t.Franchiseid equals f.Franchiseid into penalties
@@ -78,20 +91,27 @@ namespace DeadCapTracker.Services
                 {
                     //get year, then get length.  add ammount to list for each year in that span. 0 = 2020
                     returnData.FirstOrDefault(_ => _.FranchiseId == t.FranchiseId)?.AddPenalties((int)t.TransactionYear, t.DeadAmount, t.NumOfYears);
-                    
                 });
                 return returnData;
         }
 
         public List<TransactionDTO> GetAllTransactions()
         {
-            var res = _context.Transactions.ToList();
-            return _mapper.Map<List<Transaction>, List<TransactionDTO>>(res);
+            try
+            {
+                var res = _context.Transactions.ToList();
+                return _mapper.Map<List<Transaction>, List<TransactionDTO>>(res);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("entity framework error", e);
+                return new List<TransactionDTO>();
+            }
+
         }
 
         public async Task<List<StandingsV2>> GetStandingsV2(int year)
         {
-
             return await _mflSvc.GetStandings(year);
         }
 
@@ -99,6 +119,7 @@ namespace DeadCapTracker.Services
         {
             var salaryAdjListTask = _mflSvc.GetSalaryAdjustments(year);
             var transactionsListTask = _mflSvc.GetMflTransactionsByType(year, "BBID_WAIVER");
+
             await Task.WhenAll(salaryAdjListTask, transactionsListTask);
             var playerLookups = transactionsListTask.Result.Select(t => t.transaction.Split(',')[0]).ToList();
             var salaryAdjList = SortTransactions(salaryAdjListTask.Result);
@@ -135,15 +156,21 @@ namespace DeadCapTracker.Services
         public async Task<List<FranchiseDTO>> UpdateFranchises(int year)
         {
             var DTOs = await _mflSvc.GetAllFranchises();
-            var existingFranchiseIds = _context.Franchises
-                                                .OrderBy(f => f.Franchiseid)
-                                                .Select(f => f.Franchiseid)
-                                                .ToList();
-            var newFranchises = _mapper.Map<List<FranchiseDTO>, List<Franchise>>(DTOs).Where(_ => (!existingFranchiseIds.Contains(_.Franchiseid))).ToList();
+            try
+            {
+                var existingFranchiseIds = _context.Franchises
+                                    .OrderBy(f => f.Franchiseid)
+                                    .Select(f => f.Franchiseid)
+                                    .ToList();
+                var newFranchises = _mapper.Map<List<FranchiseDTO>, List<Franchise>>(DTOs).Where(_ => (!existingFranchiseIds.Contains(_.Franchiseid))).ToList();
 
-            await _context.Franchises.AddRangeAsync(newFranchises);
-            await _context.SaveChangesAsync();
-            
+                await _context.Franchises.AddRangeAsync(newFranchises);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("entity framework error", e);
+            }
             return DTOs;
         }
 

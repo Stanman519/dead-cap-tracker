@@ -11,7 +11,7 @@ using AutoMapper;
 using DeadCapTracker.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 
 namespace DeadCapTracker
 {
@@ -30,15 +30,21 @@ namespace DeadCapTracker
             services.AddCors(c =>
             {
                 c.AddPolicy("AllowSpecificOrigin",
-                    options => options.WithOrigins("https://*.dcsg.com", "https://free-agency-auction.herokuapp.com", "https://capn-crunch-gm-bot.herokuapp.com", "https://stanfan.herokuapp.com", "http://capn-crunch-gm-bot.herokuapp.com", "http://stanfan.herokuapp.com",
-                            "http://localhost:3000", "https://localhost:3000", "https://capn-crunch.herokuapp.com", "http://capn-crunch.herokuapp.com")
+                    options => options.WithOrigins(
+                            "http://localhost:3000", 
+                            "https://localhost:3000",
+                            "https://capn-crunch.herokuapp.com", 
+                            "http://capn-crunch.herokuapp.com")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials()
                         .SetIsOriginAllowedToAllowWildcardSubdomains()
                         .WithExposedHeaders("Access-Control-Allow-Origin"));
             });
-
+            var options = new ApplicationInsightsServiceOptions { 
+                ConnectionString = @"InstrumentationKey=5e884814-f8b4-4d5f-b41c-30d067b12981;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/"
+            };
+            services.AddApplicationInsightsTelemetry(options);
             services.AddControllers();
             services.AddSwaggerGen();
             services.AddSingleton(RestClient.For<IGlobalMflApi>("https://api.myfantasyleague.com"));
@@ -47,7 +53,7 @@ namespace DeadCapTracker
             services.AddSingleton(RestClient.For<IInsultApi>("https://evilinsult.com/"));
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<ILeagueService, LeagueService>();
-            services.AddScoped<IGroupMeRequestService, GroupMeRequestRequestService>();
+            services.AddScoped<IGroupMeRequestService, GroupMeRequestService>();
             services.AddScoped<IRumorService, RumorService>();
             services.AddScoped<IMflTranslationService, MflTranslationService>();
             services.AddScoped<IDataSetHelperService, DataSetHelperService>();

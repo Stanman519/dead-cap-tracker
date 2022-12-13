@@ -17,11 +17,14 @@ namespace DeadCapTracker.Services
 
     public class GroupMePostRepo : IGroupMePostRepo
     {
+        private readonly ILogger<GroupMePostRepo> _logger;
+
         public IGroupMeApi _gmApi { get; }
 
-        public GroupMePostRepo(IGroupMeApi gmApi)
+        public GroupMePostRepo(IGroupMeApi gmApi, ILogger<GroupMePostRepo> logger)
         {
             _gmApi = gmApi;
+            _logger = logger;
         }
 
 
@@ -34,9 +37,7 @@ namespace DeadCapTracker.Services
             }
             catch (HttpRequestException e)
             {
-
-                Console.WriteLine(e.Message);
-                Console.WriteLine(e.InnerException);
+                _logger.LogError("GroupMe Request Error", e);
             }
             
         }
@@ -52,12 +53,28 @@ namespace DeadCapTracker.Services
             mention.user_ids = mentionIds;
             var mentionList = new List<Mention> { mention };
             message.attachments = mentionList;
-            await _gmApi.SendMessage(message);
+            try
+            {
+                await _gmApi.SendMessage(message);
+            }
+            catch (HttpRequestException e)
+            {
+                _logger.LogError("GroupMe Tag Request Error", e);
+            }
         }
 
         public async Task<GroupParent> GetMemberIds()
         {
-            return await _gmApi.GetMemberIds();
+            try
+            {
+                return await _gmApi.GetMemberIds();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("GroupMe memberId Request Error", e);
+                return null;
+            }
+
         }
     }
 }

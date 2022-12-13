@@ -6,6 +6,7 @@ using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace DeadCapTracker.Services
 {
@@ -29,7 +30,7 @@ namespace DeadCapTracker.Services
         Task PostDraftBudgets();
     }
     
-    public class GroupMeRequestRequestService : IGroupMeRequestService
+    public class GroupMeRequestService : IGroupMeRequestService
     {
         private readonly IMflTranslationService _mflTranslationService;
         private readonly IDataSetHelperService _dataHelper;
@@ -37,16 +38,18 @@ namespace DeadCapTracker.Services
         private readonly ILeagueService _leagueService;
         private readonly IRumorService _rumor;
         private readonly IInsultApi _insult;
+        private readonly ILogger<GroupMeRequestService> _logger;
         private static Dictionary<int, string> _owners;
         private static Dictionary<int, string> _memberIds;
         private static int _thisYear;
         
-        public GroupMeRequestRequestService(IMflTranslationService mflTranslationService, 
+        public GroupMeRequestService(IMflTranslationService mflTranslationService, 
             IDataSetHelperService dataHelper, 
             IGroupMePostRepo gm, 
             ILeagueService leagueService, 
             IRumorService rumor, 
-            IInsultApi insult)
+            IInsultApi insult,
+            ILogger<GroupMeRequestService> logger)
         {
             _mflTranslationService = mflTranslationService;
             _dataHelper = dataHelper;
@@ -54,6 +57,7 @@ namespace DeadCapTracker.Services
             _leagueService = leagueService;
             _rumor = rumor;
             _insult = insult;
+            _logger = logger;
             _owners = Utils.owners;
             _memberIds = Utils.memberIds;
             _thisYear = Utils.ThisYear;
@@ -61,7 +65,8 @@ namespace DeadCapTracker.Services
 
         public async Task<List<AnnualScoringData>> PostStandingsToGroup(int year)
         {
-            var standingsData = (await _leagueService.GetStandingsV2(year));
+
+            var standingsData = await _leagueService.GetStandingsV2(year);
 
             var standings = standingsData.SelectMany(s => s.TeamStandings)
                 .Where(s => s.Year == year)
@@ -172,8 +177,8 @@ namespace DeadCapTracker.Services
             var hits = await _mflTranslationService.GetRosteredPlayersByName(year, nameSearch);
             // bot post those names and contracts
             var stringForBot = "";
-
-            if (!hits.Any())
+            if (hits == null) stringForBot = "I dunno, man. Mfl is busted.";
+            else if (!hits.Any())
                 stringForBot = "I couldn't find any players by that name with contracts.";
             else
             {
@@ -203,7 +208,7 @@ namespace DeadCapTracker.Services
             }
             catch (Exception)
             {
-                await _gm.BotPost("There was an issue retrieving the data.");
+                await _gm.BotPost("I don't know MFL is busted.");
                 return;
             }
             
@@ -248,7 +253,15 @@ namespace DeadCapTracker.Services
             var salaryAdjustmentsTask = _mflTranslationService.GetSalaryAdjustments(_thisYear);
             var salariesTask = _mflTranslationService.GetFranchiseSalaries();
             var leagueTask = _mflTranslationService.GetTeamAdjustedSalaryCaps();
-            await Task.WhenAll(salariesTask, leagueTask, salaryAdjustmentsTask);
+            try
+            {
+                await Task.WhenAll(salariesTask, leagueTask, salaryAdjustmentsTask);
+            }
+            catch (Exception e)
+            {
+                await _gm.BotPost("I'm having trouble reaching MFL. Try again later.");
+            }
+
 
             var thisSznAdj = salaryAdjustmentsTask.Result;
             var adjustments = _leagueService.GetDeadCapData();
@@ -273,7 +286,15 @@ namespace DeadCapTracker.Services
             var botText = "Live Scores (Live Projections)\n";
             var matchupScoresTask = _mflTranslationService.GetLiveScoresForMatchups(thisWeek);
             var scoreProjectionsTask = _mflTranslationService.GetProjections(thisWeek);
-            await Task.WhenAll(matchupScoresTask, scoreProjectionsTask);
+            try
+            {
+                await Task.WhenAll(matchupScoresTask, scoreProjectionsTask);
+            }
+            catch (Exception)
+            {
+                return "Uhh... something with MFL is broken.";
+            }            
+
             var matchups = matchupScoresTask.Result;
             var projections = scoreProjectionsTask.Result;
             matchups.ForEach(_ =>
