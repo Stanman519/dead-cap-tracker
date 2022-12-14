@@ -31,11 +31,11 @@ namespace DeadCapTracker.Services
         private readonly IMapper _mapper;
         private DeadCapTrackerContext _context;
         private readonly IGroupMePostRepo _gm;
-        private readonly Logger<LeagueService> _logger;
+        private readonly ILogger<LeagueService> _logger;
 
         public IMflTranslationService _mflSvc { get; }
 
-        public LeagueService(IMapper mapper, DeadCapTrackerContext context, IMflTranslationService mfl, IGroupMePostRepo gm, Logger<LeagueService> logger)
+        public LeagueService(IMapper mapper, DeadCapTrackerContext context, IMflTranslationService mfl, IGroupMePostRepo gm, ILogger<LeagueService> logger)
         {
             _mapper = mapper;
             _context = context;

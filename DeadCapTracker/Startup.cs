@@ -33,6 +33,7 @@ namespace DeadCapTracker
                     options => options.WithOrigins(
                             "http://localhost:3000", 
                             "https://localhost:3000",
+                            "https://localhost:50850",
                             "https://capn-crunch.herokuapp.com", 
                             "http://capn-crunch.herokuapp.com")
                         .AllowAnyMethod()
@@ -44,6 +45,7 @@ namespace DeadCapTracker
             var options = new ApplicationInsightsServiceOptions { 
                 ConnectionString = @"InstrumentationKey=5e884814-f8b4-4d5f-b41c-30d067b12981;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/"
             };
+            services.AddLogging();
             services.AddApplicationInsightsTelemetry(options);
             services.AddControllers();
             services.AddSwaggerGen();
@@ -64,10 +66,10 @@ namespace DeadCapTracker
             services.AddHttpClient();
             
             //pull in connection string
-            var databaseUrl =
+/*            var databaseUrl =
                 @"postgres://xhnlfkdajqdqbw:1579aa856e474268243f3b0c049dbf7395766298730f3407c78537851dcd9779@ec2-35-174-118-71.compute-1.amazonaws.com:5432/d1ea1gn980l2dr";//Environment.GetEnvironmentVariable("DATABASE_URL");
              var databaseUri = new Uri(databaseUrl);
-             var userInfo = databaseUri.UserInfo.Split(':');
+             var userInfo = databaseUri.UserInfo.Split(':');*/
 
 /*            var builder = new 
             {
