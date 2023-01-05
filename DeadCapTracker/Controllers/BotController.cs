@@ -63,17 +63,17 @@ namespace DeadCapTracker.Controllers
         public async Task<string> ContractSearch([FromBody] GmMessage message, int year)
         {
             var request = message.text.ToLower();
-            var isContractRequest = request.StartsWith("#contract");
-            var isScoresRequest = request.StartsWith("#scores");
-            var isLineupChecker = request.StartsWith("#lineups");
-            var isStandings = request.StartsWith("#standings");
-            var isCapSpace = request.StartsWith("#cap");
-            var isDraftPickReq = request.StartsWith("#draft");
-            var isFreeAgentRequest = request.StartsWith("#free");
-            var isFranchiseTag = request.StartsWith("#tag");
-            var isHelp = request.StartsWith("#help");
-            var isDeadCap = request.StartsWith("#dead");
-            var isDraftCost = request.StartsWith("#budget");
+            var isContractRequest = request.Contains("#contract");
+            var isScoresRequest = request.Contains("#scores");
+            var isLineupChecker = request.Contains("#lineups");
+            var isStandings = request.Contains("#standings");
+            var isCapSpace = request.Contains("#cap");
+            var isDraftPickReq = request.Contains("#draft");
+            var isFreeAgentRequest = request.Contains("#free");
+            var isFranchiseTag = request.Contains("#tag");
+            var isHelp = request.Contains("#help");
+            var isDeadCap = request.Contains("#dead");
+            var isDraftCost = request.Contains("#budget");
             var strayTag = request.Contains("@cap") || request.Contains("@the cap") || request.Contains("@thec");
             
             if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag && !isDeadCap && !isDraftCost)

@@ -403,12 +403,14 @@ namespace DeadCapTracker.Services
                 Salary = _.Salary,
                 Name = playerInfos.FirstOrDefault(p => p.id == _.Id)?.name,
                 Position = playerInfos.FirstOrDefault(p => p.id == _.Id)?.position,
-                Score = Decimal.TryParse(scores.FirstOrDefault(p => p.id == _.Id)?.score, out var x) ? x : 0
+                Score = Math.Round(Decimal.TryParse(scores.FirstOrDefault(p => p.id == _.Id)?.score, out var x) ? x : 0, 2)
             }).OrderByDescending(_ => _.Score).ToList();
-
+            var isFirst = true;
             topScores.Where(_ => _.Position == pos).Take(8).ToList().ForEach(p =>
             {
-                strForBot += $"{p.Name} - {p.Score} PPG\n";
+                if (isFirst) strForBot += $"{p.Name} - {p.Score} PPG\n";
+                else strForBot += $"{p.Name} - {p.Score}\n";
+                isFirst = false;
             });
             await _gm.BotPost(strForBot);
         }
@@ -507,7 +509,7 @@ namespace DeadCapTracker.Services
                       $"Projected draft picks: \"#draft\"\n" +
                       $"Team cap space: \"#cap\"\n" +
                       $"Future dead cap: \"#dead\"\n" +
-                      $"Draft pick budget: \"#budget\"\n" +
+                      $"Projected draft pick budget: \"#budget\"\n" +
                       $"Franchise Tag projections: \"#tag\"\n" +
                       $"Rules: http://tinyurl.com/m8y37433";
             await _gm.BotPost(str);
