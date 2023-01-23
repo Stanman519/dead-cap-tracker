@@ -26,7 +26,7 @@ namespace DeadCapTracker.Services
         Task PostTopUpcomingFreeAgents(string positionRequested, int year = Utils.ThisYear);
         Task PostFranchiseTagAmounts(int year = Utils.ThisYear);
         Task PostFutureDeadCap();
-        Task BotPost(string post);
+        Task BotPost(string post, bool isError = false);
         Task PostDraftBudgets();
     }
     
@@ -528,9 +528,9 @@ namespace DeadCapTracker.Services
             await _gm.BotPost($"If you need something from me, type \"#help\". {insultString}");
         }
 
-        public async Task BotPost(string post)
+        public async Task BotPost(string post, bool isError = false)
         {
-            await _gm.BotPost(post);
+            await _gm.BotPost(post, isError);
         }
     }
 }

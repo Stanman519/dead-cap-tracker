@@ -56,7 +56,7 @@ namespace DeadCapTracker.Controllers
         [HttpPost("auctionError")]
         public async Task PostAuctionError([FromBody] ErrorMessage error)
         {
-            await _groupMeRequestService.BotPost(error.Message);
+            await _groupMeRequestService.BotPost(error.Message, true);
         }
 
         [HttpPost("contractSearch/{year}")]

@@ -14,6 +14,11 @@ namespace DeadCapTracker.Models.BotModels
             bot_id = "6cac06cf66a381ec605c8fff25";
             text = _text;
         }
+        public Message(string _text, string _botId)
+        {
+            bot_id = _botId;
+            text = _text;
+        }
     }
 
     public class Mention

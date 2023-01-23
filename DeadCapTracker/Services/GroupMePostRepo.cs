@@ -10,7 +10,7 @@ namespace DeadCapTracker.Services
 {
     public interface IGroupMePostRepo
     {
-        Task BotPost(string text);
+        Task BotPost(string text, bool isError = false);
         Task BotPostWithTag(string text, string nickname, string memberId);
         Task<GroupParent> GetMemberIds();
     }
@@ -28,9 +28,10 @@ namespace DeadCapTracker.Services
         }
 
 
-        public async Task BotPost(string text)
+        public async Task BotPost(string text, bool isError = false)
         {
-            var message = new Message(text);
+            
+            var message = isError ? new Message(text, "be51b03607ae680832dfd1c7c7") : new Message(text);
             try
             {
                 await _gmApi.SendMessage(message);
