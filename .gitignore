@@ -271,3 +271,4 @@ __pycache__/
 
 # Do not commit secrets.json
 **/secrets.json
+appsettings.Local.json
