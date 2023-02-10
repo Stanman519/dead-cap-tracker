@@ -8,7 +8,9 @@ using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static DeadCapTracker.Repositories.DeadCapTrackerContext;
 
 namespace DeadCapTracker.Services
 {
@@ -19,7 +21,7 @@ namespace DeadCapTracker.Services
         //Task<List<TeamStandings>> GetStandings(int year);
         Task<List<PendingTradeDTO>> FindPendingTrades(int year);
         Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year);
-        List<DeadCapData> GetDeadCapData();
+        Task<List<DeadCapData>> GetDeadCapData();
         Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year);
         List<TransactionDTO> GetAllTransactions();
         Task<List<StandingsV2>> GetStandingsV2(int year);
@@ -44,17 +46,17 @@ namespace DeadCapTracker.Services
             _logger = logger;
         }
 
-        public List<DeadCapData> GetDeadCapData()
+        public async Task<List<DeadCapData>> GetDeadCapData()
         {
             var returnData = new List<DeadCapData>();
             //get all transactions from table and join with franchise to have team names
             var transactions = new List<Transaction>();
-            var franchises = new List<Franchise>();
+            var franchises = new List<LeagueOwnerEntity>();
 
             try
             {
-                transactions = _context.Transactions.ToList();
-                franchises = _context.Franchises.ToList();
+                transactions = await _context.Transactions.ToListAsync();
+                franchises = await _context.LeagueOwners.ToListAsync();
             }
             catch (Exception e)
             {
@@ -64,12 +66,11 @@ namespace DeadCapTracker.Services
 
             var allTransactions = (
                 from t in transactions
-                join f in franchises on t.Franchiseid equals f.Franchiseid into penalties
-                from p in penalties.DefaultIfEmpty()
+                join f in franchises on t.Franchiseid equals f.Mflfranchiseid 
                     select new
                     {
                         FranchiseId = t.Franchiseid,
-                        TeamName = p.Teamname,
+                        TeamName = f.OwnerEntity.Displayname,
                         DeadAmount = t.Amount,
                         PlayerName = t.Playername,
                         TransactionYear = t.Yearoftransaction,

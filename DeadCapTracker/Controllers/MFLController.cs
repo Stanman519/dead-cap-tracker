@@ -61,9 +61,9 @@ namespace DeadCapTracker.Controllers
         }
         
         [HttpGet("deadCapInfo")]
-        public List<DeadCapData> GetDeadCapPenalties()
+        public async Task<List<DeadCapData>> GetDeadCapPenalties()
         {
-            return _leagueService.GetDeadCapData();
+            return await _leagueService.GetDeadCapData();
         }
 
     }

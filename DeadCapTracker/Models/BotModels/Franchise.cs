@@ -9,6 +9,6 @@ namespace DeadCapTracker.Models.BotModels
         public double? Bbidavailablebalance { get; set; }
         public string Ownername { get; set; }
         public string Abbrev { get; set; }
-        public string Teamname { get; set; }
+        public string? Teamname { get; set; }
     }
 }

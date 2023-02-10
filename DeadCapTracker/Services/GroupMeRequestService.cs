@@ -264,7 +264,7 @@ namespace DeadCapTracker.Services
 
 
             var thisSznAdj = salaryAdjustmentsTask.Result;
-            var adjustments = _leagueService.GetDeadCapData();
+            var adjustments = await _leagueService.GetDeadCapData();
             // add up salaries for this year - but dont forget to * .5  and .4 for taxi and IR
             
             var orderedSummaries = _dataHelper.CreateFranchiseCapSummaries(salariesTask.Result, adjustments);
@@ -478,7 +478,7 @@ namespace DeadCapTracker.Services
 
         public async Task PostFutureDeadCap()
         {
-            var deadCapInfo = _leagueService.GetDeadCapData();
+            var deadCapInfo = await _leagueService.GetDeadCapData();
             var botStr = "";
             deadCapInfo.ForEach(franchise =>
             {

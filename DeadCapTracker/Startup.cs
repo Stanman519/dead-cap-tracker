@@ -87,6 +87,7 @@ namespace DeadCapTracker
                 options =>
                 {
                     options.UseSqlServer(Configuration.GetConnectionString("capn-sql-db"));
+                    options.UseLazyLoadingProxies();
                     // options.UseNpgsql((string) Configuration.GetValue(typeof(string),
                     //     "DatabaseOptions:ConnectionString"));
                 });
