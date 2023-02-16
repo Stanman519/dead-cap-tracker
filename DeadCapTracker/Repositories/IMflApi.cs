@@ -10,10 +10,10 @@ namespace DeadCapTracker.Repositories
     public interface IMflApi
     {
         // TODO: add API key to UTILs
-        [Get("{year}/export?TYPE=salaryAdjustments&L=13894&APIKEY=&JSON=1")]
-        Task<MflSalaryAdjParent> GetSalaryAdjustments([Path] int year = Utils.ThisYear);
-        [Get("{year}/export?TYPE=transactions&L=13894&APIKEY=&W=&TRANS_TYPE=&FRANCHISE=&DAYS=1&COUNT=&JSON=1")]
-        Task<MflTransactionsParent> GetMflTransactions([Path] int year = Utils.ThisYear);
+        [Get("{year}/export?TYPE=salaryAdjustments&L={leagueId}&APIKEY=&JSON=1")]
+        Task<MflSalaryAdjParent> GetSalaryAdjustments([Path] int leagueId, [Path] int year = Utils.ThisYear);
+        [Get("{year}/export?TYPE=transactions&L={leagueId}&APIKEY=&W=&TRANS_TYPE=&FRANCHISE=&DAYS={previousDays}&COUNT=&JSON=1")]
+        Task<MflTransactionsParent> GetMflTransactions([Path] int leagueId, [Path] int year = Utils.ThisYear, [Path] int previousDays = 1);
         [Get("{year}/export?TYPE=league&L=13894&APIKEY=&JSON=1")]
         Task<LeagueInfo> GetLeagueInfo([Path] int year = Utils.ThisYear);
         

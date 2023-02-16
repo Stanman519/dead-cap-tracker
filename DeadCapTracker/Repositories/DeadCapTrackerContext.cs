@@ -46,6 +46,29 @@ namespace DeadCapTracker.Repositories
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.HasKey(e => e.Globalid).HasName("PK_transaction");
+
+                entity.ToTable("transaction");
+
+                entity.Property(e => e.Globalid).HasColumnName("globalid");
+                entity.Property(e => e.Timestamp).HasColumnType("datetime").HasColumnName("timestamp");
+                entity.Property(e => e.Transactionid).HasColumnName("transactionid");
+                entity.Property(e => e.Leagueid).HasColumnName("leagueid");
+                entity.Property(e => e.Franchiseid).HasColumnName("franchiseid");
+                entity.Property(e => e.Salary).HasColumnName("salary");
+                entity.Property(e => e.Amount).HasColumnName("amount");
+                entity.Property(e => e.Playername).HasColumnName("playername");
+                entity.Property(e => e.Position).HasColumnName("position");
+                entity.Property(e => e.Team).HasColumnName("team");
+                entity.Property(e => e.Years).HasColumnName("years");
+                entity.Property(e => e.Yearoftransaction).HasColumnName("yearoftransaction");
+                entity.HasOne(d => d.League).WithMany(p => p.Transactions)
+                    .HasForeignKey(d => d.Leagueid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_transaction_League");
+            });
             modelBuilder.Entity<BidEntity>(entity =>
             {
                 entity.HasKey(e => e.Bidid).HasName("PK_bidledger");
@@ -123,6 +146,7 @@ namespace DeadCapTracker.Repositories
                 entity.Property(e => e.Commishcookie).HasColumnName("commishcookie");
                 entity.Property(e => e.Isauctioning).HasColumnName("isauctioning");
                 entity.Property(e => e.Mflhash).HasColumnName("mflhash");
+                entity.Property(e => e.Botid).HasColumnName("botid");
                 entity.Property(e => e.Name)
                     .HasMaxLength(80)
                     .HasColumnName("name");
@@ -447,8 +471,10 @@ namespace DeadCapTracker.Repositories
             public string? Mflhash { get; set; }
             public string? Commishcookie { get; set; }
             public bool Isauctioning { get; set; }
+            public string Botid { get; set; }
             public virtual ICollection<BidEntity> Bids { get; } = new List<BidEntity>();
             public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
+            public virtual ICollection<Transaction> Transactions { get; } = new List<Transaction>();
             public virtual ICollection<LeagueOwnerEntity> Leagueowners { get; } = new List<LeagueOwnerEntity>();
             public virtual ICollection<LotEntity> Lots { get; } = new List<LotEntity>();
         }

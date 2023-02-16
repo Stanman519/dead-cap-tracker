@@ -14,5 +14,6 @@ namespace DeadCapTracker.Models.DTOs
         public string Team { get; set; }
         public int Years { get; set; }
         public int YearOfTransaction { get; set; }
+        public int LeagueId { get; set; }
     }
 }

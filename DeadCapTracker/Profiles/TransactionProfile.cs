@@ -11,6 +11,8 @@ namespace DeadCapTracker.Profiles
         {
             CreateMap<Transaction, TransactionDTO>();
             CreateMap<TransactionDTO, Transaction>()
+             .ForMember(dest => dest.Leagueid,
+                 opts => opts.MapFrom(src => src.LeagueId))
                 // .ForMember(dest => dest.Transactionid,
                 // opts => opts.MapFrom(src => src.TransactionId))
                 // .ForMember(dest => dest.Timestamp,

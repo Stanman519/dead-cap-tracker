@@ -20,7 +20,7 @@ namespace DeadCapTracker.Services
         Task<string> FindAndPostLiveScores();
         Task CheckLineupsForHoles();
         Task PostHelpMessage();
-        Task PostCapSpace();
+        Task PostCapSpace(int leagueId);
         Task PostDraftProjections(int year);
         Task StrayTag();
         Task PostTopUpcomingFreeAgents(string positionRequested, int year = Utils.ThisYear);
@@ -245,12 +245,12 @@ namespace DeadCapTracker.Services
             if (!brokenTeams.Any()) await _gm.BotPost("Lineups are all straight, mate.");
         }
 
-        public async Task PostCapSpace()
+        public async Task PostCapSpace(int leagueId)
         {
             var botStr = "Current Cap Space (Next Year)\n";
            
             //get total salaries this season + adjustments, subtract from team budget
-            var salaryAdjustmentsTask = _mflTranslationService.GetSalaryAdjustments(_thisYear);
+            var salaryAdjustmentsTask = _mflTranslationService.GetSalaryAdjustments(leagueId, _thisYear);
             var salariesTask = _mflTranslationService.GetFranchiseSalaries();
             var leagueTask = _mflTranslationService.GetTeamAdjustedSalaryCaps();
             try
@@ -340,7 +340,7 @@ namespace DeadCapTracker.Services
             return botText;
         }
 
-        public async Task PostFranchiseTagAmounts(int year = Utils.ThisYear)
+        public async Task PostFranchiseTagAmounts(int year = Utils.ThisYear - 1)
         {
             var salariesTask = _mflTranslationService.GetAllSalaries();
             var positionTask = _mflTranslationService.GetAllRelevantPlayers();
@@ -373,7 +373,7 @@ namespace DeadCapTracker.Services
                 })
                 .ToList();
 
-            var strForBot = "Average salary of top 6 at each position:\n";
+            var strForBot = $"Avg salary of top 6 at each position in {year}:\n";
             tagAmounts.ForEach(t =>
             {
                 strForBot += $"{t.Position}: ${Decimal.Round(t.Salary)}\n";
@@ -387,7 +387,7 @@ namespace DeadCapTracker.Services
             var pos = positionRequest.ToUpper().Trim();
             if (pos != "QB" && pos != "RB" && pos != "WR" && pos != "TE") return;
 
-            var strForBot = $"Top Upcoming {pos} Free Agents\n";
+            var strForBot = $"Top {pos} Free Agents for {year + 1}\n";
             var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(year);
             var salariesTask = _mflTranslationService.GetAllSalaries();
             var playerTask = _mflTranslationService.GetAllRelevantPlayers();
@@ -530,7 +530,7 @@ namespace DeadCapTracker.Services
 
         public async Task BotPost(string post, bool isError = false)
         {
-            await _gm.BotPost(post, isError);
+            await _gm.BotPost(post, isError: isError);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace DeadCapTracker.Controllers
         {
             return await _leagueService.GetTransactions(year);
         }
-        [HttpGet("allTransactions/")]
+        [HttpGet("allTransactions")]
         public List<TransactionDTO> GetAllTransactions()
         {
             return _leagueService.GetAllTransactions();

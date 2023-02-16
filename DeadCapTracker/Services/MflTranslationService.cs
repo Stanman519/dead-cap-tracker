@@ -28,9 +28,9 @@ namespace DeadCapTracker.Services
         Task<List<MflFranchiseStandings>> GetFranchiseStandings();
         List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
         Task<List<StandingsV2>> GetStandings(int year);
-        Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int year);
+        Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int leagueId, int year);
         Task<List<MflPlayer>> GetAllSalaries();
-        Task<List<MflTransaction>> GetMflTransactionsByType(int year, string type);
+        Task<List<MflTransaction>> GetMflTransactionsByType(int leagueId, int year, string type);
         Task<List<PendingTradeDTO>> FindPendingTrades(int year);
         Task<List<Player>> GetMultiMflPlayers(string playerIds);
         Task<List<FranchiseDTO>> GetAllFranchises();
@@ -403,11 +403,11 @@ namespace DeadCapTracker.Services
 
         }
         
-        public async Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int year)
+        public async Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int leagueId, int year)
         {
             try
             {
-                return (await _mfl.GetSalaryAdjustments(year)).salaryAdjustments.salaryAdjustment;
+                return (await _mfl.GetSalaryAdjustments(leagueId, year)).salaryAdjustments.salaryAdjustment;
             }
             catch (Exception e)
             {
@@ -416,11 +416,11 @@ namespace DeadCapTracker.Services
             }
         }
         
-        public async Task<List<MflTransaction>> GetMflTransactionsByType(int year, string type = "")
+        public async Task<List<MflTransaction>> GetMflTransactionsByType(int leagueId, int year, string type = "")
         {
             try
             {
-                var ret = (await _mfl.GetMflTransactions(year)).transactions.transaction;
+                var ret = (await _mfl.GetMflTransactions(leagueId, year)).transactions.transaction;
                 if (!string.IsNullOrEmpty(type))
                 {
                     return ret.Where(t => t.type == type).ToList();

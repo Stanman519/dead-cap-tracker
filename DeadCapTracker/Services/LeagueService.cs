@@ -10,6 +10,7 @@ using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using static DeadCapTracker.Repositories.DeadCapTrackerContext;
 
 namespace DeadCapTracker.Services
@@ -118,36 +119,63 @@ namespace DeadCapTracker.Services
 
         public async Task<List<TransactionDTO>> GetTransactions(int year)
         {
-            var salaryAdjListTask = _mflSvc.GetSalaryAdjustments(year);
-            var transactionsListTask = _mflSvc.GetMflTransactionsByType(year, "BBID_WAIVER");
+            var leagues = await _context.Leagues.ToListAsync();
+            var parentTaskList = new List<Task>();
+            var salaryAdjTasks = new List<Task<List<MflSalaryAdjustment>>>();
+            var transactionTasks = new List<Task<List<MflTransaction>>>();
+            var newEntities = new List<Transaction>();
+            var playerLookups = new Dictionary<int, List<string>>();
+            var botStr = "Waiver Wire Report:\n";
 
-            await Task.WhenAll(salaryAdjListTask, transactionsListTask);
-            var playerLookups = transactionsListTask.Result.Select(t => t.transaction.Split(',')[0]).ToList();
-            var salaryAdjList = SortTransactions(salaryAdjListTask.Result.Where(adj => !adj.Description.StartsWith("X")).ToList());
+            foreach (var league in leagues)
+            {
+                salaryAdjTasks.Add(_mflSvc.GetSalaryAdjustments(league.Mflid, year));
+                transactionTasks.Add(_mflSvc.GetMflTransactionsByType(league.Mflid, year, "BBID_WAIVER"));
+            }
+            await Task.WhenAll(parentTaskList.Concat(salaryAdjTasks).Concat(transactionTasks));
+
+            for (var i = 0; i < leagues.Count; i++)
+            {
+                var salaryAdjList = SortTransactions(salaryAdjTasks[i].Result.Where(adj => !adj.Description.StartsWith("X")).ToList());
+                playerLookups[leagues[i].Mflid] = transactionTasks[i].Result.Select(t => t.transaction.Split(',')[0]).ToList();
+                
             
-            var DTOs = _mapper.Map<List<MflSalaryAdjustment>, List<TransactionDTO>>(salaryAdjList);
-            DTOs.ForEach(d => d.YearOfTransaction = d.Timestamp.Year);
-            DTOs.ForEach(d => d.TransactionId = (year * 1000) + d.TransactionId);
-            var latestTransId = _context.Transactions.OrderByDescending(t => t.Transactionid).Take(1).FirstOrDefault()?.Transactionid ?? 0;
-            //this filter should be in a service.  keep each layer simpler
+                var DTOs = _mapper.Map<List<MflSalaryAdjustment>, List<TransactionDTO>>(salaryAdjList);
+
+                DTOs.ForEach(d => {
+                    d.YearOfTransaction = d.Timestamp.Year;
+                    d.TransactionId = (year * 1000) + d.TransactionId;
+                    d.LeagueId = leagues[i].Mflid;
+                    });
+
+                var entities = _mapper.Map<List<TransactionDTO>, List<Transaction>>(DTOs);
+
+            
+                var latestTransId = _context.Transactions.Where(t => t.Leagueid == leagues[i].Mflid).OrderByDescending(t => t.Transactionid).FirstOrDefault()?.Transactionid ?? 0;
+                //this filter should be in a service.  keep each layer simpler
          
-            var newEntities = _mapper.Map<List<TransactionDTO>, List<Transaction>>(DTOs).Where(t => t.Transactionid > latestTransId);
-            //these should live in the repository layer
+                var newEntitiesForThisLeague = entities.Where(t => t.Transactionid > latestTransId && t.Leagueid == leagues[i].Mflid);
+                //these should live in the repository layer
+                newEntities.AddRange(newEntitiesForThisLeague);
+                if (leagues[i].Botid.IsNullOrEmpty()) continue;
+                if (!playerLookups[leagues[i].Mflid].Any()) continue;
+                var playerIds = string.Join(",", playerLookups);
+                playerIds += $",{Utils.LongTermPlayerHack}";
+                var playerInfos = await _mflSvc.GetMultiMflPlayers(playerIds);
+                transactionTasks[i].Result.ForEach(t =>
+                {
+                    var thisId = t.transaction.Split(',')[0];
+                    var salary = t.transaction.Split(',')[1].Split('|')[1];
+                    botStr += $"{Utils.owners[int.Parse(t.franchise)]}: {playerInfos.FirstOrDefault(p => p.id == thisId)?.name ?? ""} ${salary}\n";
+                });
+
+                await _gm.BotPost(botStr, leagues[i].Botid);
+            }
+            if (!newEntities.Any()) return null;
             await _context.Transactions.AddRangeAsync(newEntities);
             await _context.SaveChangesAsync();
-            if (!playerLookups.Any()) return DTOs;
-            var playerIds = string.Join(",", playerLookups);
-            playerIds += $",{Utils.LongTermPlayerHack}";
-            var playerInfos = await _mflSvc.GetMultiMflPlayers(playerIds);
-            var botStr = "Waiver Wire Report:\n";
-            transactionsListTask.Result.ForEach(t =>
-            {
-                var thisId = t.transaction.Split(',')[0];
-                var salary = t.transaction.Split(',')[1].Split('|')[1];
-                botStr += $"{Utils.owners[int.Parse(t.franchise)]}: {playerInfos.FirstOrDefault(p => p.id == thisId)?.name ?? ""} ${salary}\n";
-            });
-            await _gm.BotPost(botStr);
-            return DTOs;
+
+            return null;
         }
         //TODO: Needs Testing!
         public async Task<List<PendingTradeDTO>> FindPendingTrades(int year)

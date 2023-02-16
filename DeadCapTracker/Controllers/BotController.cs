@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
@@ -78,7 +79,9 @@ namespace DeadCapTracker.Controllers
             
             if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag && !isDeadCap && !isDraftCost)
                 return null;
-            
+
+            var groupId = message.group_id;
+
             if (isContractRequest)
             {
                 var capIndex = message.text.ToLower().IndexOf("#contract", StringComparison.Ordinal);
@@ -97,7 +100,7 @@ namespace DeadCapTracker.Controllers
 
             if (isStandings) await _groupMeRequestService.PostStandingsToGroup(Utils.ThisYear);
 
-            if (isCapSpace) await _groupMeRequestService.PostCapSpace();
+            if (isCapSpace) await _groupMeRequestService.PostCapSpace(Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == groupId).Item2);
 
             if (isFreeAgentRequest) await _groupMeRequestService.PostTopUpcomingFreeAgents(request.Split(" ")[1]);
             // add available free agents

@@ -1,17 +1,21 @@
+using System;
 using System.Collections.Generic;
 
 namespace DeadCapTracker.Services
 {
     public static class Utils
     {
-        public const int ThisYear = 2022;
-        public const string ApiKey = "ahBv1sGSvuWtx0emOVrJaDYeFbox";
+        public const int ThisYear = 2023;
+        public const string ApiKey = "ahBv1sGSvuWsx0amOVrJaDYeFbox";
         public const string LongTermPlayerHack = "14777"; // Joe Burrow, used to add to mfl player lookups so you always get array rather than obj
         public const int TaxiSquadSlots = 5;
         public const double TaxiSquadCapHit = 0.2;
         public const double InjuredReserveCapHit = 0.5;
         public const double CutCapHit = 0.5;
-
+        public static List<Tuple<string, int>> GmGroupToMflLeague = new List<Tuple<string, int>>
+        {
+            {"59795205", 13894 }
+        };
         public static Dictionary<int, string> owners = new Dictionary<int, string>()
         {
             {1, "Ryan"},
@@ -83,5 +87,14 @@ namespace DeadCapTracker.Services
             {36, 8},
             {37,  6}
         };
+
+        }
+    public static class TupleListExtensions
+    {
+        public static void Add<T1, T2>(this IList<Tuple<T1, T2>> list,
+                T1 item1, T2 item2)
+        {
+            list.Add(Tuple.Create(item1, item2));
+        }
     }
 }
