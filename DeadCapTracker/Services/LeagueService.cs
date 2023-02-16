@@ -123,7 +123,8 @@ namespace DeadCapTracker.Services
 
             await Task.WhenAll(salaryAdjListTask, transactionsListTask);
             var playerLookups = transactionsListTask.Result.Select(t => t.transaction.Split(',')[0]).ToList();
-            var salaryAdjList = SortTransactions(salaryAdjListTask.Result);
+            var salaryAdjList = SortTransactions(salaryAdjListTask.Result.Where(adj => !adj.Description.StartsWith("X")).ToList());
+            
             var DTOs = _mapper.Map<List<MflSalaryAdjustment>, List<TransactionDTO>>(salaryAdjList);
             DTOs.ForEach(d => d.YearOfTransaction = d.Timestamp.Year);
             DTOs.ForEach(d => d.TransactionId = (year * 1000) + d.TransactionId);
