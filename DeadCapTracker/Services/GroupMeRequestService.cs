@@ -382,20 +382,37 @@ namespace DeadCapTracker.Services
             await _gm.BotPost(strForBot);
         }
 
-        public async Task PostTopUpcomingFreeAgents(string positionRequest, int year = Utils.ThisYear)
+        public async Task PostTopUpcomingFreeAgents(string positionRequest, int nextYearAsDefault = (Utils.ThisYear + 1))
         {
             var pos = positionRequest.ToUpper().Trim();
             if (pos != "QB" && pos != "RB" && pos != "WR" && pos != "TE") return;
 
-            var strForBot = $"Top {pos} Free Agents for {year + 1}\n";
-            var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(year);
-            var salariesTask = _mflTranslationService.GetAllSalaries();
+            var strForBot = $"Top {pos} Free Agents for {nextYearAsDefault}\n";
+            var lookupYear = nextYearAsDefault < Utils.ThisYear + 1 ? (nextYearAsDefault - 1 ) : Utils.ThisYear; // if looking up future, use this year for lookup, if past, use past
+            var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(lookupYear);
+            var salariesTask = _mflTranslationService.GetAllSalaries(lookupYear);
             var playerTask = _mflTranslationService.GetAllRelevantPlayers();
             await Task.WhenAll(avgPtsTask, playerTask, salariesTask);
 
             var playerInfos = playerTask.Result;
             var scores = avgPtsTask.Result;
-            var relevantPlayers = salariesTask.Result.Where(_ => _.ContractYear == "1" && _.Salary != "");
+            var contractYear = "";
+            switch (nextYearAsDefault)
+            {
+                case Utils.ThisYear + 1:
+                    contractYear = "1";
+                    break;
+                case Utils.ThisYear + 2:
+                    contractYear = "2";
+                    break;
+                case Utils.ThisYear + 3:
+                    contractYear = "3";
+                    break;
+                default:
+                    contractYear = "1";
+                    break;
+            }
+            var relevantPlayers = salariesTask.Result.Where(_ => _.ContractYear == contractYear && _.Salary != "");
 
             var topScores = relevantPlayers.Select(_ => new
             {
@@ -406,12 +423,16 @@ namespace DeadCapTracker.Services
                 Score = Math.Round(Decimal.TryParse(scores.FirstOrDefault(p => p.id == _.Id)?.score, out var x) ? x : 0, 2)
             }).OrderByDescending(_ => _.Score).ToList();
             var isFirst = true;
-            topScores.Where(_ => _.Position == pos).Take(8).ToList().ForEach(p =>
+            topScores = topScores.Where(_ => _.Position == pos).Take(12).ToList();
+            if (!topScores.All(s => s.Score == 0)) topScores = topScores.Take(8).ToList();
+                
+            topScores.ForEach(p =>
             {
                 if (isFirst) strForBot += $"{p.Name} - {p.Score} PPG\n";
                 else strForBot += $"{p.Name} - {p.Score}\n";
                 isFirst = false;
             });
+
             await _gm.BotPost(strForBot);
         }
 

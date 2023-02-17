@@ -102,7 +102,15 @@ namespace DeadCapTracker.Controllers
 
             if (isCapSpace) await _groupMeRequestService.PostCapSpace(Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == groupId).Item2);
 
-            if (isFreeAgentRequest) await _groupMeRequestService.PostTopUpcomingFreeAgents(request.Split(" ")[1]);
+            if (isFreeAgentRequest)
+            {
+                var reqArr = request.Split(" ");
+                if (reqArr.Length < 2) return null;
+                int faYear = 0;
+                var isValidYear = reqArr.Length > 2 && int.TryParse(reqArr[2], out faYear);
+                isValidYear = faYear > 2020 && faYear < Utils.ThisYear + 3;
+                await _groupMeRequestService.PostTopUpcomingFreeAgents(reqArr[1], isValidYear ? faYear : Utils.ThisYear + 1);
+            }
             // add available free agents
             
             if (strayTag) await _groupMeRequestService.StrayTag();

@@ -29,7 +29,7 @@ namespace DeadCapTracker.Services
         List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
         Task<List<StandingsV2>> GetStandings(int year);
         Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int leagueId, int year);
-        Task<List<MflPlayer>> GetAllSalaries();
+        Task<List<MflPlayer>> GetAllSalaries(int year = Utils.ThisYear);
         Task<List<MflTransaction>> GetMflTransactionsByType(int leagueId, int year, string type);
         Task<List<PendingTradeDTO>> FindPendingTrades(int year);
         Task<List<Player>> GetMultiMflPlayers(string playerIds);
@@ -512,19 +512,19 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<MflPlayer>> GetAllSalaries()
+        public async Task<List<MflPlayer>> GetAllSalaries(int year = Utils.ThisYear)
         {
             try
             {
-
+                var salaries = await _mfl.GetSalaries(year);
+                return salaries.Salaries.LeagueUnit.Player;
             }
             catch (Exception e)
             {
                 _logger.LogError("mfl error", e);
                 return new List<MflPlayer>();
             }
-            var salaries = await _mfl.GetSalaries();
-            return salaries.Salaries.LeagueUnit.Player;
+
         }
 
         public async Task<List<MflAssetsFranchise>> GetFranchiseAssets()
