@@ -143,7 +143,7 @@ namespace DeadCapTracker.Services
                 var DTOs = _mapper.Map<List<MflSalaryAdjustment>, List<TransactionDTO>>(salaryAdjList);
 
                 DTOs.ForEach(d => {
-                    d.YearOfTransaction = d.Timestamp.Year;
+                    d.YearOfTransaction = year;
                     d.TransactionId = (year * 1000) + d.TransactionId;
                     d.LeagueId = leagues[i].Mflid;
                     });
