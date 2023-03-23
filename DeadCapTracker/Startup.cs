@@ -34,8 +34,7 @@ namespace DeadCapTracker
                             "http://localhost:3000", 
                             "https://localhost:3000",
                             "https://localhost:50850",
-                            "https://capn-crunch.herokuapp.com", 
-                            "http://capn-crunch.herokuapp.com")
+                            "https://www.stanfan.net")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials()
