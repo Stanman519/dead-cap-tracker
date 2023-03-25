@@ -60,6 +60,13 @@ namespace DeadCapTracker.Controllers
             await _groupMeRequestService.BotPost(error.Message, true);
         }
 
+        [HttpPost("stanfan-msg")]
+        public async Task PostMessageFromStanfan([FromBody] ErrorMessage error)
+        {
+            await _groupMeRequestService.BotPost(error.Message, false);
+        }
+
+
         [HttpPost("contractSearch/{year}")]
         public async Task<string> ContractSearch([FromBody] GmMessage message, int year)
         {
