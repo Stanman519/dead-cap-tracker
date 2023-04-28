@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DeadCapTracker.Models.BotModels;
@@ -9,6 +10,10 @@ namespace DeadCapTracker.Repositories
 {
     public interface IMflApi
     {
+        [Post("{year}/import?TYPE=salaries&L={leagueId}&APPEND=1")]
+        Task<HttpResponseMessage> EditPlayerSalary([Path] int leagueId, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, string> data, [Path] int year = Utils.ThisYear);
+
+
         // TODO: add API key to UTILs
         [Get("{year}/export?TYPE=salaryAdjustments&L={leagueId}&APIKEY=&JSON=1")]
         Task<MflSalaryAdjParent> GetSalaryAdjustments([Path] int leagueId, [Path] int year = Utils.ThisYear);
@@ -67,6 +72,8 @@ namespace DeadCapTracker.Repositories
 
         [Get("{year}/export?TYPE=playerScores&L=13894&APIKEY={ApiKey}&W=AVG&YEAR=&PLAYERS=&POSITION=&STATUS=&RULES=&COUNT=&JSON=1")]
         Task<MflAverageScoreRoot> GetAveragePlayerScores([Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
+        [Get("{year}/export?TYPE=draftResults&L={leagueId}&APIKEY={ApiKey}&JSON=1")]
+        Task<MflDraftResultRoot> GetMflDraftResults([Path] int year = Utils.ThisYear, [Path] int leagueid, [Path] string ApiKey = Utils.ApiKey);
     }
     
 }

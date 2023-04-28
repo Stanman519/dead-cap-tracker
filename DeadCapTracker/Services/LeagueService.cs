@@ -26,6 +26,7 @@ namespace DeadCapTracker.Services
         Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year);
         List<TransactionDTO> GetAllTransactions();
         Task<List<StandingsV2>> GetStandingsV2(int year);
+        Task FindLatestDraftPicks(int leagueId);
         Task MapPickBudgetToOwners();
     }
     
@@ -305,7 +306,29 @@ namespace DeadCapTracker.Services
             return sorted;
         }
 
-        
-        
+        public async Task FindLatestDraftPicks(int leagueId)
+        {
+            DateTime oneHourAgo = DateTime.Now.AddHours(-1);
+            var picksWithValuesTask = _mflSvc.GetDraftPicksAndContractValues(leagueId);
+            var salariesTask = _mflSvc.GetAllSalaries();
+            await Task.WhenAll(picksWithValuesTask, salariesTask);
+            var playersWithoutSalaries = salariesTask.Result.Where(p => (string.IsNullOrEmpty(p.Salary) || p.Salary == "0")).ToList();
+            playersWithoutSalaries.ForEach(async p =>
+            {
+                //find draft pick
+                var foundDraftPick = picksWithValuesTask.Result.FirstOrDefault(_ => _.Player == p.Id);
+                //if exists, post contract
+                if (foundDraftPick != null)
+                {
+                    var success = int.TryParse(foundDraftPick.Player, out var safeId);
+                    if (success)
+                    {
+                        await _mflSvc.GiveNewContractToPlayer(leagueId, safeId, foundDraftPick.Salary, foundDraftPick.Length);
+                    }
+
+                }
+            });           
+        }
+
     }
 }

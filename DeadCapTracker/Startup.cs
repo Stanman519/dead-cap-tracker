@@ -64,22 +64,6 @@ namespace DeadCapTracker
             services.AddAutoMapper(typeof(Program).Assembly);
             services.AddHttpClient();
             
-            //pull in connection string
-/*            var databaseUrl =
-                @"postgres://xhnlfkdajqdqbw:1579aa856e474268243f3b0c049dbf7395766298730f3407c78537851dcd9779@ec2-35-174-118-71.compute-1.amazonaws.com:5432/d1ea1gn980l2dr";//Environment.GetEnvironmentVariable("DATABASE_URL");
-             var databaseUri = new Uri(databaseUrl);
-             var userInfo = databaseUri.UserInfo.Split(':');*/
-
-/*            var builder = new 
-            {
-                Host = databaseUri.Host,
-                Port = databaseUri.Port,
-                Username = userInfo[0],
-                Password = userInfo[1],
-                Database = databaseUri.LocalPath.TrimStart('/'),
-                SslMode = SslMode.Require,
-                TrustServerCertificate = true
-            };*/
 
 
             services.AddDbContext<DeadCapTrackerContext>(
@@ -87,8 +71,6 @@ namespace DeadCapTracker
                 {
                     options.UseSqlServer(Configuration.GetConnectionString("capn-sql-db"));
                     options.UseLazyLoadingProxies();
-                    // options.UseNpgsql((string) Configuration.GetValue(typeof(string),
-                    //     "DatabaseOptions:ConnectionString"));
                 });
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DeadCapTracker.Models.BotModels;
+using System.Xml.Serialization;
 using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
@@ -14,6 +15,7 @@ namespace DeadCapTracker.Services
 {
     public interface IMflTranslationService
     {
+        Task GiveNewContractToPlayer(int leagueId, int mflPlayerId, int salary, int length);
         Task<List<TradeSingle>> GetCompletedTrades();
         Task<List<TradeBait>> GetNewTradeBait();
         Task<List<RosterPlayer>> GetRosteredPlayersByName(int year, string name);
@@ -41,6 +43,7 @@ namespace DeadCapTracker.Services
         Task<List<ProjectedPlayerScore>> GetProjections(string thisWeek);
         Task<List<PlayerAvgScore>> GetAveragePlayerScores(int year);
         Task<List<MflAssetsFranchise>> GetFranchiseAssets();
+        Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId);
         int GetDraftPickPrice(int round, int pick);
     }
 
@@ -51,6 +54,7 @@ namespace DeadCapTracker.Services
 
         private readonly IMflApi _mfl;
         private readonly IGlobalMflApi _globalMflApi;
+        private readonly IGroupMePostRepo _gm;
         private static Dictionary<int, string> _owners;
         private static Dictionary<int, string> _memberIds;
         private static int _thisYear;
@@ -59,12 +63,13 @@ namespace DeadCapTracker.Services
         public IMapper Mapper { get; }
         public ILogger<MflTranslationService> _logger { get; }
 
-        public MflTranslationService(IMflApi mfl, IGlobalMflApi globalMflApi, IRumorService rumor, IMapper mapper, ILogger<MflTranslationService> logger)
+        public MflTranslationService(IMflApi mfl, IGlobalMflApi globalMflApi, IRumorService rumor, IMapper mapper, ILogger<MflTranslationService> logger, IGroupMePostRepo gm)
         {
             _mfl = mfl;
             _globalMflApi = globalMflApi;
             Mapper = mapper;
             _logger = logger;
+            _gm = gm;
             _owners = Utils.owners;
             _memberIds = Utils.memberIds;
             _thisYear = Utils.ThisYear;
@@ -378,6 +383,23 @@ namespace DeadCapTracker.Services
             return franchisePicks;
         }
 
+        public async Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId)
+        {
+            var mflDraftRoot = await _mfl.GetMflDraftResults(leagueid: leagueId);
+            var picksMadeWithOutSalaries = mflDraftRoot.DraftResults.DraftUnit.DraftPick.Where(p => !string.IsNullOrEmpty(p.Player));
+            var picksWithValues = picksMadeWithOutSalaries.Select(_ => new DraftPickWithSlotValue
+            {
+                Player = _.Player,
+                Pick = _.Pick,
+                Round = _.Round,
+                Franchise = _.Franchise,
+                Timestamp = _.Timestamp,
+                Salary = GetDraftPickPrice(int.Parse(_.Round), int.Parse(_.Pick)),
+                Length = int.Parse(_.Round) > 2 ? 3 : 4
+            }).ToList();
+            return picksWithValues;
+        }
+
         public int GetDraftPickPrice(int round, int pick)
         {   
             var slot = (round - 1) * 12 + pick;
@@ -581,6 +603,38 @@ namespace DeadCapTracker.Services
                 return new List<PlayerAvgScore>();
             }
 
+        }
+        public async Task GiveNewContractToPlayer(int leagueId, int mflPlayerId, int salary, int length)
+        {
+            var data = CreateBodyDataForNewContract(mflPlayerId, salary, length);
+            try
+            {
+                var resp = await _mfl.EditPlayerSalary(leagueId, data);
+                var respString = await resp.Content.ReadAsStringAsync();
+                if (respString.ToUpper().Contains("ERROR"))
+                {
+                    var error = respString.XmlDeserializeFromString<MflXmlError>();
+                    _logger.LogInformation(respString);
+                    _logger.LogError("{lastname}'s contract was not updated in mfl.", mflPlayerId);
+                    await _gm.BotPost($"league: {leagueId} player:{mflPlayerId} contract was not updated in mfl. \n\n${error.ErrorMsg}", isError: true) ;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "New Contract mfl");
+                return;
+            }
+        }
+        private Dictionary<string, string> CreateBodyDataForNewContract(int playerId, int salary, int length = 1)
+        {
+            var ret = new Dictionary<string, string>()
+            {
+                {
+                    "DATA",
+                    $"<?xml version='1.0' encoding='UTF-8' ?><salaries><leagueUnit unit=\"LEAGUE\"><player id=\"{playerId}\" salary=\"{salary}\" contractYear=\"{length}\"/></leagueUnit></salaries>"
+                }
+            };
+            return ret;
         }
 
         public string InvertNameString(string commaName)

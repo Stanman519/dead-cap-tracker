@@ -6,6 +6,7 @@ using DeadCapTracker.Models.DTOs;
 using DeadCapTracker.Repositories;
 using DeadCapTracker.Services;
 using Microsoft.AspNetCore.Mvc;
+using RestEase;
 
 namespace DeadCapTracker.Controllers
 {
@@ -65,7 +66,11 @@ namespace DeadCapTracker.Controllers
         {
             return await _leagueService.GetDeadCapData();
         }
-
+        [HttpGet("draft-sync/{leagueId}")]
+        public async Task SyncRookieDraftContracts([Path] int leagueId)
+        {
+            await _leagueService.FindLatestDraftPicks(leagueId);
+        }
     }
     
     //TODO: api versioning
