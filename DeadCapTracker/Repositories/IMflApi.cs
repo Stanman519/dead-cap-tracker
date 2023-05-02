@@ -73,7 +73,7 @@ namespace DeadCapTracker.Repositories
         [Get("{year}/export?TYPE=playerScores&L=13894&APIKEY={ApiKey}&W=AVG&YEAR=&PLAYERS=&POSITION=&STATUS=&RULES=&COUNT=&JSON=1")]
         Task<MflAverageScoreRoot> GetAveragePlayerScores([Path] int year = Utils.ThisYear, [Path] string ApiKey = Utils.ApiKey);
         [Get("{year}/export?TYPE=draftResults&L={leagueId}&APIKEY={ApiKey}&JSON=1")]
-        Task<MflDraftResultRoot> GetMflDraftResults([Path] int year = Utils.ThisYear, [Path] int leagueid, [Path] string ApiKey = Utils.ApiKey);
+        Task<MflDraftResultRoot> GetMflDraftResults([Path] int leagueId, [Path] int year = Utils.ThisYear,  [Path] string ApiKey = Utils.ApiKey);
     }
     
 }

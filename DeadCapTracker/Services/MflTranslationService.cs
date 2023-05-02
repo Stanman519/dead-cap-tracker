@@ -385,7 +385,7 @@ namespace DeadCapTracker.Services
 
         public async Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId)
         {
-            var mflDraftRoot = await _mfl.GetMflDraftResults(leagueid: leagueId);
+            var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId: leagueId);
             var picksMadeWithOutSalaries = mflDraftRoot.DraftResults.DraftUnit.DraftPick.Where(p => !string.IsNullOrEmpty(p.Player));
             var picksWithValues = picksMadeWithOutSalaries.Select(_ => new DraftPickWithSlotValue
             {
