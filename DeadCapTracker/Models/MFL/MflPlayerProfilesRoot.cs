@@ -1,3 +1,6 @@
+using DeadCapTracker.Models.BotModels;
+using DeadCapTracker.Services;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace DeadCapTracker.Models.MFL
@@ -11,7 +14,8 @@ namespace DeadCapTracker.Models.MFL
 
     public class MflPlayerProfileParent
     {
-        public List<MflPlayerProfile> playerProfile { get; set; }
+        [JsonConverter(typeof(SingleOrArrayConverter<MflPlayerProfile>))]
+        public List<MflPlayerProfile> playerProfile { get; set; } = new List<MflPlayerProfile>();
     }
 
     public class MflPlayerProfile

@@ -58,7 +58,7 @@ namespace DeadCapTracker.Services
         private static Dictionary<int, string> _owners;
         private static Dictionary<int, string> _memberIds;
         private static int _thisYear;
-        
+
 
         public IMapper Mapper { get; }
         public ILogger<MflTranslationService> _logger { get; }
@@ -77,13 +77,13 @@ namespace DeadCapTracker.Services
 
         public async Task<List<TradeSingle>> GetCompletedTrades()
         {
-            try 
+            try
             {
                 return (await _mfl.GetRecentTrade()).transactions.transaction;
             }
             catch (Exception e) {
                 _logger.LogError(e, "MFL Request Error");
-                return new List<TradeSingle>(); 
+                return new List<TradeSingle>();
             }
         }
 
@@ -142,15 +142,15 @@ namespace DeadCapTracker.Services
                     rp,
                     nameRows = pd.DefaultIfEmpty()
                 }).SelectMany(p => p.nameRows.Select(n => new RosterPlayer
-            {
-                contractYear = p.rp.contractYear,
-                id = p.rp.id,
-                name = InvertNameString(n?.name),
-                owner = p.rp.owner,
-                salary = p.rp.salary,
-                status = p.rp.status
-            })).ToList();
-            
+                {
+                    contractYear = p.rp.contractYear,
+                    id = p.rp.id,
+                    name = InvertNameString(n?.name),
+                    owner = p.rp.owner,
+                    salary = p.rp.salary,
+                    status = p.rp.status
+                })).ToList();
+
             // search through with the name search to find players with that string in their name
             var hits = withNames.Where(p => p.name.Contains(name)).ToList();
             hits.ForEach(p =>
@@ -362,7 +362,7 @@ namespace DeadCapTracker.Services
             }).ToList();
             return franchisePicks.SelectMany(_ => _.FuturePicks).ToList();
         }
-        
+
         public List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises)
         {
             var franchisePicks = franchises.SelectMany(_ => _?.currentYearDraftPicks?.draftPick?.Select(pick =>
@@ -375,7 +375,7 @@ namespace DeadCapTracker.Services
                         Pick = Int32.Parse(arr[2]) + 1,
                         CurrentOwner = Int32.Parse(_.id),
                         SlotCost = GetDraftPickPrice(Int32.Parse(arr[1]) + 1, Int32.Parse(arr[2]) + 1)
-                        
+
                     };
                 })
             ).ToList();
@@ -387,18 +387,28 @@ namespace DeadCapTracker.Services
         {
             var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId: leagueId);
             var picksMadeWithOutSalaries = mflDraftRoot.DraftResults.DraftUnit.DraftPick.Where(p => !string.IsNullOrEmpty(p.Player));
-            var picksWithValues = picksMadeWithOutSalaries.Select(_ => new DraftPickWithSlotValue
-            {
-                Player = _.Player,
-                Pick = _.Pick,
-                Round = _.Round,
-                Franchise = _.Franchise,
-                Timestamp = _.Timestamp,
-                Salary = GetDraftPickPrice(int.Parse(_.Round), int.Parse(_.Pick)),
-                Length = int.Parse(_.Round) > 2 ? 3 : 4
+            var queryString = string.Join(",", picksMadeWithOutSalaries.Select(p => p.Player));
+            var picksWithPlayerInfo = await _mfl.GetBotPlayersDetails(queryString);
+
+            var picksWithValues = picksMadeWithOutSalaries.Select(_ => {
+                var rawSalary = GetDraftPickPrice(int.Parse(_.Round), int.Parse(_.Pick));
+                var playerInfo = picksWithPlayerInfo.players.player.FirstOrDefault(p => p.id == _.Player);
+                var fixedSalary = 0.0;
+                if (playerInfo != null) fixedSalary = playerInfo.position == "RB" ? rawSalary * 1.2 : rawSalary * 1.0;
+                return new DraftPickWithSlotValue
+                {
+                    Player = _.Player,
+                    Pick = _.Pick,
+                    Round = _.Round,
+                    Franchise = _.Franchise,
+                    Timestamp = _.Timestamp,
+                    Salary = (int)Math.Round(fixedSalary),
+                    Length = int.Parse(_.Round) > 2 ? 3 : 4
+                };
             }).ToList();
+        
             return picksWithValues;
-        }
+        } 
 
         public int GetDraftPickPrice(int round, int pick)
         {   

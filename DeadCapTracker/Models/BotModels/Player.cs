@@ -1,3 +1,6 @@
+using DeadCapTracker.Models.MFL;
+using DeadCapTracker.Services;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace DeadCapTracker.Models.BotModels
@@ -18,7 +21,8 @@ namespace DeadCapTracker.Models.BotModels
     {
         public string timestamp { get; set; }
         public string since { get; set; }
-        public List<Player> player { get; set; }
+        [JsonConverter(typeof(SingleOrArrayConverter<Player>))]
+        public List<Player> player { get; set; } = new List<Player>();
     }
 
     public class PlayersSingle
