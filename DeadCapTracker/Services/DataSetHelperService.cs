@@ -59,7 +59,7 @@ namespace DeadCapTracker.Services
                     CurrentRosterSalary = rosterBoys.Sum(_ => _.Salary),
                     CurrentIRSalary = ((decimal) 0.5 * irBoys.Sum(_ => _.Salary)),
                     CurrentTaxiSalary = ((decimal) 0.2 * taxiBoys.Sum(_ => _.Salary)),
-                    DeadCapData = adjustments.FirstOrDefault(_ => _.FranchiseId == Int32.Parse(roster.id))?.Amount,
+                    DeadCapData = adjustments.FirstOrDefault(_ => _.FranchiseId == Int32.Parse(roster.id))?.Amount ?? new Dictionary<string, decimal>(),
                     NextYearRosterSalary = nextYearBoys.Sum(_ => _.Salary)
                 });
             });
