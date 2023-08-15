@@ -120,7 +120,7 @@ namespace DeadCapTracker.Services
 
         public async Task<List<TransactionDTO>> GetTransactions(int year)
         {
-            var leagues = await _context.Leagues.ToListAsync();
+            var leagues = await _context.Leagues.Where(l => l.Mflid > 0).ToListAsync();
             var parentTaskList = new List<Task>();
             var salaryAdjTasks = new List<Task<List<MflSalaryAdjustment>>>();
             var transactionTasks = new List<Task<List<MflTransaction>>>();
@@ -139,7 +139,7 @@ namespace DeadCapTracker.Services
             {
                 var salaryAdjList = SortTransactions(salaryAdjTasks[i].Result.Where(adj => !adj.Description.StartsWith("X")).ToList());
                 playerLookups[leagues[i].Mflid] = transactionTasks[i].Result.Select(t => t.transaction.Split(',')[0]).ToList();
-                
+                // something is wrong with this.  if i want to post the latest adds,  I'm only looking at salary adjustments so ? ^^^
             
                 var DTOs = _mapper.Map<List<MflSalaryAdjustment>, List<TransactionDTO>>(salaryAdjList);
 
@@ -160,7 +160,7 @@ namespace DeadCapTracker.Services
                 newEntities.AddRange(newEntitiesForThisLeague);
                 if (leagues[i].Botid.IsNullOrEmpty()) continue;
                 if (!playerLookups[leagues[i].Mflid].Any()) continue;
-                var playerIds = string.Join(",", playerLookups);
+                var playerIds = string.Join(",", playerLookups[leagues[i].Mflid]);
                 playerIds += $",{Utils.LongTermPlayerHack}";
                 var playerInfos = await _mflSvc.GetMultiMflPlayers(playerIds);
                 transactionTasks[i].Result.ForEach(t =>
