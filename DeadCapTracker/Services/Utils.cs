@@ -5,8 +5,8 @@ namespace DeadCapTracker.Services
 {
     public static class Utils
     {
-        public const int ThisYear = 2023;
-        public const string ApiKey = "ahBv1sGSvuWsx0amOVrJaDYeFbox";
+        public const int ThisYear = 2024;
+        public const string ApiKey = "ahBv1sGSvuWrx1mmOVrJaDYeFLox";
         public const string LongTermPlayerHack = "14777"; // Joe Burrow, used to add to mfl player lookups so you always get array rather than obj
         public const int TaxiSquadSlots = 5;
         public const double TaxiSquadCapHit = 0.2;
