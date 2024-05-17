@@ -48,6 +48,7 @@ namespace DeadCapTracker
             services.AddApplicationInsightsTelemetry(options);
             services.AddControllers();
             services.AddSwaggerGen();
+            services.AddSingleton(RestClient.For<IFreeAgencyAuctionAPI>("https://contract-auction-api.azurewebsites.net/"));
             services.AddSingleton(RestClient.For<IGlobalMflApi>("https://api.myfantasyleague.com"));
             services.AddSingleton(RestClient.For<IMflApi>("https://www49.myfantasyleague.com"));
             services.AddSingleton(RestClient.For<IGroupMeApi>("https://api.groupme.com"));
@@ -59,7 +60,7 @@ namespace DeadCapTracker
             services.AddScoped<IMflTranslationService, MflTranslationService>();
             services.AddScoped<IDataSetHelperService, DataSetHelperService>();
             services.AddScoped<IGroupMePostRepo, GroupMePostRepo>();
-
+            services.AddScoped<IGmFreeAgencyService, GmFreeAgencyService>();
             //TODO : use config for value instead of hardcoding
             services.AddAutoMapper(typeof(Program).Assembly);
             services.AddHttpClient();

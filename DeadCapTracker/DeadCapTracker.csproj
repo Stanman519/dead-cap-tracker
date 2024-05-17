@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <UserSecretsId>b01e4b69-f1fc-4282-8df4-bac6be95e69e</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

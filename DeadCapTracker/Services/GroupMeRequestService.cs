@@ -84,7 +84,7 @@ namespace DeadCapTracker.Services
             var tytScores = standingsData.Select(t => new TYTScore
             {
                 Owner = _owners[t.FranchiseId],
-                Score = t.TeamStandings.Sum(s => s.PointsFor) + t.TeamStandings.Select(s => s.H2hWins * (s.Year == 2020 ? 5 : 10)).Sum()
+                Score = t.TeamStandings.Sum(s => s.PointsFor) + t.TeamStandings.Select(s => s.H2hWins * 10).Sum()
             }).OrderByDescending(t => t.Score)
                 .Take(5)
                 .ToList();

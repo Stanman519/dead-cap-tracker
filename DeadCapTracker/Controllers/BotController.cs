@@ -14,10 +14,12 @@ namespace DeadCapTracker.Controllers
     [Route("[controller]")]
     public class BotController : ControllerBase
     {
+        private IGmFreeAgencyService _gmFA;
         private IGroupMeRequestService _groupMeRequestService;
 
-        public BotController(IGroupMeRequestService groupMeRequestService)
+        public BotController(IGroupMeRequestService groupMeRequestService, IGmFreeAgencyService gmFA)
         {
+            _gmFA = gmFA;
             _groupMeRequestService = groupMeRequestService;
         }
 
@@ -82,9 +84,10 @@ namespace DeadCapTracker.Controllers
             var isHelp = request.Contains("#help");
             var isDeadCap = request.Contains("#dead");
             var isDraftCost = request.Contains("#budget");
+            var isQuickBid = request.Contains("#bid");
             var strayTag = request.Contains("@cap") || request.Contains("@the cap") || request.Contains("@thec");
             
-            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag && !isDeadCap && !isDraftCost)
+            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag && !isDeadCap && !isDraftCost && !isQuickBid)
                 return null;
 
             var groupId = message.group_id;
@@ -127,6 +130,8 @@ namespace DeadCapTracker.Controllers
             if (isDeadCap) await _groupMeRequestService.PostFutureDeadCap();
 
             if (isDraftCost) await _groupMeRequestService.PostDraftBudgets();
+
+            if (isQuickBid) await _gmFA.PostQuickBidByLotId(message);
 
             return null;
         }

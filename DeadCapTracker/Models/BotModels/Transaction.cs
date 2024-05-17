@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DeadCapTracker.Repositories;
+using System;
 using static DeadCapTracker.Repositories.DeadCapTrackerContext;
 
 #nullable disable

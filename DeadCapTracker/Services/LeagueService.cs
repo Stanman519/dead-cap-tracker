@@ -18,7 +18,7 @@ namespace DeadCapTracker.Services
     public interface ILeagueService
     {
         Task<List<TransactionDTO>> GetTransactions(int year);
-        Task<List<FranchiseDTO>> UpdateFranchises(int year);
+/*        Task<List<FranchiseDTO>> UpdateFranchises(int year);*/
         //Task<List<TeamStandings>> GetStandings(int year);
         Task<List<PendingTradeDTO>> FindPendingTrades(int year);
         Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year);
@@ -52,7 +52,7 @@ namespace DeadCapTracker.Services
         {
             var returnData = new List<DeadCapData>();
             //get all transactions from table and join with franchise to have team names
-            var transactions = new List<Transaction>();
+            var transactions = new List<Repositories.Transaction>();
             var franchises = new List<LeagueOwnerEntity>();
 
             try
@@ -72,7 +72,7 @@ namespace DeadCapTracker.Services
                     select new
                     {
                         FranchiseId = t.Franchiseid,
-                        TeamName = f.OwnerEntity.Displayname,
+                        TeamName = f.Owner.Displayname,
                         DeadAmount = t.Amount,
                         PlayerName = t.Playername,
                         TransactionYear = t.Yearoftransaction,
@@ -103,7 +103,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var res = _context.Transactions.ToList();
-                return _mapper.Map<List<Transaction>, List<TransactionDTO>>(res);
+                return _mapper.Map<List<Repositories.Transaction>, List<TransactionDTO>>(res);
             }
             catch (Exception e)
             {
@@ -124,7 +124,7 @@ namespace DeadCapTracker.Services
             var parentTaskList = new List<Task>();
             var salaryAdjTasks = new List<Task<List<MflSalaryAdjustment>>>();
             var transactionTasks = new List<Task<List<MflTransaction>>>();
-            var newEntities = new List<Transaction>();
+            var newEntities = new List<Repositories.Transaction>();
             var playerLookups = new Dictionary<int, List<string>>();
             var botStr = "Waiver Wire Report:\n";
 
@@ -149,7 +149,7 @@ namespace DeadCapTracker.Services
                     d.LeagueId = leagues[i].Mflid;
                     });
 
-                var entities = _mapper.Map<List<TransactionDTO>, List<Transaction>>(DTOs);
+                var entities = _mapper.Map<List<TransactionDTO>, List<Repositories.Transaction>>(DTOs);
 
             
                 var latestTransId = _context.Transactions.Where(t => t.Leagueid == leagues[i].Mflid).OrderByDescending(t => t.Transactionid).FirstOrDefault()?.Transactionid ?? 0;
@@ -184,12 +184,12 @@ namespace DeadCapTracker.Services
             return await _mflSvc.FindPendingTrades(year);
         }
         
-        public async Task<List<FranchiseDTO>> UpdateFranchises(int year)
+        /*public async Task<List<FranchiseDTO>> UpdateFranchises(int year)
         {
             var DTOs = await _mflSvc.GetAllFranchises();
             try
             {
-                var existingFranchiseIds = _context.Franchises
+                var existingFranchiseIds = _context.Franchise
                                     .OrderBy(f => f.Franchiseid)
                                     .Select(f => f.Franchiseid)
                                     .ToList();
@@ -203,7 +203,7 @@ namespace DeadCapTracker.Services
                 _logger.LogError("entity framework error", e);
             }
             return DTOs;
-        }
+        }*/
 
         public async Task MapPickBudgetToOwners()
         {

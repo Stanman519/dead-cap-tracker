@@ -22,10 +22,8 @@ namespace DeadCapTracker.Repositories
             : base(options)
         {
         }
+                public DbSet<PlayerEntity> Players { get; set; }
 
-        public virtual DbSet<Franchise> Franchises { get; set; }
-        public virtual DbSet<Transaction> Transactions { get; set; }
-        public DbSet<PlayerEntity> Players { get; set; }
         public DbSet<BidEntity> Bids { get; set; }
         public DbSet<OwnerEntity> Owners { get; set; }
         public DbSet<LotEntity> Lots { get; set; }
@@ -33,6 +31,18 @@ namespace DeadCapTracker.Repositories
         public DbSet<LeagueOwnerEntity> LeagueOwners { get; set; }
         public DbSet<LeagueEntity> Leagues { get; set; }
         public DbSet<ContractEntity> Contracts { get; set; }
+        public DbSet<FranchiseTagPlayer> FranchiseTagPlayers { get; set; }
+        public DbSet<FranchiseTagLeague> FranchiseTagLeagues { get; set; }
+        public DbSet<Buyout> Buyouts { get; set; }
+        public virtual DbSet<Transaction> Transactions { get; set; }
+        public DbSet<NflTeam> NflTeams { get; set; }
+        public DbSet<NflTeamMatchup> NflTeamMatchups { get; set; }
+        public DbSet<Pick> NflPicks { get; set; }
+        public DbSet<ExtraPick> ExtraPicks { get; set; }
+        public DbSet<Prop> Props { get; set; } 
+        public DbSet<SeasonWins> SeasonWins { get;set; }
+        public DbSet<OverUnderPick> OverUnderPicks { get; set; }
+        public DbSet<WaiverExtension> WaiverExtensions { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -46,6 +56,87 @@ namespace DeadCapTracker.Repositories
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<NflTeam>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK_nflteam");
+                entity.ToTable("nflteam");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Name).HasColumnName("name");
+                entity.Property(e => e.Tricode).HasColumnName("tricode");
+                entity.Property(e => e.City).HasColumnName("city");
+                entity.Property(e => e.Logo).HasColumnName("logo");
+                entity.Property(e => e.SecondaryLogo).HasColumnName("secondaryLogo");
+                entity.Property(e => e.Primary).HasColumnName("primary");
+                entity.Property(e => e.Secondary).HasColumnName("secondary");
+                entity.Property(e => e.Tertiary).HasColumnName("tertiary");
+                entity.Property(e => e.Tricode).HasColumnName("tricode");
+                entity.Property(e => e.League).HasColumnName("league");
+
+            });
+
+            modelBuilder.Entity<Pick>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK_pick");
+                entity.ToTable("pick");
+                entity.Property(e => e.OwnerId).HasColumnName("ownerid");
+                entity.Property(e => e.MatchupId).HasColumnName("matchupid");
+                entity.Property(e => e.Choice).HasColumnName("choice");
+                entity.Property(e => e.Points).HasColumnName("points");
+                entity.HasOne(d => d.Owner).WithMany(p => p.ConfidencePicks)
+                    .HasForeignKey(d => d.OwnerId)
+                    .HasConstraintName("FK_pick_owner");
+                entity.HasOne(d => d.ChosenTeam).WithMany(p => p.ChosenPicks)
+                    .HasForeignKey(d => d.Choice)
+                    .HasConstraintName("FK_pick_nflteam");
+                entity.HasOne(d => d.NflTeamMatchup).WithMany(p => p.ChosenPicks)
+                    .HasForeignKey(d => d.MatchupId)
+                    .HasConstraintName("FK_pick_matchup");
+
+            });
+            modelBuilder.Entity<ExtraPick>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK_extrapick");
+                entity.ToTable("extrapick");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.OwnerId).HasColumnName("ownerid");
+                entity.Property(e => e.Choice).HasColumnName("choice");
+                entity.Property(e => e.PropId).HasColumnName("propid");
+                entity.HasOne(d => d.Owner).WithMany(p => p.ExtraPicks)
+                    .HasForeignKey(d => d.OwnerId)
+                    .HasConstraintName("FK_extrapick_owner");
+                entity.HasOne(d => d.Prop).WithMany(p => p.ChosenProps)
+                    .HasForeignKey(d => d.PropId)
+                    .HasConstraintName("FK_extrapick_prop");
+            });
+            modelBuilder.Entity<NflTeamMatchup>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK_matchup");
+                entity.ToTable("matchup");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Left).HasColumnName("left");
+                entity.Property(e => e.Right).HasColumnName("right");
+                entity.Property(e => e.Year).HasColumnName("year");
+                entity.Property(e => e.Week).HasColumnName("week");
+                entity.Property(e => e.Pickable).HasColumnName("pickable");
+                entity.Property(e => e.Winner).HasColumnName("winner");
+                entity.HasOne(e => e.LeftTeam).WithMany(e => e.LeftMatchups).HasForeignKey(d => d.Left).HasConstraintName("FK_matchup_nflteam_left");
+                entity.HasOne(e => e.RightTeam).WithMany(e => e.RightMatchups).HasForeignKey(d => d.Right).HasConstraintName("FK_matchup_nflteam_right");
+                entity.HasOne(e => e.WinningTeam).WithMany(e => e.WinMatchups).HasForeignKey(d => d.Winner).HasConstraintName("FK_matchup_nflteam_winner");
+            });
+            modelBuilder.Entity<Prop>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK_prop");
+                entity.ToTable("prop");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.OptionA).HasColumnName("optionA");
+                entity.Property(e => e.OptionB).HasColumnName("optionB");
+                entity.Property(e => e.Year).HasColumnName("year");
+                entity.Property(e => e.Week).HasColumnName("week");
+                entity.Property(e => e.Pickable).HasColumnName("pickable");
+                entity.Property(e => e.Winner).HasColumnName("winner");
+
+            });
             modelBuilder.Entity<Transaction>(entity =>
             {
                 entity.HasKey(e => e.Globalid).HasName("PK_transaction");
@@ -75,7 +166,7 @@ namespace DeadCapTracker.Repositories
 
                 entity.ToTable("bid");
 
-                entity.Property(e => e.Bidid).HasColumnName("bidid");
+                entity.Property(e => e.Bidid).HasColumnName("bidid").ValueGeneratedOnAdd();
                 entity.Property(e => e.Bidlength).HasColumnName("bidlength");
                 entity.Property(e => e.Bidsalary).HasColumnName("bidsalary");
                 entity.Property(e => e.Expires)
@@ -159,17 +250,18 @@ namespace DeadCapTracker.Repositories
 
                 entity.Property(e => e.Leagueownerid).HasColumnName("leagueownerid");
                 entity.Property(e => e.Caproom).HasColumnName("caproom");
+                entity.Property(e => e.Teamname).HasColumnName("teamname");
                 entity.Property(e => e.Leagueid).HasColumnName("leagueid");
                 entity.Property(e => e.Mflfranchiseid).HasColumnName("mflfranchiseid");
                 entity.Property(e => e.Ownerid).HasColumnName("ownerid");
                 entity.Property(e => e.Yearsleft).HasColumnName("yearsleft");
 
-                entity.HasOne(d => d.LeagueEntity).WithMany(p => p.Leagueowners)
+                entity.HasOne(d => d.League).WithMany(p => p.Leagueowners)
                     .HasForeignKey(d => d.Leagueid)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_leagueowner_League");
 
-                entity.HasOne(d => d.OwnerEntity).WithMany(p => p.Leagueowners)
+                entity.HasOne(d => d.Owner).WithMany(p => p.Leagueowners)
                     .HasForeignKey(d => d.Ownerid)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_leagueowner_owner");
@@ -180,14 +272,18 @@ namespace DeadCapTracker.Repositories
                 entity.ToTable("lot");
 
                 entity.Property(e => e.Lotid)
-                    .ValueGeneratedNever()
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("lotid");
                 entity.Property(e => e.Bidid).HasColumnName("bidid");
+                entity.Property(e => e.Nominatedby).HasColumnName("nominatedby");
                 entity.Property(e => e.Leagueid).HasColumnName("leagueid");
 
                 entity.HasOne(d => d.Bid).WithMany(p => p.Lots)
                     .HasForeignKey(d => d.Bidid)
                     .HasConstraintName("FK_bidid_fkey");
+                entity.HasOne(d => d.LotOwner).WithMany(p => p.Lots)
+                    .HasForeignKey(d => d.Nominatedby)
+                    .HasConstraintName("FK_lot_leagueowner");
 
                 entity.HasOne(d => d.League).WithMany(p => p.Lots)
                     .HasForeignKey(d => d.Leagueid)
@@ -200,7 +296,7 @@ namespace DeadCapTracker.Repositories
                 entity.ToTable("owner");
 
                 entity.Property(e => e.Ownerid)
-                    .ValueGeneratedNever()
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("ownerid");
                 entity.Property(e => e.Displayname)
                     .HasMaxLength(50)
@@ -212,6 +308,9 @@ namespace DeadCapTracker.Repositories
                 entity.Property(e => e.PasswordHash)
                     .IsUnicode(false)
                     .HasColumnName("password_hash");
+                entity.Property(e => e.ConfidencePaid).HasColumnName("confidencepaid");
+                entity.Property(e => e.StreamToken)
+                    .HasColumnName("streamtoken");
                 entity.Property(e => e.Premium).HasColumnName("premium");
             });
 
@@ -290,210 +389,522 @@ namespace DeadCapTracker.Repositories
                 entity.Property(e => e.YearMax).HasColumnName("yearMax");
                 entity.Property(e => e.YearMin).HasColumnName("yearMin");
             });
-            modelBuilder.Entity<Franchise>(entity =>
+            modelBuilder.Entity<FranchiseTagLeague>(entity =>
             {
-                entity.ToTable("franchise");
+                entity.ToTable("franchisetagleague");
 
-                entity.Property(e => e.Franchiseid)
-                    .ValueGeneratedNever()
-                    .HasColumnName("franchiseid");
+                entity.Property(e => e.Mflleagueid)
+                    .HasColumnName("mflleagueid");
+                entity.Property(e => e.Year)
+                    .HasColumnName("year");
+                entity.Property(e => e.QB)
+                    .HasColumnName("qb");
+                entity.Property(e => e.RB)
+                    .HasColumnName("rb");
+                entity.Property(e => e.WR)
+                    .HasColumnName("wr");
+                entity.Property(e => e.TE)
+                    .HasColumnName("te");
+                entity.HasOne(e => e.League)
+                .WithMany(l => l.FranchiseTagLeagues)
+                .HasForeignKey(d => d.Mflleagueid)
+                    .HasConstraintName("FK_franchisetagleauge_League");
 
-                entity.Property(e => e.Abbrev)
-                    .HasMaxLength(10)
-                    .HasColumnName("abbrev");
-
-                entity.Property(e => e.Bbidavailablebalance).HasColumnName("bbidavailablebalance");
-
-                entity.Property(e => e.Icon)
-                    .HasMaxLength(1000)
-                    .HasColumnName("icon");
-
-                entity.Property(e => e.Ownername)
-                    .HasMaxLength(40)
-                    .HasColumnName("ownername");
-
-                entity.Property(e => e.Teamname)
-                    .IsRequired()
-                    .HasMaxLength(140)
-                    .HasColumnName("teamname");
+                entity.HasKey(e => new
+                {
+                    e.Mflleagueid,
+                    e.Year
+                });
             });
 
-            modelBuilder.Entity<Transaction>(entity =>
+            modelBuilder.Entity<Buyout>(entity =>
             {
-                entity.ToTable("transaction");
+                entity.ToTable("buyout");
 
-                entity.Property(e => e.Transactionid)
-                    .ValueGeneratedNever()
-                    .HasColumnName("transactionid");
+                entity.Property(e => e.BuyoutId)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("buyoutid");
+                entity.Property(e => e.LeagueId)
+                    .HasColumnName("leagueid");
+                entity.Property(e => e.PlayerId)
+                    .HasColumnName("playerid");
+                entity.Property(e => e.Year)
+                    .HasColumnName("year");
+                entity.Property(e => e.LeagueOwnerId)
+                    .HasColumnName("leagueownerid");
+                entity.Property(e => e.OriginalSalary)
+                    .HasColumnName("originalsalary");
+                entity.HasOne(e => e.League)
+                .WithMany(l => l.Buyouts)
+                .HasForeignKey(d => d.LeagueId)
+                .HasConstraintName("FK_buyout_League");
+                entity.HasOne(e => e.Player)
+                .WithMany(l => l.Buyouts)
+                .HasForeignKey(d => d.PlayerId)
+                .HasConstraintName("FK_buyout_player");
+                entity.HasOne(e => e.LeagueOwner)
+                .WithMany(l => l.Buyouts)
+                .HasForeignKey(d => d.LeagueOwnerId)
+                .HasConstraintName("FK_buyout_leagueowner");
 
-                entity.Property(e => e.Amount).HasColumnName("amount");
+                entity.HasKey(e => e.BuyoutId);
+            });
+            modelBuilder.Entity<WaiverExtension>(entity =>
+            {
+                entity.ToTable("waiverextension");
 
-                entity.Property(e => e.Franchiseid).HasColumnName("franchiseid");
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
+                entity.Property(e => e.LeagueId)
+                    .HasColumnName("leagueid");
+                entity.Property(e => e.PlayerId)
+                    .HasColumnName("playerid");
+                entity.Property(e => e.Year)
+                    .HasColumnName("year");
+                entity.Property(e => e.LeagueOwnerId)
+                    .HasColumnName("leagueownerid");
+                entity.HasOne(e => e.League)
+                .WithMany(l => l.WaiverExtensions)
+                .HasForeignKey(d => d.LeagueId)
+                .HasConstraintName("FK_waiverextension_League");
+                entity.HasOne(e => e.Player)
+                .WithMany(l => l.WaiverExtensions)
+                .HasForeignKey(d => d.PlayerId)
+                .HasConstraintName("FK_waiverextension_player");
+                entity.HasOne(e => e.LeagueOwner)
+                .WithMany(l => l.WaiverExtensions)
+                .HasForeignKey(d => d.LeagueOwnerId)
+                .HasConstraintName("FK_waiverextension_leagueowner");
 
-                entity.Property(e => e.Playername)
-                    .IsRequired()
-                    .HasMaxLength(75)
-                    .HasColumnName("playername");
+                entity.HasKey(e => e.Id);
+            });
 
+            modelBuilder.Entity<SeasonWins>(entity =>
+            {
+                entity.ToTable("seasonwins");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
+                entity.Property(e => e.FranchiseId)
+                    .HasColumnName("franchiseid");
+                entity.Property(e => e.Year)
+                    .HasColumnName("year");
+                entity.Property(e => e.BaseOverUnder)
+                    .HasColumnName("baseoverunder");
+                entity.Property(e => e.RealWins)
+                    .HasColumnName("realwins");
+                entity.Property(e => e.GamesRemaining)
+                    .HasColumnName("gamesremaining");
+                entity.HasOne(e => e.Franchise)
+                    .WithMany(l => l.SeasonWins)
+                    .HasForeignKey(d => d.FranchiseId)
+                    .HasConstraintName("FK_seasonwins_nflteam");
+                entity.HasKey(e => e.Id);
+            });
+            modelBuilder.Entity<OverUnderPick>(entity =>
+            {
+                entity.ToTable("overunderpick");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
+                entity.Property(e => e.LineId)
+                    .HasColumnName("lineid");
+                entity.Property(e => e.OwnerId)
+                    .HasColumnName("ownerid");
+                entity.Property(e => e.IsOver)
+                    .HasColumnName("isover");
+                entity.Property(e => e.LineAdjustment)
+                    .HasColumnName("lineadjustment");
+                entity.HasOne(e => e.WinLine)
+                    .WithMany(l => l.OverUnderPicks)
+                    .HasForeignKey(d => d.LineId)
+                    .HasConstraintName("FK_seasonwins_nflteam");
+                entity.HasKey(e => e.Id);
+            });
+            modelBuilder.Entity<FranchiseTagPlayer>(entity =>
+            {
+                entity.ToTable("franchisetagplayer");
+
+                entity.Property(e => e.Mflplayerid)
+                    .HasColumnName("mflplayerid");
+                entity.Property(e => e.Mflleagueid)
+                    .HasColumnName("mflleagueid");
+                entity.Property(e => e.Year)
+                    .HasColumnName("year");
+                entity.Property(e => e.Leagueownerid)
+                    .HasColumnName("leagueownerid");
+                entity.Property(e => e.Franchisetagid)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("franchisetagid");
+                entity.Property(e => e.Originalsalary)
+                    .HasColumnName("originalsalary");
+                entity.Property(e => e.Tagprice)
+                    .HasColumnName("tagprice");
                 entity.Property(e => e.Position)
-                    .HasMaxLength(8)
+                     .HasMaxLength(8)
+                    .IsUnicode(false)
                     .HasColumnName("position");
-
-                entity.Property(e => e.Salary).HasColumnName("salary");
-
-                entity.Property(e => e.Team)
-                    .HasMaxLength(5)
-                    .HasColumnName("team");
-
-                entity.Property(e => e.Timestamp)
-                    .HasColumnType("date")
-                    .HasColumnName("timestamp");
-
-                entity.Property(e => e.Yearoftransaction).HasColumnName("yearoftransaction");
-
-                entity.Property(e => e.Years).HasColumnName("years");
+                entity.Property(e => e.Fullname)
+                    .HasMaxLength(80)
+                    .IsUnicode(false)
+                      .HasColumnName("fullname");
+                entity.HasOne(e => e.Player)
+                    .WithMany(p => p.FranchiseTags)
+                     .HasForeignKey(d => d.Mflplayerid)
+                    .HasConstraintName("FK_franchisetagplayer_player");
+                entity.HasOne(e => e.Leagueowner)
+                    .WithMany(p => p.FranchiseTags)
+                    .HasForeignKey(d => d.Leagueownerid)
+                    .HasConstraintName("FK_franchisetagplayer_leagueowner");
+                entity.HasOne(e => e.FranchiseTagLeagueData)
+                    .WithMany(p => p.FranchiseTagPlayers)
+                    .HasForeignKey(d => new
+                    {
+                        d.Mflleagueid,
+                        d.Year
+                    })
+                    .HasConstraintName("FK_franchisetagplayer_franchisetagleauge");
             });
 
             OnModelCreatingPartial(modelBuilder);
         }
 
+
+
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    }
 
-        public partial class PlayerEntity
+
+    public partial class PlayerEntity
+    {
+        [Key]
+        public int Mflid { get; set; }
+        public string? Firstname { get; set; }
+        public string? Lastname { get; set; }
+        public string? Position { get; set; }
+        public string? Fullname { get; set; }
+        public string? Team { get; set; }
+        public int? Age { get; set; }
+        public int? Height { get; set; }
+        public int? Weight { get; set; }
+        public string? Headshot { get; set; }
+        public string? Actionshot { get; set; }
+        public string? Espnid { get; set; }
+        public string? College { get; set; }
+        public string? Rotowireid { get; set; }
+        public int? Draftround { get; set; }
+        public int? Draftpick { get; set; }
+        public int? Draftyear { get; set; }
+        public int? Jersey { get; set; }
+        public string? Draftteam { get; set; }
+        public string? Cbsid { get; set; }
+        public string? Rotoworldid { get; set; }
+        public decimal? Lastseasonpts { get; set; }
+        public bool? IsActive { get; set; }
+        public virtual ICollection<Buyout> Buyouts { get; } = new List<Buyout>();
+        public virtual ICollection<FranchiseTagPlayer> FranchiseTags { get; } = new List<FranchiseTagPlayer>();
+        public virtual ICollection<BidEntity> Bids { get; } = new List<BidEntity>();
+        public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
+        public virtual ICollection<WaiverExtension> WaiverExtensions { get; } = new List<WaiverExtension>();
+    }
+    public partial class BidEntity
+    {
+        [Key]
+        public int Bidid { get; set; }
+        public int Bidlength { get; set; }
+        public int Bidsalary { get; set; }
+        public DateTime Expires { get; set; }
+        public int Mflid { get; set; }
+        public int Ownerid { get; set; }
+        public int Leagueid { get; set; }
+        public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
+        public virtual LeagueEntity League { get; set; } = null!;
+        public virtual ICollection<LotEntity> Lots { get; } = new List<LotEntity>();
+        public virtual PlayerEntity Player { get; set; } = null!;
+        public virtual LeagueOwnerEntity LeagueOwner { get; set; } = null!;
+    }
+    public partial class LeagueOwnerEntity
+    {
+        [Key]
+        public int Leagueownerid { get; set; }
+        public int Leagueid { get; set; }
+        public int Ownerid { get; set; }
+        public int Mflfranchiseid { get; set; }
+        public int? Caproom { get; set; }
+        public int? Yearsleft { get; set; }
+        public string Teamname { get; set; }
+        public virtual ICollection<FranchiseTagPlayer> FranchiseTags { get; } = new List<FranchiseTagPlayer>();
+        public virtual ICollection<Buyout> Buyouts { get; } = new List<Buyout>();
+        public virtual ICollection<BidEntity> Bids { get; } = new List<BidEntity>();
+        public virtual ICollection<LotEntity> Lots { get; } = new List<LotEntity>();
+        public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
+        public virtual LeagueEntity League { get; set; } = null!;
+        public virtual OwnerEntity Owner { get; set; } = null!;
+        public virtual ICollection<WaiverExtension> WaiverExtensions { get; } = new List<WaiverExtension>();
+    }
+
+    public partial class SuggestionEntity
+    {
+        public int Ownerid { get; set; }
+        public int Suggestion { get; set; }
+        public string Mflid { get; set; } = null!;
+        public int? YearMin { get; set; }
+        public int? YearMax { get; set; }
+        [Key]
+        public int Id { get; set; }
+        public SuggestionEntity()
         {
-            [Key]
-            public int Mflid { get; set; }
-            public string? Firstname { get; set; }
-            public string? Lastname { get; set; }
-            public string? Position { get; set; }
-            public string? Fullname { get; set; }
-            public string? Team { get; set; }
-            public int? Age { get; set; }
-            public int? Height { get; set; }
-            public int? Weight { get; set; }
-            public string? Headshot { get; set; }
-            public string? Actionshot { get; set; }
-            public string? Espnid { get; set; }
-            public string? College { get; set; }
-            public string? Rotowireid { get; set; }
-            public int? Draftround { get; set; }
-            public int? Draftpick { get; set; }
-            public int? Draftyear { get; set; }
-            public int? Jersey { get; set; }
-            public string? Draftteam { get; set; }
-            public string? Cbsid { get; set; }
-            public string? Rotoworldid { get; set; }
-            public decimal? Lastseasonpts { get; set; }
-            public bool? IsActive { get; set; }
-            public virtual ICollection<BidEntity> Bids { get; } = new List<BidEntity>();
-            public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
 
         }
-        public partial class BidEntity
-        {
-            [Key]
-            public int Bidid { get; set; }
-            public int Bidlength { get; set; }
-            public int Bidsalary { get; set; }
-            public DateTime Expires { get; set; }
-            public int Mflid { get; set; }
-            public int Ownerid { get; set; }
-            public int Leagueid { get; set; }
-            public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
-            public virtual LeagueEntity League { get; set; } = null!;
-            public virtual ICollection<LotEntity> Lots { get; } = new List<LotEntity>();
-            public virtual PlayerEntity Player { get; set; } = null!;
-            public virtual LeagueOwnerEntity LeagueOwner { get; set; } = null!;
-        }
-        public partial class LeagueOwnerEntity
-        {
-            [Key]
-            public int Leagueownerid { get; set; }
-            public int Leagueid { get; set; }
-            public int Ownerid { get; set; }
-            public int Mflfranchiseid { get; set; }
-            public int? Caproom { get; set; }
-            public int? Yearsleft { get; set; }
-            public virtual ICollection<BidEntity> Bids { get; } = new List<BidEntity>();
-            public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
-            public virtual LeagueEntity LeagueEntity { get; set; } = null!;
-            public virtual OwnerEntity OwnerEntity { get; set; } = null!;
-        }
 
-        public partial class SuggestionEntity
+        public SuggestionEntity(int owner, string mfl, int salary)
         {
-            public int Ownerid { get; set; }
-            public int Suggestion { get; set; }
-            public string Mflid { get; set; } = null!;
-            public int? YearMin { get; set; }
-            public int? YearMax { get; set; }
-            [Key]
-            public int Id { get; set; }
-            public SuggestionEntity()
-            {
-
-            }
-
-            public SuggestionEntity(int owner, string mfl, int salary)
-            {
-                Ownerid = owner;
-                Mflid = mfl;
-                Suggestion = salary;
-            }
+            Ownerid = owner;
+            Mflid = mfl;
+            Suggestion = salary;
         }
+    }
 
-        public partial class LotEntity
-        {
-            [Key]
-            public int Lotid { get; set; }
-            public int? Bidid { get; set; }
-            public int Leagueid { get; set; }
-            public virtual BidEntity? Bid { get; set; }
-            public virtual LeagueEntity League { get; set; } = null!;
-        }
+    public partial class LotEntity
+    {
+        [Key]
+        public int Lotid { get; set; }
+        public int? Bidid { get; set; }
+        public int Leagueid { get; set; }
+        public int? Nominatedby { get; set; }
+        public virtual LeagueOwnerEntity? LotOwner { get; set; }
+        public virtual BidEntity? Bid { get; set; }
+        public virtual LeagueEntity League { get; set; } = null!;
+    }
 
-        public partial class OwnerEntity
-        {
-            [Key]
-            public int Ownerid { get; set; }
-            public string? Ownername { get; set; }
-            public string? PasswordHash { get; set; }
-            public string? Displayname { get; set; }
-            public bool? Premium { get; set; }
-            public virtual ICollection<LeagueOwnerEntity> Leagueowners { get; } = new List<LeagueOwnerEntity>();
-        }
+    public partial class OwnerEntity
+    {
+        [Key]
+        public int Ownerid { get; set; }
+        public string? Ownername { get; set; }
+        public string? PasswordHash { get; set; }
+        public string? Displayname { get; set; }
+        public bool? Premium { get; set; }
+        public bool istest { get; set; }
+        public string Avatar { get; set; }
+        public string authid { get; set; }
+        public string StreamToken { get; set; }
+        public bool ConfidencePaid { get; set; }
+        public virtual ICollection<LeagueOwnerEntity> Leagueowners { get; } = new List<LeagueOwnerEntity>();
+        public virtual ICollection<Pick> ConfidencePicks { get; } = new List<Pick>();
+        public virtual ICollection<ExtraPick> ExtraPicks { get; } = new List<ExtraPick>();
+    }
 
-        public partial class LeagueEntity
-        {
-            [Key]
-            public int Mflid { get; set; }
-            public string Name { get; set; } = null!;
-            public string? Mflhash { get; set; }
-            public string? Commishcookie { get; set; }
-            public bool Isauctioning { get; set; }
-            public string Botid { get; set; }
-            public virtual ICollection<BidEntity> Bids { get; } = new List<BidEntity>();
-            public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
-            public virtual ICollection<Transaction> Transactions { get; } = new List<Transaction>();
-            public virtual ICollection<LeagueOwnerEntity> Leagueowners { get; } = new List<LeagueOwnerEntity>();
-            public virtual ICollection<LotEntity> Lots { get; } = new List<LotEntity>();
-        }
+    public partial class LeagueEntity
+    {
+        [Key]
+        public int Mflid { get; set; }
+        public string Name { get; set; } = null!;
+        public string Botid { get; set; }
+        public string? Mflhash { get; set; }
+        public string? Commishcookie { get; set; }
+        public bool Isauctioning { get; set; }
+        public bool Istest { get; set; }
+        public virtual ICollection<Buyout> Buyouts { get; } = new List<Buyout>();
+        public virtual ICollection<BidEntity> Bids { get; } = new List<BidEntity>();
+        public virtual ICollection<WaiverExtension> WaiverExtensions { get; } = new List<WaiverExtension>();
+        public virtual ICollection<FranchiseTagLeague> FranchiseTagLeagues { get; } = new List<FranchiseTagLeague>();
+        public virtual ICollection<Transaction> Transactions { get; } = new List<Transaction>();
+        public virtual ICollection<ContractEntity> Contracts { get; } = new List<ContractEntity>();
+        public virtual ICollection<LeagueOwnerEntity> Leagueowners { get; } = new List<LeagueOwnerEntity>();
+        public virtual ICollection<LotEntity> Lots { get; } = new List<LotEntity>();
 
-        public partial class ContractEntity
-        {
-            [Key]
-            public int Id { get; set; }
-            public int Mflid { get; set; }
-            public int Length { get; set; }
-            public int Salary { get; set; }
-            public int Contractvalue { get; set; }
-            public int Ownerid { get; set; }
-            public int? Leagueid { get; set; }
-            public int? Bidid { get; set; }
-            public virtual BidEntity? Bid { get; set; }
-            public virtual LeagueEntity? League { get; set; }
-            public virtual PlayerEntity Player { get; set; } = null!;
-            public virtual LeagueOwnerEntity Owner { get; set; } = null!;
-        }
+    }
+
+    public partial class ContractEntity
+    {
+        [Key]
+        public int Id { get; set; }
+        public int Mflid { get; set; }
+        public int Length { get; set; }
+        public int Salary { get; set; }
+        public int Contractvalue { get; set; }
+        public int Ownerid { get; set; }
+        public int? Leagueid { get; set; }
+        public int? Bidid { get; set; }
+        public virtual BidEntity? Bid { get; set; }
+        public virtual LeagueEntity? League { get; set; }
+        public virtual PlayerEntity Player { get; set; } = null!;
+        public virtual LeagueOwnerEntity Owner { get; set; } = null!;
+
+    }
+    public partial class Transaction
+    {
+        public DateTime? Timestamp { get; set; }
+        public int Transactionid { get; set; }
+        public int Franchiseid { get; set; }
+        public int? Salary { get; set; }
+        public decimal Amount { get; set; }
+        public string Playername { get; set; }
+        public string Position { get; set; }
+        public string Team { get; set; }
+        public int Years { get; set; }
+        public int? Yearoftransaction { get; set; }
+        public int Leagueid { get; set; }
+        public int Globalid { get; set; }
+        public virtual LeagueEntity League { get; set; } = null!;
+    }
+    public partial class FranchiseTagPlayer
+    {
+
+        public int Mflplayerid { get; set; }
+        [Key]
+        public int Franchisetagid { get; set; }
+        public int Year { get; set; }
+        public int Leagueownerid { get; set; }
+        public int Mflleagueid { get; set; }
+        public int Originalsalary { get; set; }
+        public int Tagprice { get; set; }
+        public string Position { get; set; }
+        public string Fullname { get; set; }
+        public virtual LeagueOwnerEntity Leagueowner { get; set; }
+        public virtual PlayerEntity Player { get; set; }
+        public virtual FranchiseTagLeague FranchiseTagLeagueData { get; set; }
+    }
+    public partial class FranchiseTagLeague
+    {
+        [Key]
+        public int Mflleagueid { get; set; }
+        [Key]
+        public int Year { get; set; }
+        public int QB { get; set; }
+        public int RB { get; set; }
+        public int WR { get; set; }
+        public int TE { get; set; }
+        public virtual LeagueEntity League { get; set; }
+        public virtual ICollection<FranchiseTagPlayer> FranchiseTagPlayers { get; } = new List<FranchiseTagPlayer>();
+    }
+    public partial class Buyout
+    {
+        [Key]
+        public int BuyoutId { get; set; }
+        public int LeagueId { get; set; }
+        public int PlayerId { get; set; }
+        public int Year { get; set; }
+        public int LeagueOwnerId { get; set; }
+        public int OriginalSalary { get; set; }
+        public decimal BuyoutPenalty { get; set; }
+        public virtual LeagueEntity League { get; set; }
+        public virtual LeagueOwnerEntity LeagueOwner { get; set; }
+        public virtual PlayerEntity Player { get; set; }
+    }
+    public partial class WaiverExtension
+    {
+        [Key]
+        public int Id { get; set; }
+        public int LeagueId { get; set; }
+        public int LeagueOwnerId { get; set; }
+        public int Year { get; set; }
+        public int PlayerId { get; set; }
+        public virtual LeagueEntity League { get; set; }
+        public virtual LeagueOwnerEntity LeagueOwner { get; set; }
+        public virtual PlayerEntity Player { get; set; }
+    }
+
+    public partial class NflTeam
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Tricode { get; set; }
+        public string City { get; set; }
+        public string Name { get; set; }
+        public string Primary { get; set; }
+        public string Secondary { get; set; }
+        public string Tertiary { get; set; }
+        public string Logo { get; set; }
+        public string SecondaryLogo { get; set; }
+        public string League { get; set; }
+        public virtual ICollection<NflTeamMatchup> LeftMatchups { get; } = new List<NflTeamMatchup>();
+        public virtual ICollection<NflTeamMatchup> RightMatchups { get; } = new List<NflTeamMatchup>();
+        public virtual ICollection<NflTeamMatchup> WinMatchups { get; } = new List<NflTeamMatchup>();
+        public virtual ICollection<SeasonWins> SeasonWins { get; } = new List<SeasonWins>();
+        public virtual ICollection<Pick> ChosenPicks { get; } = new List<Pick>();
+    }
+
+    public partial class NflTeamMatchup
+    {
+        [Key]
+        public int Id { get; set; }
+        public int Left { get; set; }
+        public int Right { get; set; }
+        public int Year { get; set; }
+        public int Week { get; set; }
+        public int? Winner { get; set; }
+        public bool Pickable { get; set; }
+        public virtual NflTeam LeftTeam { get; set; }
+        public virtual NflTeam RightTeam { get; set; }
+        public virtual NflTeam? WinningTeam { get; set; }
+        public virtual ICollection<Pick> ChosenPicks { get; } = new List<Pick>();
+    }
+
+    public partial class Pick
+    {
+        [Key]
+        public int Id { get; set; }
+        public int OwnerId { get; set; }
+        public int MatchupId { get; set; }
+        public int? Choice { get; set; }
+        public int Points { get; set; }
+        public virtual NflTeam ChosenTeam { get; set; }
+        public virtual OwnerEntity Owner { get; set; }
+        public virtual NflTeamMatchup NflTeamMatchup { get; set; }
+
+    }
+
+    public partial class ExtraPick
+    {
+        [Key]
+        public int Id { get; set; }
+        public int OwnerId { get; set; }
+        public int PropId { get; set; }
+        public string Choice { get; set; }
+        public virtual OwnerEntity Owner { get; set; }
+        public virtual Prop Prop { get; set; }
+    }
+
+    public partial class Prop
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Prompt { get; set; }
+        public string OptionA { get; set; }
+        public string OptionB { get; set; }
+        public int Year { get; set; }
+        public int Week { get; set; }
+        public string Winner { get; set; }
+        public bool Pickable { get; set; }
+        public virtual ICollection<ExtraPick> ChosenProps { get; } = new List<ExtraPick>();
+    }
+
+    public partial class SeasonWins
+    {
+        [Key]
+        public int Id { get; set; }
+        public int FranchiseId { get; set; }
+        public int Year { get; set; }
+        public decimal BaseOverUnder { get; set; }
+        public int RealWins { get; set; }
+        public int? GamesRemaining { get; set; }
+        public virtual ICollection<OverUnderPick> OverUnderPicks { get; } = new List<OverUnderPick>();
+        public virtual NflTeam Franchise { get; set; } = null!;
+    }
+    public partial class OverUnderPick
+    {
+        [Key]
+        public int Id { get; set; }
+        public int LineId { get; set; }
+        public int OwnerId { get; set; }
+        public bool? IsOver { get; set; }
+        public int LineAdjustment { get; set; }
+        public virtual SeasonWins WinLine { get; set; } = null!;
+        public virtual OwnerEntity Owner { get; set; } = null!;
     }
 }

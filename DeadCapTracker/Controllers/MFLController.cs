@@ -16,7 +16,7 @@ namespace DeadCapTracker.Controllers
     {
         private ILeagueService _leagueService;
 
-        public MflController(ILeagueService leagueService, DeadCapTrackerContext context)
+        public MflController(ILeagueService leagueService)
         {
             _leagueService = leagueService;
         }
@@ -31,11 +31,11 @@ namespace DeadCapTracker.Controllers
             return _leagueService.GetAllTransactions();
         }
         
-        [HttpGet("franchises/{year}")]
+/*        [HttpGet("franchises/{year}")]
         public async Task<List<FranchiseDTO>> GetFranchises(int year)
         {
             return await _leagueService.UpdateFranchises(year);
-        }
+        }*/
         
         [HttpGet("standings/{year}")]
         public async Task<List<StandingsV2>> GetStandings(int year)
