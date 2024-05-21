@@ -58,7 +58,7 @@ namespace DeadCapTracker.Services
                     }
                 };
                 var res = await _auctionAPI.PostNewBid(bidDTO);
-                await _gm.BotPost($"successful bid: {res.Player.LastName} {res.BidLength}yr/${res.BidSalary} ({leagueOwner.Owner.Displayname})");
+                await _gm.BotPost($"New Bid (lot {res.LotId}):\n{res.Ownername}\n{res.Player.Position} {res.Player.LastName}\n{res.BidLength} yr/${res.BidSalary}");
             }
             catch (Exception e)
             {
