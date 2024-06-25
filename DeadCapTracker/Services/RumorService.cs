@@ -116,11 +116,11 @@ namespace DeadCapTracker.Services
                 onlyPlayersList.RemoveAt(onlyPlayersList.Count - 1);
             var onlyPlayers = String.Join(",", onlyPlayersList);
             if (onlyPlayersList.Count > 1) 
-                playerList = (await _mflApi.GetBotPlayersDetails(leagueId, onlyPlayers, year)).players.player;
+                playerList = (await _mflApi.GetBotPlayersDetails(leagueId, onlyPlayers, year, Utils.ApiKeys[leagueId])).players.player;
             if (onlyPlayersList.Count == 1)
-                playerList.Add((await _mflApi.GetBotPlayerDetails(leagueId, onlyPlayers, year)).players.player);
+                playerList.Add((await _mflApi.GetBotPlayerDetails(leagueId, onlyPlayers, year, Utils.ApiKeys[leagueId])).players.player);
 
-            var salaries = await _mflApi.GetSalaries(leagueId, year);
+            var salaries = await _mflApi.GetSalaries(leagueId, year, Utils.ApiKeys[leagueId]);
             
             foreach (var player in playerList)
             {
@@ -177,12 +177,12 @@ namespace DeadCapTracker.Services
             var hasEarlyPicks = CheckForFirstRounders(post.willGiveUp);
             if (CheckForMultiplePlayers(post.willGiveUp))
             {
-                var players = (await _mflApi.GetBotPlayersDetails(leagueId, post.willGiveUp, year)).players.player;
+                var players = (await _mflApi.GetBotPlayersDetails(leagueId, post.willGiveUp, year, Utils.ApiKeys[leagueId])).players.player;
                 strForBot += ListPlayers(players, hasEarlyPicks);
             }
             else
             {
-                var player = (await _mflApi.GetBotPlayerDetails(leagueId, post.willGiveUp, year)).players.player;
+                var player = (await _mflApi.GetBotPlayerDetails(leagueId, post.willGiveUp, year, Utils.ApiKeys[leagueId])).players.player;
                 strForBot += ListPlayer(player, hasEarlyPicks);
             }
             return strForBot;
@@ -199,8 +199,8 @@ namespace DeadCapTracker.Services
             {
                 if (!assets.Contains("_"))
                 {
-                    var res = await _mflApi.GetBotPlayerDetails(leagueId, assets, year);
-                    var salaries = await _mflApi.GetSalaries(leagueId, year);
+                    var res = await _mflApi.GetBotPlayerDetails(leagueId, assets, year, Utils.ApiKeys[leagueId]);
+                    var salaries = await _mflApi.GetSalaries(leagueId, year, Utils.ApiKeys[leagueId]);
                     var player = res.players.player;
                     var nameArray = player.name.Split(",");
                     var name = nameArray[1].Trim() + " " + nameArray[0];

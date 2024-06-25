@@ -25,7 +25,7 @@ namespace DeadCapTracker.Services
         Task<List<DeadCapData>> GetDeadCapData();
         Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int leagueId, int year);
         List<TransactionDTO> GetAllTransactions();
-        Task<List<StandingsV2>> GetStandingsV2(int year);
+        Task<List<StandingsV2>> GetStandingsV2(int leagueId, int year);
         Task FindLatestDraftPicks(int leagueId);
         Task MapPickBudgetToOwners(int leagueId);
     }
@@ -113,9 +113,10 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<StandingsV2>> GetStandingsV2(int year)
+        public async Task<List<StandingsV2>> GetStandingsV2(int leagueId, int year)
         {
-            return await _mflSvc.GetStandings(year);
+
+            return await _mflSvc.GetStandings(leagueId, year);
         }
 
         public async Task<List<TransactionDTO>> GetTransactions(int year)

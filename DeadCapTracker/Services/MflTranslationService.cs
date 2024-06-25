@@ -29,7 +29,7 @@ namespace DeadCapTracker.Services
         List<DraftPickTranslation> GetFutureFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
         Task<List<MflFranchiseStandings>> GetFranchiseStandings(int leagueId);
         List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
-        Task<List<StandingsV2>> GetStandings(int leagueId);
+        Task<List<StandingsV2>> GetStandings(int leagueId, int year);
         Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int leagueId, int year);
         Task<List<MflPlayer>> GetAllSalaries(int leagueId);
         Task<List<MflTransaction>> GetMflTransactionsByType(int leagueId, int year, string type);
@@ -79,7 +79,7 @@ namespace DeadCapTracker.Services
             var year = DateTime.UtcNow.Year;
             try
             {
-                return (await _mfl.GetRecentTrade(leagueId, year)).transactions.transaction;
+                return (await _mfl.GetRecentTrade(leagueId, year, Utils.ApiKeys[leagueId])).transactions.transaction;
             }
             catch (Exception e) {
                 _logger.LogError(e, "MFL Request Error");
@@ -92,7 +92,7 @@ namespace DeadCapTracker.Services
             var year = DateTime.UtcNow.Year;
             try //multi
             {
-                return (await _mfl.GetTradeBait(leagueId, year)).tradeBaits.tradeBait;
+                return (await _mfl.GetTradeBait(leagueId, year, Utils.ApiKeys[leagueId])).tradeBaits.tradeBait;
             }
             catch (Exception e)
             {
@@ -124,7 +124,7 @@ namespace DeadCapTracker.Services
             var playerDetails = new List<Player>();
             try
             {
-                playerDetails = (await _mfl.GetBotPlayersDetails(leagueId, queryIds, year)).players.player;
+                playerDetails = (await _mfl.GetBotPlayersDetails(leagueId, queryIds, year, Utils.ApiKeys[leagueId])).players.player;
             }
             catch (Exception e)
             {
@@ -164,7 +164,7 @@ namespace DeadCapTracker.Services
         public async Task<string> GetThisLeagueWeek(int leagueId)
         {
             var year = DateTime.UtcNow.Year;
-            return (await _mfl.GetMatchupSchedule(leagueId, year)).schedule.weeklySchedule.First(_ =>
+            return (await _mfl.GetMatchupSchedule(leagueId, year, Utils.ApiKeys[leagueId]   )).schedule.weeklySchedule.First(_ =>
                 _.matchup.All(gm => gm.franchise.Any(tm => tm.result == "T" && tm.score == null))).week;
         }
 
@@ -175,7 +175,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetAllMflPlayers(leagueId, year)).players.player
+                return (await _mfl.GetAllMflPlayers(leagueId, year, Utils.ApiKeys[leagueId])).players.player
                     .Where(p => p.position == "WR" || p.position == "QB" || p.position == "TE" || p.position == "RB").ToList();
             }
             catch (Exception e)
@@ -223,7 +223,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetProjections(leagueId, thisWeek, year)).projectedScores.playerScore;
+                return (await _mfl.GetProjections(leagueId, thisWeek, year, Utils.ApiKeys[leagueId])).projectedScores.playerScore;
             }
             catch (Exception e)
             {
@@ -300,12 +300,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<StandingsV2>> GetStandings(int year)
+        public async Task<List<StandingsV2>> GetStandings(int leagueId, int year)
         {
             var modYear = year % 3;
             var yearArr = GetThreeYearArray(modYear, year);
             var dict = new Dictionary<int, MflStandingsParent>();
-            var apiTasks = yearArr.Select(y => _mfl.GetStandings(y, year));
+            var apiTasks = yearArr.Select(y => _mfl.GetStandings(leagueId, y, Utils.ApiKeys[leagueId]));
             var mflStandings = new List<MflStandingsParent>();
             try
             {
@@ -395,10 +395,10 @@ namespace DeadCapTracker.Services
         public async Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId)
         {
             var year = DateTime.UtcNow.Year;
-            var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId: leagueId, year);
+            var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId: leagueId, year, Utils.ApiKeys[leagueId]);
             var picksMadeWithOutSalaries = mflDraftRoot.DraftResults.DraftUnit.DraftPick.Where(p => !string.IsNullOrEmpty(p.Player));
             var queryString = string.Join(",", picksMadeWithOutSalaries.Select(p => p.Player));
-            var picksWithPlayerInfo = await _mfl.GetBotPlayersDetails(leagueId, queryString,  year);
+            var picksWithPlayerInfo = await _mfl.GetBotPlayersDetails(leagueId, queryString,  year, Utils.ApiKeys[leagueId]);
 
             var picksWithValues = picksMadeWithOutSalaries.Select(_ => {
                 var rawSalary = GetDraftPickPrice(int.Parse(_.Round), int.Parse(_.Pick));
@@ -433,7 +433,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetStandings(leagueId, year)).LeagueStandings.Franchise
+                return (await _mfl.GetStandings(leagueId, year, Utils.ApiKeys[leagueId])).LeagueStandings.Franchise
                     .OrderBy(tm => Int32.Parse(tm.vp))
                     .ThenBy(tm => int.Parse(tm.h2hw))
                     .ThenBy(tm => Decimal.Parse(tm.pf)).ToList();
@@ -487,7 +487,7 @@ namespace DeadCapTracker.Services
             for (int i = 2; i < 13; i++)
             {
                 string franchiseNum = i.ToString("D4");
-                responses.Add(_mfl.GetPendingTrades(leagueId, franchiseNum, year));
+                responses.Add(_mfl.GetPendingTrades(leagueId, franchiseNum, year, Utils.ApiKeys[leagueId]));
             }
             try
             {
@@ -515,7 +515,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetBotPlayersDetails(leagueId, playerIds, year)).players.player;
+                return (await _mfl.GetBotPlayersDetails(leagueId, playerIds, year, Utils.ApiKeys[leagueId]  )).players.player;
             }
             catch (Exception e)
             {
@@ -547,7 +547,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                var salaries = await _mfl.GetSalaries(leagueId, year);
+                var salaries = await _mfl.GetSalaries(leagueId, year, Utils.ApiKeys[leagueId]);
                 return salaries.Salaries.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
             }
             catch (Exception e)
@@ -563,7 +563,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                var salaries = await _mfl.GetSalaries(leagueId, year);
+                var salaries = await _mfl.GetSalaries(leagueId, year, Utils.ApiKeys[leagueId]);
                 return salaries.Salaries.LeagueUnit.Player;
             }
             catch (Exception e)
@@ -579,7 +579,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetFranchiseAssets(leagueId, year)).assets.franchise;
+                return (await _mfl.GetFranchiseAssets(leagueId, year, Utils.ApiKeys[leagueId])).assets.franchise;
             }
             catch (Exception e)
             {
@@ -608,7 +608,7 @@ namespace DeadCapTracker.Services
         {
             try
             {
-                var rawMfl = await _mfl.GetFreeAgents(leagueId, year);
+                var rawMfl = await _mfl.GetFreeAgents(leagueId, year, Utils.ApiKeys[leagueId]);
                 return rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
             }
             catch (Exception e)
@@ -622,7 +622,7 @@ namespace DeadCapTracker.Services
         {
             try
             {   
-                return (await _mfl.GetAveragePlayerScores(leagueId, year)).playerScores.playerScore;
+                return (await _mfl.GetAveragePlayerScores(leagueId, year, Utils.ApiKeys[leagueId])).playerScores.playerScore;
             }
             catch (Exception e)
             {

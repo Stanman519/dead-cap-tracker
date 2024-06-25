@@ -66,7 +66,7 @@ namespace DeadCapTracker.Services
         public async Task<List<AnnualScoringData>> PostStandingsToGroup(int leagueId, int year)
         {
 
-            var standingsData = await _leagueService.GetStandingsV2(year);
+            var standingsData = await _leagueService.GetStandingsV2(leagueId, year);
 
             var standings = standingsData.SelectMany(s => s.TeamStandings)
                 .Where(s => s.Year == year)
