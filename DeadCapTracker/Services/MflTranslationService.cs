@@ -16,33 +16,33 @@ namespace DeadCapTracker.Services
     public interface IMflTranslationService
     {
         Task GiveNewContractToPlayer(int leagueId, int mflPlayerId, int salary, int length);
-        Task<List<TradeSingle>> GetCompletedTrades();
-        Task<List<TradeBait>> GetNewTradeBait();
-        Task<List<RosterPlayer>> GetRosteredPlayersByName(int year, string name);
-        Task<string> GetThisLeagueWeek();
-        Task<List<Player>> GetAllRelevantPlayers();
-        Task<List<LiveScoreFranchise>> GetLiveScoresForFranchises(string thisWeek);
+        Task<List<TradeSingle>> GetCompletedTrades(int leagueId);
+        Task<List<TradeBait>> GetNewTradeBait(int leagueId);
+        Task<List<RosterPlayer>> GetRosteredPlayersByName(int leagueId, int year, string name);
+        Task<string> GetThisLeagueWeek(int leagueId);
+        Task<List<Player>> GetAllRelevantPlayers(int leagueId);
+        Task<List<LiveScoreFranchise>> GetLiveScoresForFranchises(int leagueId, string thisWeek);
         Task<List<string>> GetByesThisWeek(string thisWeek);
         Task<List<string>> GetInjurredPlayerIdsThisWeek(string thisWeek);
         Task<List<FranchiseRoster>> GetFranchiseSalaries();
         Task<List<TeamAdjustedSalaryCap>> GetTeamAdjustedSalaryCaps();
         List<DraftPickTranslation> GetFutureFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
-        Task<List<MflFranchiseStandings>> GetFranchiseStandings();
+        Task<List<MflFranchiseStandings>> GetFranchiseStandings(int leagueId);
         List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
-        Task<List<StandingsV2>> GetStandings(int year);
+        Task<List<StandingsV2>> GetStandings(int leagueId);
         Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int leagueId, int year);
-        Task<List<MflPlayer>> GetAllSalaries(int year = Utils.ThisYear);
+        Task<List<MflPlayer>> GetAllSalaries(int leagueId);
         Task<List<MflTransaction>> GetMflTransactionsByType(int leagueId, int year, string type);
-        Task<List<PendingTradeDTO>> FindPendingTrades(int year);
-        Task<List<Player>> GetMultiMflPlayers(string playerIds);
-        Task<List<FranchiseDTO>> GetAllFranchises();
-        Task<List<MflPlayer>> GetPlayersOnLastYearOfContract();
+        Task<List<PendingTradeDTO>> FindPendingTrades(int leagueId, int year);
+        Task<List<Player>> GetMultiMflPlayers(int leagueId, string playerIds);
+        Task<List<FranchiseDTO>> GetAllFranchises(int leagueId);
+        Task<List<MflPlayer>> GetPlayersOnLastYearOfContract(int leagueId);
         Task<List<MflPlayerProfile>> GetMultiMflPlayerDetails(string playerIds);
-        Task<List<MflPlayer>> GetFreeAgents(int year);
-        Task<List<Matchup>> GetLiveScoresForMatchups(string thisWeek);
-        Task<List<ProjectedPlayerScore>> GetProjections(string thisWeek);
-        Task<List<PlayerAvgScore>> GetAveragePlayerScores(int year);
-        Task<List<MflAssetsFranchise>> GetFranchiseAssets();
+        Task<List<MflPlayer>> GetFreeAgents(int leagueId, int year);
+        Task<List<Matchup>> GetLiveScoresForMatchups(int leagueId, string thisWeek);
+        Task<List<ProjectedPlayerScore>> GetProjections(int leagueId, string thisWeek);
+        Task<List<PlayerAvgScore>> GetAveragePlayerScores(int leagueId, int year);
+        Task<List<MflAssetsFranchise>> GetFranchiseAssets(int leagueId);
         Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId);
         int GetDraftPickPrice(int round, int pick);
     }
@@ -55,8 +55,8 @@ namespace DeadCapTracker.Services
         private readonly IMflApi _mfl;
         private readonly IGlobalMflApi _globalMflApi;
         private readonly IGroupMePostRepo _gm;
-        private static Dictionary<int, string> _owners;
-        private static Dictionary<int, string> _memberIds;
+        private static Dictionary<int, Dictionary<int, string>> _owners;
+        private static Dictionary<int, Dictionary<int, string>> _memberIds;
         private static int _thisYear;
 
 
@@ -72,14 +72,14 @@ namespace DeadCapTracker.Services
             _gm = gm;
             _owners = Utils.owners;
             _memberIds = Utils.memberIds;
-            _thisYear = Utils.ThisYear;
         }
 
-        public async Task<List<TradeSingle>> GetCompletedTrades()
+        public async Task<List<TradeSingle>> GetCompletedTrades(int leagueId)
         {
+            var year = DateTime.UtcNow.Year;
             try
             {
-                return (await _mfl.GetRecentTrade()).transactions.transaction;
+                return (await _mfl.GetRecentTrade(leagueId, year)).transactions.transaction;
             }
             catch (Exception e) {
                 _logger.LogError(e, "MFL Request Error");
@@ -87,12 +87,12 @@ namespace DeadCapTracker.Services
             }
         }
 
-        public async Task<List<TradeBait>> GetNewTradeBait()
+        public async Task<List<TradeBait>> GetNewTradeBait(int leagueId)
         {
-            // TODO: maybe instead of this process, just post a message saying there has been new trade bait and that you can message to see what it is
+            var year = DateTime.UtcNow.Year;
             try //multi
             {
-                return (await _mfl.GetTradeBait()).tradeBaits.tradeBait;
+                return (await _mfl.GetTradeBait(leagueId, year)).tradeBaits.tradeBait;
             }
             catch (Exception e)
             {
@@ -102,12 +102,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<RosterPlayer>> GetRosteredPlayersByName(int year, string name)
+        public async Task<List<RosterPlayer>> GetRosteredPlayersByName(int leagueId, int year, string name)
         {
             var rosters = new List<FranchiseRoster>();
             try
             {
-                rosters = (await _mfl.GetRostersWithContracts(year)).rosters.franchise;
+                rosters = (await _mfl.GetRostersWithContracts(leagueId, year)).rosters.franchise;
             }
             catch (Exception e)
             {
@@ -124,7 +124,7 @@ namespace DeadCapTracker.Services
             var playerDetails = new List<Player>();
             try
             {
-                playerDetails = (await _mfl.GetBotPlayersDetails(queryIds)).players.player;
+                playerDetails = (await _mfl.GetBotPlayersDetails(leagueId, queryIds, year)).players.player;
             }
             catch (Exception e)
             {
@@ -156,24 +156,26 @@ namespace DeadCapTracker.Services
             hits.ForEach(p =>
             {
                 var owner = rosters.FirstOrDefault(tm => tm.player.Any(_ => _.id == p.id));
-                p.owner = owner == null ? "" : _owners.GetValueOrDefault(Int32.Parse(owner.id));
+                p.owner = owner == null ? "" : _owners[leagueId].GetValueOrDefault(Int32.Parse(owner.id));
             });
             return hits;
         }
 
-        public async Task<string> GetThisLeagueWeek()
+        public async Task<string> GetThisLeagueWeek(int leagueId)
         {
-            return (await _mfl.GetMatchupSchedule()).schedule.weeklySchedule.First(_ =>
+            var year = DateTime.UtcNow.Year;
+            return (await _mfl.GetMatchupSchedule(leagueId, year)).schedule.weeklySchedule.First(_ =>
                 _.matchup.All(gm => gm.franchise.Any(tm => tm.result == "T" && tm.score == null))).week;
         }
 
 
 
-        public async Task<List<Player>> GetAllRelevantPlayers()
+        public async Task<List<Player>> GetAllRelevantPlayers(int leagueId)
         {
             try
             {
-                return (await _mfl.GetAllMflPlayers()).players.player
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetAllMflPlayers(leagueId, year)).players.player
                     .Where(p => p.position == "WR" || p.position == "QB" || p.position == "TE" || p.position == "RB").ToList();
             }
             catch (Exception e)
@@ -183,11 +185,12 @@ namespace DeadCapTracker.Services
             }
         }
 
-        public async Task<List<LiveScoreFranchise>> GetLiveScoresForFranchises(string thisWeek)
+        public async Task<List<LiveScoreFranchise>> GetLiveScoresForFranchises(int leagueId, string thisWeek)
         {
             try
             {
-                return (await _mfl.GetLiveScores(thisWeek)).liveScoring.matchup
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetLiveScores(leagueId, thisWeek, year)).liveScoring.matchup
                     .SelectMany(game => game.franchise)
                     .ToList();
             }
@@ -199,11 +202,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<Matchup>> GetLiveScoresForMatchups(string thisWeek)
+        public async Task<List<Matchup>> GetLiveScoresForMatchups(int leagueId, string thisWeek)
         {
             try
             {
-                return (await _mfl.GetLiveScores(thisWeek)).liveScoring.matchup
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetLiveScores(leagueId, thisWeek, year)).liveScoring.matchup
                     .ToList();
             }
             catch (Exception e)
@@ -214,11 +218,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<ProjectedPlayerScore>> GetProjections(string thisWeek)
+        public async Task<List<ProjectedPlayerScore>> GetProjections(int leagueId, string thisWeek)
         {
             try
             {
-                return (await _mfl.GetProjections(thisWeek)).projectedScores.playerScore;
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetProjections(leagueId, thisWeek, year)).projectedScores.playerScore;
             }
             catch (Exception e)
             {
@@ -231,7 +236,8 @@ namespace DeadCapTracker.Services
         {
             try
             {
-                return (await _globalMflApi.GetByesForWeek(thisWeek)).nflByeWeeks.team?
+                var year = DateTime.UtcNow.Year;
+                return (await _globalMflApi.GetByesForWeek(thisWeek, year)).nflByeWeeks.team?
                     .Select(t => t.id).ToList() ?? new List<string>();
             }
             catch (Exception e)
@@ -246,7 +252,8 @@ namespace DeadCapTracker.Services
         {
             try
             {
-                return (await _globalMflApi.GetInjuries(thisWeek)).injuries.injury
+                var year = DateTime.UtcNow.Year;
+                return (await _globalMflApi.GetInjuries(thisWeek, year)).injuries.injury
                     .Where(p => p.status.ToLower() != "questionable" && p.status.ToLower() != "doubtful")
                     .Select(_ => _.id).ToList();
             }
@@ -262,7 +269,8 @@ namespace DeadCapTracker.Services
         {
             try
             {
-                return (await _mfl.GetRostersWithContracts(_thisYear)).rosters.franchise;
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetRostersWithContracts(_thisYear, year)).rosters.franchise;
             }
             catch (Exception e)
             {
@@ -276,7 +284,8 @@ namespace DeadCapTracker.Services
         {
             try
             {
-                return (await _mfl.GetFullLeagueDetails(_thisYear)).league.franchises.franchise
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetFullLeagueDetails(_thisYear, year)).league.franchises.franchise
                     .Select(tm => new TeamAdjustedSalaryCap()
                     {
                         Id = int.Parse(tm.id),
@@ -296,7 +305,7 @@ namespace DeadCapTracker.Services
             var modYear = year % 3;
             var yearArr = GetThreeYearArray(modYear, year);
             var dict = new Dictionary<int, MflStandingsParent>();
-            var apiTasks = yearArr.Select(y => _mfl.GetStandings(y));
+            var apiTasks = yearArr.Select(y => _mfl.GetStandings(y, year));
             var mflStandings = new List<MflStandingsParent>();
             try
             {
@@ -385,10 +394,11 @@ namespace DeadCapTracker.Services
 
         public async Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId)
         {
-            var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId: leagueId);
+            var year = DateTime.UtcNow.Year;
+            var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId: leagueId, year);
             var picksMadeWithOutSalaries = mflDraftRoot.DraftResults.DraftUnit.DraftPick.Where(p => !string.IsNullOrEmpty(p.Player));
             var queryString = string.Join(",", picksMadeWithOutSalaries.Select(p => p.Player));
-            var picksWithPlayerInfo = await _mfl.GetBotPlayersDetails(queryString);
+            var picksWithPlayerInfo = await _mfl.GetBotPlayersDetails(leagueId, queryString,  year);
 
             var picksWithValues = picksMadeWithOutSalaries.Select(_ => {
                 var rawSalary = GetDraftPickPrice(int.Parse(_.Round), int.Parse(_.Pick));
@@ -418,11 +428,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<MflFranchiseStandings>> GetFranchiseStandings()
+        public async Task<List<MflFranchiseStandings>> GetFranchiseStandings(int leagueId)
         {
             try
             {
-                return (await _mfl.GetStandings(_thisYear)).LeagueStandings.Franchise
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetStandings(leagueId, year)).LeagueStandings.Franchise
                     .OrderBy(tm => Int32.Parse(tm.vp))
                     .ThenBy(tm => int.Parse(tm.h2hw))
                     .ThenBy(tm => Decimal.Parse(tm.pf)).ToList();
@@ -469,14 +480,14 @@ namespace DeadCapTracker.Services
 
         }
         
-        public async Task<List<PendingTradeDTO>> FindPendingTrades(int year)
+        public async Task<List<PendingTradeDTO>> FindPendingTrades(int leagueId, int year)
         {
             var DTOs = new List<PendingTradeDTO>();
             var responses = new List<Task<MflPendingTradesListRoot>>();
             for (int i = 2; i < 13; i++)
             {
                 string franchiseNum = i.ToString("D4");
-                responses.Add(_mfl.GetPendingTrades(franchiseNum));
+                responses.Add(_mfl.GetPendingTrades(leagueId, franchiseNum, year));
             }
             try
             {
@@ -499,11 +510,12 @@ namespace DeadCapTracker.Services
             return DTOs.GroupBy(t => t.tradeId).Select(t => t.First()).ToList();
         }
 
-        public async Task<List<Player>> GetMultiMflPlayers(string playerIds)
+        public async Task<List<Player>> GetMultiMflPlayers(int leagueId, string playerIds)
         {
             try
             {
-                return (await _mfl.GetBotPlayersDetails(playerIds)).players.player;
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetBotPlayersDetails(leagueId, playerIds, year)).players.player;
             }
             catch (Exception e)
             {
@@ -513,11 +525,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<FranchiseDTO>> GetAllFranchises()
+        public async Task<List<FranchiseDTO>> GetAllFranchises(int leagueId)
         {
             try
             {
-                var leagueInfo = await _mfl.GetLeagueInfo();
+                var year = DateTime.UtcNow.Year;
+                var leagueInfo = await _mfl.GetLeagueInfo(leagueId, year);
                 var allFranchises = leagueInfo.League.Franchises.Franchise;
                 return Mapper.Map<List<MflFranchise>, List<FranchiseDTO>>(allFranchises);
             }
@@ -529,11 +542,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<MflPlayer>> GetPlayersOnLastYearOfContract()
+        public async Task<List<MflPlayer>> GetPlayersOnLastYearOfContract(int leagueId)
         {
             try
             {
-                var salaries = await _mfl.GetSalaries();
+                var year = DateTime.UtcNow.Year;
+                var salaries = await _mfl.GetSalaries(leagueId, year);
                 return salaries.Salaries.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
             }
             catch (Exception e)
@@ -544,11 +558,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<MflPlayer>> GetAllSalaries(int year = Utils.ThisYear)
+        public async Task<List<MflPlayer>> GetAllSalaries(int leagueId)
         {
             try
             {
-                var salaries = await _mfl.GetSalaries(year);
+                var year = DateTime.UtcNow.Year;
+                var salaries = await _mfl.GetSalaries(leagueId, year);
                 return salaries.Salaries.LeagueUnit.Player;
             }
             catch (Exception e)
@@ -559,11 +574,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<MflAssetsFranchise>> GetFranchiseAssets()
+        public async Task<List<MflAssetsFranchise>> GetFranchiseAssets(int leagueId)
         {
             try
             {
-                return (await _mfl.GetFranchiseAssets()).assets.franchise;
+                var year = DateTime.UtcNow.Year;
+                return (await _mfl.GetFranchiseAssets(leagueId, year)).assets.franchise;
             }
             catch (Exception e)
             {
@@ -577,7 +593,8 @@ namespace DeadCapTracker.Services
         {
             try
             {
-                var playerDetails = await _globalMflApi.GetPlayerDetails(playerIds);
+                var year = DateTime.UtcNow.Year;
+                var playerDetails = await _globalMflApi.GetPlayerDetails(playerIds, year);
                 return playerDetails.playerProfiles.playerProfile.ToList();
             }
             catch (Exception e)
@@ -587,11 +604,11 @@ namespace DeadCapTracker.Services
             }
 
         }
-        public async Task<List<MflPlayer>> GetFreeAgents(int year)
+        public async Task<List<MflPlayer>> GetFreeAgents(int leagueId, int year)
         {
             try
             {
-                var rawMfl = await _mfl.GetFreeAgents(year);
+                var rawMfl = await _mfl.GetFreeAgents(leagueId, year);
                 return rawMfl.freeAgents.LeagueUnit.Player.Where(p => p.ContractYear == "1").ToList();
             }
             catch (Exception e)
@@ -601,11 +618,11 @@ namespace DeadCapTracker.Services
             }
 
         }
-        public async Task<List<PlayerAvgScore>> GetAveragePlayerScores(int year)
+        public async Task<List<PlayerAvgScore>> GetAveragePlayerScores(int leagueId, int year)
         {
             try
-            {
-                return (await _mfl.GetAveragePlayerScores(year)).playerScores.playerScore;
+            {   
+                return (await _mfl.GetAveragePlayerScores(leagueId, year)).playerScores.playerScore;
             }
             catch (Exception e)
             {
@@ -616,10 +633,11 @@ namespace DeadCapTracker.Services
         }
         public async Task GiveNewContractToPlayer(int leagueId, int mflPlayerId, int salary, int length)
         {
+            var year = DateTime.UtcNow.Year;
             var data = CreateBodyDataForNewContract(mflPlayerId, salary, length);
             try
             {
-                var resp = await _mfl.EditPlayerSalary(leagueId, data);
+                var resp = await _mfl.EditPlayerSalary(leagueId, data, year);
                 var respString = await resp.Content.ReadAsStringAsync();
                 if (respString.ToUpper().Contains("ERROR"))
                 {

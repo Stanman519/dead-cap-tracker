@@ -16,7 +16,6 @@ namespace DeadCapTracker.Services
         private static int _thisYear;
         public DataSetHelperService()
         {
-            _thisYear = Utils.ThisYear;
         }
         
         public List<FranchiseCapSummary> CreateFranchiseCapSummaries(List<FranchiseRoster> rosters, List<DeadCapData> adjustments)

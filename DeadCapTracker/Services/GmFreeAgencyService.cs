@@ -19,7 +19,7 @@ namespace DeadCapTracker.Services
         private readonly IFreeAgencyAuctionAPI _auctionAPI;
         private readonly IGroupMePostRepo _gm;
         private readonly DeadCapTrackerContext _context;
-        private readonly Dictionary<int, string> _members;
+        private readonly Dictionary<int, Dictionary<int, string>> _members;
 
         public GmFreeAgencyService(DeadCapTrackerContext context, IFreeAgencyAuctionAPI auctionAPI, IGroupMePostRepo gm)
         {
@@ -34,11 +34,11 @@ namespace DeadCapTracker.Services
             // sanitize message - get lotId and franchise id from user
             try
             {
+                var leagueId = Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == message.group_id)?.Item2 ?? 0;
                 var lotId = GetSanitizedLotId(message.text);
-                var franchiseId = _members.FirstOrDefault(m => m.Value == message.sender_id, new KeyValuePair<int, string>(-1, "")).Key;
+                var franchiseId = _members[leagueId].FirstOrDefault(m => m.Value == message.sender_id, new KeyValuePair<int, string>(-1, "")).Key;
                 if (franchiseId == -1) throw new ArgumentException("Unable to find user's franchise.");
                 var lot = await _context.Lots.FindAsync(lotId);
-                var leagueId = Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == message.group_id)?.Item2;
                 if (lot == null) throw new ArgumentException("Unable to find lot.");
                 if (lot.Bidid == null) throw new ArgumentException("This lot is empty and has no current bid.");
                 if (lot.Leagueid != leagueId) throw new ArgumentException("Lot submitted is not assigned to this league.");

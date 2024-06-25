@@ -24,11 +24,15 @@ namespace DeadCapTracker.Controllers
         }
 
         [HttpGet("standings/{year}")]
-        public async Task<List<AnnualScoringData>> PostStandings(int year)
+        public async Task PostStandings(int year)
         {
             try
             {
-                return await _groupMeRequestService.PostStandingsToGroup(year);
+                var leagues = Utils.GmGroupToMflLeague;
+                foreach (var item in leagues)
+                {
+                    await _groupMeRequestService.PostStandingsToGroup(item.Item2, year);
+                }
             }
             catch (Exception e)
             {
@@ -38,22 +42,37 @@ namespace DeadCapTracker.Controllers
             }
         }
 
-        [HttpGet("pendingTrades/{year}")]
-        public async Task<List<PendingTradeDTO>> PostTradeOffers(int year)
+        [HttpGet("pendingTrades")]
+        public async Task PostTradeOffers()
         {
-            return await _groupMeRequestService.PostTradeOffersToGroup(year);
+            var year = DateTime.Now.Year;
+            var leagues = Utils.GmGroupToMflLeague;
+            foreach (var item in leagues)
+            {
+                await _groupMeRequestService.PostTradeOffersToGroup(item.Item2, year);
+            }
+
         }
 
         [HttpGet("tradeBait")]
         public async Task PostTradeRumor()
         {
-            await _groupMeRequestService.PostTradeRumor();
+            var leagues = Utils.GmGroupToMflLeague;
+            foreach (var item in leagues)
+            {
+                await _groupMeRequestService.PostTradeRumor(item.Item2);
+            }
         }
 
-        [HttpGet("completedTrades/{year}")]
-        public async Task PostCompletedTrades(int year)
+        [HttpGet("completedTrades")]
+        public async Task PostCompletedTrades()
         {
-            await _groupMeRequestService.PostCompletedTradeToGroup();
+            var leagues = Utils.GmGroupToMflLeague;
+            foreach (var item in leagues)
+            {
+                await _groupMeRequestService.PostCompletedTradeToGroup(item.Item2);
+            }
+
         }
 
         [HttpPost("auctionError")]
@@ -69,69 +88,53 @@ namespace DeadCapTracker.Controllers
         }
 
 
-        [HttpPost("contractSearch/{year}")]
-        public async Task<string> ContractSearch([FromBody] GmMessage message, int year)
+        [HttpPost("contractSearch/{fakeYear}")]
+        public async Task<string> ContractSearch([FromBody] GmMessage message, int fakeYear)
         {
+            var year = DateTime.Now.Year;
             var request = message.text.ToLower();
-            var isContractRequest = request.Contains("#contract");
-            var isScoresRequest = request.Contains("#scores");
-            var isLineupChecker = request.Contains("#lineups");
-            var isStandings = request.Contains("#standings");
-            var isCapSpace = request.Contains("#cap");
-            var isDraftPickReq = request.Contains("#draft");
-            var isFreeAgentRequest = request.Contains("#free");
-            var isFranchiseTag = request.Contains("#tag");
-            var isHelp = request.Contains("#help");
-            var isDeadCap = request.Contains("#dead");
-            var isDraftCost = request.Contains("#budget");
-            var isQuickBid = request.Contains("#bid");
-            var strayTag = request.Contains("@cap") || request.Contains("@the cap") || request.Contains("@thec");
-            
-            if (!isContractRequest && !isScoresRequest && !isLineupChecker && !isStandings && !isHelp && !strayTag && !isCapSpace && !isDraftPickReq && !isFreeAgentRequest && !isFranchiseTag && !isDeadCap && !isDraftCost && !isQuickBid)
-                return null;
-
             var groupId = message.group_id;
-
-            if (isContractRequest)
+            var leagueId = Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == groupId).Item2;
+            var actions = new Dictionary<string, Func<Task<string>>>
             {
-                var capIndex = message.text.ToLower().IndexOf("#contract", StringComparison.Ordinal);
-                var searchText = message.text.Remove(capIndex, 10);
-                return await _groupMeRequestService.FindAndPostContract(Utils.ThisYear, searchText.ToLower());
-            }
+                ["#contract"] = async () =>
+                {
+                    var capIndex = message.text.IndexOf("#contract", StringComparison.Ordinal);
+                    var searchText = message.text.Remove(capIndex, 10);
+                    return await _groupMeRequestService.FindAndPostContract(leagueId, year, searchText.ToLower());
+                },
+                ["#scores"] = () => _groupMeRequestService.FindAndPostLiveScores(leagueId),
+                ["#lineups"] = async () => { await _groupMeRequestService.CheckLineupsForHoles(leagueId); return null; },
+                ["#standings"] = async () => { await _groupMeRequestService.PostStandingsToGroup(leagueId, year); return null; },
+                ["#cap"] = async () => { await _groupMeRequestService.PostCapSpace(leagueId); return null; },
+                ["#draft"] = async () => { await _groupMeRequestService.PostDraftProjections(leagueId, year); return null; },
+                ["#free"] = async () =>
+                {
+                    var reqArr = request.Split(" ");
+                    if (reqArr.Length < 2) return null;
+                    int faYear = 0;
+                    var isValidYear = reqArr.Length > 2 && int.TryParse(reqArr[2], out faYear);
+                    isValidYear = faYear > 2020 && faYear < year + 3;
+                    await _groupMeRequestService.PostTopUpcomingFreeAgents(leagueId, reqArr[1], isValidYear ? faYear : year + 1);
+                    return "";
+                },
+                ["#tag"] = async () => { await _groupMeRequestService.PostFranchiseTagAmounts(leagueId); return null; },
+                ["#help"] = async () => { await _groupMeRequestService.PostHelpMessage(); return null; },
+                ["#dead"] = async () => { await _groupMeRequestService.PostFutureDeadCap(); return null; },
+                ["#budget"] = async () => { await _groupMeRequestService.PostDraftBudgets(leagueId); return null; },
+                ["#bid"] = async () => { await _gmFA.PostQuickBidByLotId(message); return null; },
+                ["@cap"] = async () => { await _groupMeRequestService.StrayTag(); return null; },
+                ["@the cap"] = async () => { await _groupMeRequestService.StrayTag(); return null; },
+                ["@thec"] = async () => { await _groupMeRequestService.StrayTag(); return null; }
+            };
 
-            if (isFranchiseTag) await _groupMeRequestService.PostFranchiseTagAmounts();
-
-            if (isScoresRequest)
-                return await _groupMeRequestService.FindAndPostLiveScores();
-
-            if (isLineupChecker) await _groupMeRequestService.CheckLineupsForHoles();
-
-            if (isHelp) await _groupMeRequestService.PostHelpMessage();
-
-            if (isStandings) await _groupMeRequestService.PostStandingsToGroup(Utils.ThisYear);
-
-            if (isCapSpace) await _groupMeRequestService.PostCapSpace(Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == groupId).Item2);
-
-            if (isFreeAgentRequest)
+            foreach (var action in actions)
             {
-                var reqArr = request.Split(" ");
-                if (reqArr.Length < 2) return null;
-                int faYear = 0;
-                var isValidYear = reqArr.Length > 2 && int.TryParse(reqArr[2], out faYear);
-                isValidYear = faYear > 2020 && faYear < Utils.ThisYear + 3;
-                await _groupMeRequestService.PostTopUpcomingFreeAgents(reqArr[1], isValidYear ? faYear : Utils.ThisYear + 1);
+                if (request.Contains(action.Key))
+                {
+                    return await action.Value();
+                }
             }
-            // add available free agents
-            
-            if (strayTag) await _groupMeRequestService.StrayTag();
-
-            if (isDraftPickReq) await _groupMeRequestService.PostDraftProjections(Utils.ThisYear);
-
-            if (isDeadCap) await _groupMeRequestService.PostFutureDeadCap();
-
-            if (isDraftCost) await _groupMeRequestService.PostDraftBudgets();
-
-            if (isQuickBid) await _gmFA.PostQuickBidByLotId(message);
 
             return null;
         }

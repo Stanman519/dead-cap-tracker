@@ -9,8 +9,8 @@ namespace DeadCapTracker.Services
 {
     public interface IRumorService
     {
-        Task<string> GetCompletedTradeString(TradeSingle trade);
-        Task<string> GetTradeBaitString(TradeBait post);
+        Task<string> GetCompletedTradeString(int leagueId, TradeSingle trade);
+        Task<string> GetTradeBaitString(int leagueId, TradeBait post);
 
     }
 
@@ -18,7 +18,7 @@ namespace DeadCapTracker.Services
     {
         private readonly IMflApi _mflApi;
         Random rnd = new Random();
-        private static Dictionary<int, string> _owners;
+        private static Dictionary<int, Dictionary<int, string>> _owners;
 
         public RumorService(IMflApi mflApi)
         {
@@ -100,8 +100,9 @@ namespace DeadCapTracker.Services
             return false;
         }
 
-        public async Task<string> ListTradeInfoWithMultiplePlayers(string assets)
+        public async Task<string> ListTradeInfoWithMultiplePlayers(int leagueId, string assets)
         {
+            var year = DateTime.UtcNow.Year;
             var ret = "";
             var salary = "";
             var years = "";
@@ -115,11 +116,11 @@ namespace DeadCapTracker.Services
                 onlyPlayersList.RemoveAt(onlyPlayersList.Count - 1);
             var onlyPlayers = String.Join(",", onlyPlayersList);
             if (onlyPlayersList.Count > 1) 
-                playerList = (await _mflApi.GetBotPlayersDetails(onlyPlayers)).players.player;
+                playerList = (await _mflApi.GetBotPlayersDetails(leagueId, onlyPlayers, year)).players.player;
             if (onlyPlayersList.Count == 1)
-                playerList.Add((await _mflApi.GetBotPlayerDetails(onlyPlayers)).players.player);
+                playerList.Add((await _mflApi.GetBotPlayerDetails(leagueId, onlyPlayers, year)).players.player);
 
-            var salaries = await _mflApi.GetSalaries();
+            var salaries = await _mflApi.GetSalaries(leagueId, year);
             
             foreach (var player in playerList)
             {
@@ -148,26 +149,27 @@ namespace DeadCapTracker.Services
             }
             return ret;
         }
-        public async Task<string> GetCompletedTradeString(TradeSingle trade)
+        public async Task<string> GetCompletedTradeString(int leagueId, TradeSingle trade)
         {
             _owners.TryGetValue(Int32.Parse(trade.franchise), out var owner1);
             _owners.TryGetValue(Int32.Parse(trade.franchise2), out var owner2);
             var strForBot = $"{GetSources()}{owner1} and {owner2} have completed a trade.\n";
            
             var assets1 = CheckForMultiplePlayers(trade.franchise1_gave_up)
-                ? await ListTradeInfoWithMultiplePlayers(trade.franchise1_gave_up)
-                : await ListTradeInfoWithSinglePlayer(trade.franchise1_gave_up);
+                ? await ListTradeInfoWithMultiplePlayers(leagueId, trade.franchise1_gave_up)
+                : await ListTradeInfoWithSinglePlayer(leagueId, trade.franchise1_gave_up);
             
             var assets2 = CheckForMultiplePlayers(trade.franchise2_gave_up)
-                ? await ListTradeInfoWithMultiplePlayers(trade.franchise2_gave_up)
-                : await ListTradeInfoWithSinglePlayer(trade.franchise2_gave_up);
+                ? await ListTradeInfoWithMultiplePlayers(leagueId, trade.franchise2_gave_up)
+                : await ListTradeInfoWithSinglePlayer(leagueId, trade.franchise2_gave_up);
 
             strForBot += $"{owner1} sends:\n{assets1}\n{owner2} sends:\n{assets2}";
             return strForBot;
         }
 
-        public async Task<string> GetTradeBaitString(TradeBait post)
+        public async Task<string> GetTradeBaitString(int leagueId, TradeBait post)
         {
+            var year = DateTime.UtcNow.Year;
             var strForBot = GetSources();
             _owners.TryGetValue(Int32.Parse(post.franchise_id), out var ownerName);
             strForBot += $"{ownerName} ";
@@ -175,29 +177,30 @@ namespace DeadCapTracker.Services
             var hasEarlyPicks = CheckForFirstRounders(post.willGiveUp);
             if (CheckForMultiplePlayers(post.willGiveUp))
             {
-                var players = (await _mflApi.GetBotPlayersDetails(post.willGiveUp)).players.player;
+                var players = (await _mflApi.GetBotPlayersDetails(leagueId, post.willGiveUp, year)).players.player;
                 strForBot += ListPlayers(players, hasEarlyPicks);
             }
             else
             {
-                var player = (await _mflApi.GetBotPlayerDetails(post.willGiveUp)).players.player;
+                var player = (await _mflApi.GetBotPlayerDetails(leagueId, post.willGiveUp, year)).players.player;
                 strForBot += ListPlayer(player, hasEarlyPicks);
             }
             return strForBot;
         }
         
-        public async Task<string> ListTradeInfoWithSinglePlayer(string assets)
+        public async Task<string> ListTradeInfoWithSinglePlayer(int leagueId, string assets)
         {
             var ret = "";
             var salary = "";
             var years = "";
             var splitAssets = assets.Split(",");
+            var year = DateTime.UtcNow.Year;
             foreach (var asset in splitAssets)
             {
                 if (!assets.Contains("_"))
                 {
-                    var res = await _mflApi.GetBotPlayerDetails(assets);
-                    var salaries = await _mflApi.GetSalaries();
+                    var res = await _mflApi.GetBotPlayerDetails(leagueId, assets, year);
+                    var salaries = await _mflApi.GetSalaries(leagueId, year);
                     var player = res.players.player;
                     var nameArray = player.name.Split(",");
                     var name = nameArray[1].Trim() + " " + nameArray[0];

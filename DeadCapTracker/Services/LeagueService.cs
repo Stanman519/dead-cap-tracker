@@ -20,14 +20,14 @@ namespace DeadCapTracker.Services
         Task<List<TransactionDTO>> GetTransactions(int year);
 /*        Task<List<FranchiseDTO>> UpdateFranchises(int year);*/
         //Task<List<TeamStandings>> GetStandings(int year);
-        Task<List<PendingTradeDTO>> FindPendingTrades(int year);
-        Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year);
+        Task<List<PendingTradeDTO>> FindPendingTrades(int leagueId, int year);
+        Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int leagueId, int year);
         Task<List<DeadCapData>> GetDeadCapData();
-        Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year);
+        Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int leagueId, int year);
         List<TransactionDTO> GetAllTransactions();
         Task<List<StandingsV2>> GetStandingsV2(int year);
         Task FindLatestDraftPicks(int leagueId);
-        Task MapPickBudgetToOwners();
+        Task MapPickBudgetToOwners(int leagueId);
     }
     
     public class LeagueService : ILeagueService
@@ -162,7 +162,7 @@ namespace DeadCapTracker.Services
                 if (!playerLookups[leagues[i].Mflid].Any()) continue;
                 var playerIds = string.Join(",", playerLookups[leagues[i].Mflid]);
                 playerIds += $",{Utils.LongTermPlayerHack}";
-                var playerInfos = await _mflSvc.GetMultiMflPlayers(playerIds);
+                var playerInfos = await _mflSvc.GetMultiMflPlayers(leagues[i].Mflid, playerIds);
                 transactionTasks[i].Result.ForEach(t =>
                 {
                     var thisId = t.transaction.Split(',')[0];
@@ -179,43 +179,22 @@ namespace DeadCapTracker.Services
             return null;
         }
         //TODO: Needs Testing!
-        public async Task<List<PendingTradeDTO>> FindPendingTrades(int year)
+        public async Task<List<PendingTradeDTO>> FindPendingTrades(int leagueId, int year)
         {
-            return await _mflSvc.FindPendingTrades(year);
+            return await _mflSvc.FindPendingTrades(leagueId, year);
         }
-        
-        /*public async Task<List<FranchiseDTO>> UpdateFranchises(int year)
-        {
-            var DTOs = await _mflSvc.GetAllFranchises();
-            try
-            {
-                var existingFranchiseIds = _context.Franchise
-                                    .OrderBy(f => f.Franchiseid)
-                                    .Select(f => f.Franchiseid)
-                                    .ToList();
-                var newFranchises = _mapper.Map<List<FranchiseDTO>, List<Franchise>>(DTOs).Where(_ => (!existingFranchiseIds.Contains(_.Franchiseid))).ToList();
 
-                await _context.Franchises.AddRangeAsync(newFranchises);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError("entity framework error", e);
-            }
-            return DTOs;
-        }*/
-
-        public async Task MapPickBudgetToOwners()
+        public async Task MapPickBudgetToOwners(int leagueId)
         {
             // guard clause for off-season? too much unknown 
-            var standingsTask = _mflSvc.GetFranchiseStandings();
-            var draftPicksTask = _mflSvc.GetFranchiseAssets();
+            var standingsTask = _mflSvc.GetFranchiseStandings(leagueId);
+            var draftPicksTask = _mflSvc.GetFranchiseAssets(leagueId);
             await Task.WhenAll(standingsTask, draftPicksTask);
             var draftPicks = new List<DraftPickTranslation>();
             var standings = standingsTask.Result.ToList();
             if (draftPicksTask.Result.All(tm => tm.currentYearDraftPicks == null)) //we are in-season or offseason postdraft
             {
-                var year = Utils.ThisYear + 1;
+                var year = DateTime.UtcNow.Year + 1;
                 draftPicks = _mflSvc.GetFutureFranchiseDraftPicks(draftPicksTask.Result).Where(_ => _.Year == year)
                        .OrderBy(pk => pk.Round)
                        .ThenBy(pk => pk.Pick).ToList();
@@ -251,9 +230,9 @@ namespace DeadCapTracker.Services
         }
 
 
-        public async Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year)
+        public async Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int leagueId, int year)
         {
-            var oneYearPlayers = await _mflSvc.GetPlayersOnLastYearOfContract();
+            var oneYearPlayers = await _mflSvc.GetPlayersOnLastYearOfContract(leagueId);
 
             string queryParam = "";
             oneYearPlayers.ForEach(p => queryParam = $"{queryParam}{p.Id},");
@@ -267,9 +246,9 @@ namespace DeadCapTracker.Services
 
             return DTOs;
         }
-        public async Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int year)
+        public async Task<List<PlayerDetailsDTO>> GetCurrentFreeAgents(int leagueId, int year)
         {
-            var freeAgents = await _mflSvc.GetFreeAgents(year);
+            var freeAgents = await _mflSvc.GetFreeAgents(leagueId, year);
             var freeAgents1 = new List<MflPlayer>();
             var freeAgents2 = new List<MflPlayer>();
 
@@ -308,9 +287,10 @@ namespace DeadCapTracker.Services
 
         public async Task FindLatestDraftPicks(int leagueId)
         {
+            var year = DateTime.Now.Year;
             DateTime oneHourAgo = DateTime.Now.AddHours(-1);
             var picksWithValuesTask = _mflSvc.GetDraftPicksAndContractValues(leagueId);
-            var salariesTask = _mflSvc.GetAllSalaries();
+            var salariesTask = _mflSvc.GetAllSalaries(year);
             await Task.WhenAll(picksWithValuesTask, salariesTask);
             var playersWithoutSalaries = salariesTask.Result.Where(p => (string.IsNullOrEmpty(p.Salary) || p.Salary == "0")).ToList();
             playersWithoutSalaries.ForEach(async p =>

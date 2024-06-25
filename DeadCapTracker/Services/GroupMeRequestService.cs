@@ -12,22 +12,22 @@ namespace DeadCapTracker.Services
 {
     public interface IGroupMeRequestService
     {
-        public Task<List<AnnualScoringData>> PostStandingsToGroup(int year);
-        public Task<List<PendingTradeDTO>> PostTradeOffersToGroup(int year);
-        public Task PostTradeRumor();
-        public Task PostCompletedTradeToGroup();
-        public Task<string> FindAndPostContract(int year, string nameSearch);
-        Task<string> FindAndPostLiveScores();
-        Task CheckLineupsForHoles();
+        public Task<List<AnnualScoringData>> PostStandingsToGroup(int leagueId, int year);
+        public Task<List<PendingTradeDTO>> PostTradeOffersToGroup(int leagueId, int year);
+        public Task PostTradeRumor(int leagueId);
+        public Task PostCompletedTradeToGroup(int leagueId);
+        public Task<string> FindAndPostContract(int leagueId, int year, string nameSearch);
+        Task<string> FindAndPostLiveScores(int leagueId);
+        Task CheckLineupsForHoles(int leagueId);
         Task PostHelpMessage();
         Task PostCapSpace(int leagueId);
-        Task PostDraftProjections(int year);
+        Task PostDraftProjections(int leagueId, int year);
         Task StrayTag();
-        Task PostTopUpcomingFreeAgents(string positionRequested, int year = Utils.ThisYear);
-        Task PostFranchiseTagAmounts(int year = Utils.ThisYear);
+        Task PostTopUpcomingFreeAgents(int leagueId, string positionRequested, int year);
+        Task PostFranchiseTagAmounts(int leagueId);
         Task PostFutureDeadCap();
         Task BotPost(string post, bool isError = false);
-        Task PostDraftBudgets();
+        Task PostDraftBudgets(int leagueId);
     }
     
     public class GroupMeRequestService : IGroupMeRequestService
@@ -39,8 +39,8 @@ namespace DeadCapTracker.Services
         private readonly IRumorService _rumor;
         private readonly IInsultApi _insult;
         private readonly ILogger<GroupMeRequestService> _logger;
-        private static Dictionary<int, string> _owners;
-        private static Dictionary<int, string> _memberIds;
+        private static Dictionary<int, Dictionary<int, string>> _owners;
+        private static Dictionary<int, Dictionary<int, string>> _memberIds;
         private static int _thisYear;
         
         public GroupMeRequestService(IMflTranslationService mflTranslationService, 
@@ -60,10 +60,10 @@ namespace DeadCapTracker.Services
             _logger = logger;
             _owners = Utils.owners;
             _memberIds = Utils.memberIds;
-            _thisYear = Utils.ThisYear;
+
         }
 
-        public async Task<List<AnnualScoringData>> PostStandingsToGroup(int year)
+        public async Task<List<AnnualScoringData>> PostStandingsToGroup(int leagueId, int year)
         {
 
             var standingsData = await _leagueService.GetStandingsV2(year);
@@ -83,7 +83,7 @@ namespace DeadCapTracker.Services
             // TODO: add guard to check if this is year one of cycle - not worth posting if so
             var tytScores = standingsData.Select(t => new TYTScore
             {
-                Owner = _owners[t.FranchiseId],
+                Owner = _owners[leagueId][t.FranchiseId],
                 Score = t.TeamStandings.Sum(s => s.PointsFor) + t.TeamStandings.Select(s => s.H2hWins * 10).Sum()
             }).OrderByDescending(t => t.Score)
                 .Take(5)
@@ -104,10 +104,10 @@ namespace DeadCapTracker.Services
             return h2hWins + vp - (h2hWins * 2);
         }*/
 
-        public async Task<List<PendingTradeDTO>> PostTradeOffersToGroup(int year)
+        public async Task<List<PendingTradeDTO>> PostTradeOffersToGroup(int leagueId, int year)
         {
             var tenMinDuration = new TimeSpan(0, 0, 10, 0);
-            var trades = await _leagueService.FindPendingTrades(year);
+            var trades = await _leagueService.FindPendingTrades(leagueId, year);
             var memberList = (await _gm.GetMemberIds()).response.members;
 
             string strForBot = "";
@@ -120,7 +120,7 @@ namespace DeadCapTracker.Services
                     if (timeDifference.Ticks > 0 && timeDifference < tenMinDuration)
                     {
                         // get member id, then lookup their name;
-                        var tagName = memberList.Find(m => m.user_id == _memberIds[t.offeredTo]);
+                        var tagName = memberList.Find(m => m.user_id == _memberIds[leagueId][t.offeredTo]);
                         var tagString = $"@{tagName.nickname}";
                         strForBot = ", you have a pending trade offer!";
                         await _gm.BotPostWithTag(strForBot, tagString, tagName.user_id);
@@ -130,11 +130,11 @@ namespace DeadCapTracker.Services
             return trades;
         }
 
-        public async Task PostCompletedTradeToGroup()
+        public async Task PostCompletedTradeToGroup(int leagueId)
         {
             DateTime tenMinAgo = DateTime.Now.AddMinutes(-11);
 
-            var tradeInfoList = await _mflTranslationService.GetCompletedTrades();
+            var tradeInfoList = await _mflTranslationService.GetCompletedTrades(leagueId);
             //TODO: CHECK FOR NULL?? it would mean it could not serialize it as either type
             
             foreach (var trade in tradeInfoList)
@@ -144,17 +144,17 @@ namespace DeadCapTracker.Services
                     var tradeTime = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(trade.timestamp));
                     // check if trade was not in the last 10 minutes to bail early
                     if (tradeTime <= tenMinAgo) continue;
-                    var strForBot = await _rumor.GetCompletedTradeString(trade);
+                    var strForBot = await _rumor.GetCompletedTradeString(leagueId, trade);
                     await _gm.BotPost(strForBot);
                 }
             }
         }
 
-        public async Task PostTradeRumor()
+        public async Task PostTradeRumor(int leagueId)
         {
             // TODO: make the rumor service a string builder service.
 
-            var baitList = await _mflTranslationService.GetNewTradeBait();
+            var baitList = await _mflTranslationService.GetNewTradeBait(leagueId);
 
             foreach (var post in baitList)
             {
@@ -164,17 +164,17 @@ namespace DeadCapTracker.Services
                     var postDate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(post.timestamp));
                     if (postDate > DateTime.Now.AddMinutes(-11))
                     {
-                        strForBot = await _rumor.GetTradeBaitString(post);
+                        strForBot = await _rumor.GetTradeBaitString(leagueId, post);
                         await _gm.BotPost(strForBot);
                     }
                 }
             }
         }
 
-        public async Task<string> FindAndPostContract(int year, string nameSearch)
+        public async Task<string> FindAndPostContract(int leagueId, int year, string nameSearch)
         {
             if (nameSearch.EndsWith(" ")) nameSearch = nameSearch.Trim();
-            var hits = await _mflTranslationService.GetRosteredPlayersByName(year, nameSearch);
+            var hits = await _mflTranslationService.GetRosteredPlayersByName(leagueId, year, nameSearch);
             // bot post those names and contracts
             var stringForBot = "";
             if (hits == null) stringForBot = "I dunno, man. Mfl is busted.";
@@ -191,15 +191,15 @@ namespace DeadCapTracker.Services
             return stringForBot;
         }
 
-        public async Task CheckLineupsForHoles()
+        public async Task CheckLineupsForHoles(int leagueId)
         {
-            var thisWeek = await _mflTranslationService.GetThisLeagueWeek();
+            var thisWeek = await _mflTranslationService.GetThisLeagueWeek(leagueId);
 
             // task when all get injuries and byes get scores with that week num
-            var scoresTask = _mflTranslationService.GetLiveScoresForFranchises(thisWeek);
+            var scoresTask = _mflTranslationService.GetLiveScoresForFranchises(leagueId, thisWeek);
             var byesTask = _mflTranslationService.GetByesThisWeek(thisWeek);
             var injuriesTask = _mflTranslationService.GetInjurredPlayerIdsThisWeek(thisWeek);
-            var allPlayersTask = _mflTranslationService.GetAllRelevantPlayers();
+            var allPlayersTask = _mflTranslationService.GetAllRelevantPlayers(leagueId);
             var groupTask = _gm.GetMemberIds();
 
             try
@@ -235,13 +235,12 @@ namespace DeadCapTracker.Services
                     var isOut = injuriesTask.Result.Contains(player.id);
                     if (!hasBye && !isOut) continue;
                     if (brokenTeams.Contains(franch.id)) continue;
-                    var tagName = memberList.Find(m => m.user_id == _memberIds[Int32.Parse(franch.id)]);
+                    var tagName = memberList.Find(m => m.user_id == _memberIds[leagueId][Int32.Parse(franch.id)]);
                     var tagString = $"@{tagName?.nickname}";
                     await _gm.BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
                     brokenTeams.Add(franch.id);
                 }
             }
-            //TODO: mark if tankin'?
             if (!brokenTeams.Any()) await _gm.BotPost("Lineups are all straight, mate.");
         }
 
@@ -280,137 +279,149 @@ namespace DeadCapTracker.Services
             await _gm.BotPost(botStr);
         }
 
-        public async Task<string> FindAndPostLiveScores()
+        public async Task<string> FindAndPostLiveScores(int leagueId)
         {
-            var thisWeek = await _mflTranslationService.GetThisLeagueWeek();
-            var botText = "Live Scores (Live Projections)\n";
-            var matchupScoresTask = _mflTranslationService.GetLiveScoresForMatchups(thisWeek);
-            var scoreProjectionsTask = _mflTranslationService.GetProjections(thisWeek);
             try
             {
+                var thisWeek = await _mflTranslationService.GetThisLeagueWeek(leagueId);
+                var matchupScoresTask = _mflTranslationService.GetLiveScoresForMatchups(leagueId, thisWeek);
+                var scoreProjectionsTask = _mflTranslationService.GetProjections(leagueId,thisWeek);
+
                 await Task.WhenAll(matchupScoresTask, scoreProjectionsTask);
+
+                var matchups = matchupScoresTask.Result;
+                var projections = scoreProjectionsTask.Result;
+
+                var botText = "Live Scores (Live Projections)\n";
+
+                foreach (var matchup in matchups)
+                {
+                    _owners[leagueId].TryGetValue(int.Parse(matchup.franchise.First().id), out var team1);
+                    _owners[leagueId].TryGetValue(int.Parse(matchup.franchise.Last().id), out var team2);
+
+                    if (!double.TryParse(matchup.franchise.First().score, out var team1Score) ||
+                        !double.TryParse(matchup.franchise.Last().score, out var team2Score))
+                    {
+                        continue;
+                    }
+
+                    var team1Starters = matchup.franchise.First().players.player.Where(p => p.status == "starter").ToList();
+                    var team2Starters = matchup.franchise.Last().players.player.Where(p => p.status == "starter").ToList();
+
+                    var team1ProjectedScore = CalculateProjectedScore(team1Starters, projections);
+                    var team2ProjectedScore = CalculateProjectedScore(team2Starters, projections);
+
+                    team1 += $": {team1Score} ({team1ProjectedScore:F})\n";
+                    team2 += $": {team2Score} ({team2ProjectedScore:F})\n";
+
+                    botText += $"-----\n{team1}{team2}";
+                }
+
+                await _gm.BotPost(botText);
+                return botText;
             }
             catch (Exception)
             {
                 return "Uhh... something with MFL is broken.";
-            }            
-
-            var matchups = matchupScoresTask.Result;
-            var projections = scoreProjectionsTask.Result;
-            matchups.ForEach(_ =>
-            {
-                _owners.TryGetValue(Int32.Parse(_.franchise.First().id), out var tm1);
-                _owners.TryGetValue(Int32.Parse(_.franchise.Last().id), out var tm2);
-                var success = Double.TryParse(_.franchise.First().score, out var tm1Score);
-                var success2 = Double.TryParse(_.franchise.Last().score, out var tm2Score);
-                
-                // go through all the "starter"s on each team and add up their projected score.
-                var tm1Starters = _.franchise.First().players.player.Where(p => p.status == "starter").ToList();
-                var tm2Starters = _.franchise.Last().players.player.Where(p => p.status == "starter").ToList();
-
-                tm1Starters.ForEach(s => s.origProjectedScore = projections.FirstOrDefault(p => p.id == s.id)?.score ?? "0");
-                tm2Starters.ForEach(s => s.origProjectedScore = projections.FirstOrDefault(p => p.id == s.id)?.score ?? "0");
-                
-                // for each player
-                // get % of game left for each player (out of 3600) multiply 
-                // add actual score + remaining projection
-                var tm1ProjectedScore = 0.0;
-                var tm2ProjectedScore = 0.0;
-                tm1Starters.ForEach(p =>
-                {
-                    var pctRemaining = Double.Parse(p.gameSecondsRemaining) / 3600;
-                    p.liveRemainingProjectedScore = Double.Parse(p.score) + (Double.Parse(p.origProjectedScore) * pctRemaining);
-                    tm1ProjectedScore += p.liveRemainingProjectedScore;
-                });
-                tm2Starters.ForEach(p =>
-                {
-                    var pctRemaining = Double.Parse(p.gameSecondsRemaining) / 3600;
-                    p.liveRemainingProjectedScore = Double.Parse(p.score) + (Double.Parse(p.origProjectedScore) * pctRemaining);
-                    tm2ProjectedScore += p.liveRemainingProjectedScore;
-                });
-                
-                if (!success || !success2) return;
-                tm1 += $": {tm1Score} ({tm1ProjectedScore.ToString("F")})\n";
-                tm2 += $": {tm2Score} ({tm2ProjectedScore.ToString("F")})\n";
-                botText += $"-----\n{tm1}{tm2}";
-                
-                
-            });
-            await _gm.BotPost(botText);
-            return botText;
+            }
         }
 
-        public async Task PostFranchiseTagAmounts(int year = Utils.ThisYear - 1)
+        private double CalculateProjectedScore(List<LiveScorePlayer> starters, IEnumerable<ProjectedPlayerScore> projections)
         {
-            var salariesTask = _mflTranslationService.GetAllSalaries();
-            var positionTask = _mflTranslationService.GetAllRelevantPlayers();
-            await Task.WhenAll(salariesTask, positionTask);
+            double totalProjectedScore = 0.0;
 
-            var positionIds = positionTask.Result;
-            var playerSalaries = salariesTask.Result.Select(_ => new
+            foreach (var player in starters)
             {
-                Salary = Decimal.TryParse(_.Salary, out var sal) ? sal : 0,
-                Id = _.Id
-            }).ToList();
-            
-            var tagAmounts = positionIds.GroupJoin(playerSalaries, pos => pos.id, salary => salary.Id, (pos, salaryRows) => new
-                {
-                    pos,
-                    salaryRows = salaryRows.DefaultIfEmpty()
-                }).SelectMany(p => p.salaryRows.Select(sal => new
-                {
-                    Id = p.pos.id,
-                    Name = p.pos.name,
-                    Position = p.pos.position,
-                    Salary = sal?.Salary ?? 0
-                }).ToList())
-                .OrderByDescending(p => p.Salary)
-                .GroupBy(p => p.Position)
-                .Select(pos => new
-                {
-                    Position = pos.Key,
-                    Salary = pos.Take(6).Average(_ => _.Salary)
-                })
-                .ToList();
+                var projection = projections.FirstOrDefault(p => p.id == player.id)?.score ?? "0";
+                player.origProjectedScore = projection;
 
-            var strForBot = $"Avg salary of top 6 at each position in {year}:\n";
-            tagAmounts.ForEach(t =>
-            {
-                strForBot += $"{t.Position}: ${Decimal.Round(t.Salary)}\n";
-            });
+                var pctRemaining = double.Parse(player.gameSecondsRemaining) / 3600;
+                player.liveRemainingProjectedScore = double.Parse(player.score) + (double.Parse(player.origProjectedScore) * pctRemaining);
 
-            await _gm.BotPost(strForBot);
+                totalProjectedScore += player.liveRemainingProjectedScore;
+            }
+
+            return totalProjectedScore;
         }
 
-        public async Task PostTopUpcomingFreeAgents(string positionRequest, int nextYearAsDefault = (Utils.ThisYear + 1))
+        public async Task PostFranchiseTagAmounts(int leagueId)
         {
+            try
+            {
+                var year = DateTime.UtcNow.Year - 1;
+                var salariesTask = _mflTranslationService.GetAllSalaries(leagueId);
+                var positionsTask = _mflTranslationService.GetAllRelevantPlayers(leagueId);
+
+                await Task.WhenAll(salariesTask, positionsTask);
+
+                var playerSalaries = salariesTask.Result
+                    .Select(s => new
+                    {
+                        Salary = decimal.TryParse(s.Salary, out var sal) ? sal : 0,
+                        s.Id
+                    })
+                    .ToList();
+
+                var tagAmounts = positionsTask.Result
+                    .GroupJoin(playerSalaries, pos => pos.id, sal => sal.Id,
+                        (pos, salRows) => new { pos, salRows = salRows.DefaultIfEmpty() })
+                    .SelectMany(p => p.salRows.Select(sal => new
+                    {
+                        p.pos.id,
+                        p.pos.name,
+                        p.pos.position,
+                        Salary = sal?.Salary ?? 0
+                    }))
+                    .GroupBy(p => p.position)
+                    .Select(g => new
+                    {
+                        Position = g.Key,
+                        Salary = g.OrderByDescending(p => p.Salary).Take(6).Average(p => p.Salary)
+                    })
+                    .ToList();
+
+                var strForBot = $"Avg salary of top 6 at each position in {year}:\n";
+                tagAmounts.ForEach(t => strForBot += $"{t.Position}: ${Decimal.Round(t.Salary)}\n");
+
+                await _gm.BotPost(strForBot);
+            }
+            catch (Exception)
+            {
+                await _gm.BotPost("Error calculating franchise tag amounts.");
+            }
+        }
+
+        public async Task PostTopUpcomingFreeAgents(int leagueId, string positionRequest, int nextYearAsDefault)
+        {
+            var year = DateTime.UtcNow.Year;
             var pos = positionRequest.ToUpper().Trim();
             if (pos != "QB" && pos != "RB" && pos != "WR" && pos != "TE") return;
 
             var strForBot = $"Top {pos} Free Agents for {nextYearAsDefault}\n";
-            var lookupYear = nextYearAsDefault < Utils.ThisYear + 1 ? (nextYearAsDefault - 1 ) : Utils.ThisYear; // if looking up future, use this year for lookup, if past, use past
-            var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(lookupYear);
+            var lookupYear = nextYearAsDefault < year + 1 ? (nextYearAsDefault - 1 ) : year; // if looking up future, use this year for lookup, if past, use past
+            var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(leagueId, lookupYear);
             var salariesTask = _mflTranslationService.GetAllSalaries(lookupYear);
-            var playerTask = _mflTranslationService.GetAllRelevantPlayers();
+            var playerTask = _mflTranslationService.GetAllRelevantPlayers(leagueId);
             await Task.WhenAll(avgPtsTask, playerTask, salariesTask);
 
             var playerInfos = playerTask.Result;
             var scores = avgPtsTask.Result;
             var contractYear = "";
-            switch (nextYearAsDefault)
+            if (nextYearAsDefault == year + 1)
             {
-                case Utils.ThisYear + 1:
-                    contractYear = "1";
-                    break;
-                case Utils.ThisYear + 2:
-                    contractYear = "2";
-                    break;
-                case Utils.ThisYear + 3:
-                    contractYear = "3";
-                    break;
-                default:
-                    contractYear = "1";
-                    break;
+                contractYear = "1";
+            }
+            else if (nextYearAsDefault == year + 2)
+            {
+                contractYear = "2";
+            }
+            else if (nextYearAsDefault == year + 3)
+            {
+                contractYear = "3";
+            }
+            else
+            {
+                contractYear = "1";
             }
             var relevantPlayers = salariesTask.Result.Where(_ => _.ContractYear == contractYear && _.Salary != "");
 
@@ -436,11 +447,11 @@ namespace DeadCapTracker.Services
             await _gm.BotPost(strForBot);
         }
 
-        public async Task PostDraftProjections(int year)
+        public async Task PostDraftProjections(int leagueId, int year)
         {
             //TODO: need to check if we are predraft in the offseason, just get this year's order from that 
-            var standingsTask = _mflTranslationService.GetFranchiseStandings();
-            var draftPicksTask = _mflTranslationService.GetFranchiseAssets();
+            var standingsTask = _mflTranslationService.GetFranchiseStandings(leagueId);
+            var draftPicksTask = _mflTranslationService.GetFranchiseAssets(leagueId);
             await Task.WhenAll(standingsTask, draftPicksTask);
 
             if (standingsTask.Result.All(tm => tm.h2hw == "0" && tm.h2hl == "0")) //preseason
@@ -515,9 +526,9 @@ namespace DeadCapTracker.Services
             await _gm.BotPost(botStr);
         }
 
-        public async Task PostDraftBudgets()
+        public async Task PostDraftBudgets(int leagueId)
         {
-             await _leagueService.MapPickBudgetToOwners();
+             await _leagueService.MapPickBudgetToOwners(leagueId);
         }
 
         public async Task PostHelpMessage()

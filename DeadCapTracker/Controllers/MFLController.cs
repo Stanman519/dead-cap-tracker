@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DeadCapTracker.Models;
@@ -20,9 +21,10 @@ namespace DeadCapTracker.Controllers
         {
             _leagueService = leagueService;
         }
-        [HttpGet("transactions/{year}")]
-        public async Task<List<TransactionDTO>> GetTransactions(int year)
+        [HttpGet("transactions")]
+        public async Task<List<TransactionDTO>> GetTransactions()
         {
+            var year = DateTime.Now.Year; 
             return await _leagueService.GetTransactions(year);
         }
         [HttpGet("allTransactions")]
@@ -43,22 +45,23 @@ namespace DeadCapTracker.Controllers
             return await _leagueService.GetStandingsV2(year);
         }
 
-        [HttpGet("pendingTrades/{year}")]
-        public async Task<List<PendingTradeDTO>> GetPendingTrades(int year)
+        [HttpGet("leagues/{leagueId}/pending-trades")]
+        public async Task<List<PendingTradeDTO>> GetPendingTrades([Path] int leagueId)
         {
-            return await _leagueService.FindPendingTrades(year);
+            var year = DateTime.UtcNow.Year;
+            return await _leagueService.FindPendingTrades(leagueId, year);
         }
         
-        [HttpGet("impendingFreeAgents/{year}")]
+/*        [HttpGet("impendingFreeAgents/{year}")]
         public async Task<List<PlayerDetailsDTO>> GetImpendingFreeAgents(int year)
         {
             return await _leagueService.GetImpendingFreeAgents(year);
-        }
+        }*/
         
-        [HttpGet("currentFreeAgents/{year}")]
-        public async Task<List<PlayerDetailsDTO>> GetAllFreeAgents(int year)
+        [HttpGet("leagues/{leagueId}/years/{year}/current-free-agents")]
+        public async Task<List<PlayerDetailsDTO>> GetAllFreeAgents(int leagueId, int year)
         {
-            return await _leagueService.GetCurrentFreeAgents(year);
+            return await _leagueService.GetCurrentFreeAgents(leagueId, year);
         }
         
         [HttpGet("deadCapInfo")]
