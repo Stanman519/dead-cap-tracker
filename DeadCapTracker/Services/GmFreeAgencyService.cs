@@ -39,7 +39,7 @@ namespace DeadCapTracker.Services
                 return;
             };
             // sanitize message - get lotId and franchise id from user
-            try
+            try { 
             
                 var lotId = GetSanitizedLotId(message.text);
                 var franchiseId = _members[leagueId].FirstOrDefault(m => m.Value == message.sender_id, new KeyValuePair<int, string>(-1, "")).Key;
