@@ -633,6 +633,10 @@ namespace DeadCapTracker.Services
         }
         public async Task GiveNewContractToPlayer(int leagueId, int mflPlayerId, int salary, int length)
         {
+            if (!Utils.leagueBotDict.TryGetValue(leagueId, out var botId)) {
+                _gm.BotPost(string.Empty, "giveContractToNewPlayerfailed with bad league id...", true);
+                    return;
+             };
             var year = DateTime.UtcNow.Year;
             var data = CreateBodyDataForNewContract(mflPlayerId, salary, length);
             try
@@ -644,7 +648,7 @@ namespace DeadCapTracker.Services
                     var error = respString.XmlDeserializeFromString<MflXmlError>();
                     _logger.LogInformation(respString);
                     _logger.LogError("{lastname}'s contract was not updated in mfl.", mflPlayerId);
-                    await _gm.BotPost($"league: {leagueId} player:{mflPlayerId} contract was not updated in mfl. \n\n${error.ErrorMsg}", isError: true) ;
+                    await _gm.BotPost(botId, $"league: {leagueId} player:{mflPlayerId} contract was not updated in mfl. \n\n${error.ErrorMsg}", isError: true) ;
                 }
             }
             catch (Exception e)

@@ -187,6 +187,7 @@ namespace DeadCapTracker.Services
 
         public async Task MapPickBudgetToOwners(int leagueId)
         {
+            if (!Utils.leagueBotDict.TryGetValue(leagueId, out var botId)) return;
             // guard clause for off-season? too much unknown 
             var standingsTask = _mflSvc.GetFranchiseStandings(leagueId);
             var draftPicksTask = _mflSvc.GetFranchiseAssets(leagueId);
@@ -227,7 +228,7 @@ namespace DeadCapTracker.Services
             {
                 strBot += $"{Utils.owners[o.OwnerId]}: ${o.RawBudget} (${o.PotentialSavings})\n";
             });
-            await _gm.BotPost(strBot);
+            await _gm.BotPost(botId, strBot);
         }
 
 

@@ -1,5 +1,6 @@
 ﻿using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
+using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,10 +32,15 @@ namespace DeadCapTracker.Services
 
         public async Task PostQuickBidByLotId(GmMessage message)
         {
+            var leagueId = Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == message.group_id).Item2;
+            if (!Utils.leagueBotDict.TryGetValue(leagueId, out var botId))
+            {
+                _gm.BotPost(string.Empty, "PostQuickBidByLotId failed with bad league id...", true);
+                return;
+            };
             // sanitize message - get lotId and franchise id from user
             try
-            {
-                var leagueId = Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == message.group_id)?.Item2 ?? 0;
+            
                 var lotId = GetSanitizedLotId(message.text);
                 var franchiseId = _members[leagueId].FirstOrDefault(m => m.Value == message.sender_id, new KeyValuePair<int, string>(-1, "")).Key;
                 if (franchiseId == -1) throw new ArgumentException("Unable to find user's franchise.");
@@ -58,11 +64,11 @@ namespace DeadCapTracker.Services
                     }
                 };
                 var res = await _auctionAPI.PostNewBid(bidDTO);
-                await _gm.BotPost($"New Bid (lot {res.LotId}):\n{res.Ownername}\n{res.Player.Position} {res.Player.LastName}\n{res.BidLength} yr/${res.BidSalary}");
+                await _gm.BotPost(botId, $"New Bid (lot {res.LotId}):\n{res.Ownername}\n{res.Player.Position} {res.Player.LastName}\n{res.BidLength} yr/${res.BidSalary}");
             }
             catch (Exception e)
             {
-                await _gm.BotPost(e.Message);
+                await _gm.BotPost(botId, e.Message);
             }
 
 

@@ -20,6 +20,10 @@ namespace DeadCapTracker.Services
             {"59795205", 13894 },
             {"101420221", 26548 }
         };
+        public static Dictionary<int, string> leagueBotDict = new Dictionary<int, string>{
+            { 13894, "6cac06cf66a381ec605c8fff25" },
+            { 26548, "d3c557c0ccf5d8b10e5f0ef195"}
+        };
         public static Dictionary<int, Dictionary<int, string>> owners = new Dictionary<int, Dictionary<int, string>>()
         {
              {13894, new Dictionary<int, string>()

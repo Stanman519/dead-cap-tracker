@@ -10,8 +10,8 @@ namespace DeadCapTracker.Services
 {
     public interface IGroupMePostRepo
     {
-        Task BotPost(string text, string botId = "6cac06cf66a381ec605c8fff25", bool isError = false);
-        Task BotPostWithTag(string text, string nickname, string memberId);
+        Task BotPost(string botId, string text, bool isError = false);
+        Task BotPostWithTag(string botId, string text, string nickname, string memberId);
         Task<GroupParent> GetMemberIds();
     }
 
@@ -28,7 +28,7 @@ namespace DeadCapTracker.Services
         }
 
 
-        public async Task BotPost(string text, string botId, bool isError = false)
+        public async Task BotPost(string botId, string text, bool isError = false)
         {
             
             var message = isError ? new Message(text, "be51b03607ae680832dfd1c7c7") : new Message(text, botId);
@@ -43,10 +43,10 @@ namespace DeadCapTracker.Services
             
         }
 
-        public async Task BotPostWithTag(string text, string nickname, string memberId)
+        public async Task BotPostWithTag(string botId, string text, string nickname, string memberId)
         {
             var rawText = $"{nickname}{text}";
-            var message = new Message(rawText);
+            var message = new Message(rawText, botId);
             var mention = new Mention { type = "mentions" };
             int[][] locis = new int[1][] { new[] { 0, nickname.Length } };
             var mentionIds = new[] { memberId };

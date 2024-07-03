@@ -12,22 +12,22 @@ namespace DeadCapTracker.Services
 {
     public interface IGroupMeRequestService
     {
-        public Task<List<AnnualScoringData>> PostStandingsToGroup(int leagueId, int year);
-        public Task<List<PendingTradeDTO>> PostTradeOffersToGroup(int leagueId, int year);
-        public Task PostTradeRumor(int leagueId);
-        public Task PostCompletedTradeToGroup(int leagueId);
-        public Task<string> FindAndPostContract(int leagueId, int year, string nameSearch);
-        Task<string> FindAndPostLiveScores(int leagueId);
-        Task CheckLineupsForHoles(int leagueId);
-        Task PostHelpMessage();
-        Task PostCapSpace(int leagueId);
-        Task PostDraftProjections(int leagueId, int year);
-        Task StrayTag();
-        Task PostTopUpcomingFreeAgents(int leagueId, string positionRequested, int year);
-        Task PostFranchiseTagAmounts(int leagueId);
-        Task PostFutureDeadCap();
-        Task BotPost(string post, bool isError = false);
-        Task PostDraftBudgets(int leagueId);
+        public Task<List<AnnualScoringData>> PostStandingsToGroup(string botId, int leagueId, int year);
+        public Task<List<PendingTradeDTO>> PostTradeOffersToGroup(string botId, int leagueId, int year);
+        public Task PostTradeRumor(string botId, int leagueId);
+        public Task PostCompletedTradeToGroup(string botId, int leagueId);
+        public Task<string> FindAndPostContract(string botId, int leagueId, int year, string nameSearch);
+        Task<string> FindAndPostLiveScores(string botId, int leagueId);
+        Task CheckLineupsForHoles(string botId, int leagueId);
+        Task PostHelpMessage(string botId);
+        Task PostCapSpace(string botId, int leagueId);
+        Task PostDraftProjections(string botId, int leagueId, int year);
+        Task StrayTag(string botId);
+        Task PostTopUpcomingFreeAgents(string botId, int leagueId, string positionRequested, int year);
+        Task PostFranchiseTagAmounts(string botId, int leagueId);
+        Task PostFutureDeadCap(string botId);
+        Task BotPost(string botId, string post, bool isError = false);
+        Task PostDraftBudgets(string botId, int leagueId);
     }
     
     public class GroupMeRequestService : IGroupMeRequestService
@@ -63,7 +63,7 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<AnnualScoringData>> PostStandingsToGroup(int leagueId, int year)
+        public async Task<List<AnnualScoringData>> PostStandingsToGroup(string botId, int leagueId, int year)
         {
 
             var standingsData = await _leagueService.GetStandingsV2(leagueId, year);
@@ -93,8 +93,8 @@ namespace DeadCapTracker.Services
             {
                 tytString = $"{tytString}{s.Owner} - {s.Score}\n";
             });
-            await _gm.BotPost(strForBot);
-            await _gm.BotPost(tytString);
+            await _gm.BotPost(botId, strForBot);
+            await _gm.BotPost(botId, tytString);
             return standings;
         }
 
@@ -104,7 +104,7 @@ namespace DeadCapTracker.Services
             return h2hWins + vp - (h2hWins * 2);
         }*/
 
-        public async Task<List<PendingTradeDTO>> PostTradeOffersToGroup(int leagueId, int year)
+        public async Task<List<PendingTradeDTO>> PostTradeOffersToGroup(string botId, int leagueId, int year)
         {
             var tenMinDuration = new TimeSpan(0, 0, 10, 0);
             var trades = await _leagueService.FindPendingTrades(leagueId, year);
@@ -123,14 +123,14 @@ namespace DeadCapTracker.Services
                         var tagName = memberList.Find(m => m.user_id == _memberIds[leagueId][t.offeredTo]);
                         var tagString = $"@{tagName.nickname}";
                         strForBot = ", you have a pending trade offer!";
-                        await _gm.BotPostWithTag(strForBot, tagString, tagName.user_id);
+                        await _gm.BotPostWithTag(botId, strForBot, tagString, tagName.user_id);
                     }
                 });
             }
             return trades;
         }
 
-        public async Task PostCompletedTradeToGroup(int leagueId)
+        public async Task PostCompletedTradeToGroup(string botId, int leagueId)
         {
             DateTime tenMinAgo = DateTime.Now.AddMinutes(-11);
 
@@ -145,12 +145,12 @@ namespace DeadCapTracker.Services
                     // check if trade was not in the last 10 minutes to bail early
                     if (tradeTime <= tenMinAgo) continue;
                     var strForBot = await _rumor.GetCompletedTradeString(leagueId, trade);
-                    await _gm.BotPost(strForBot);
+                    await _gm.BotPost(botId, strForBot);
                 }
             }
         }
 
-        public async Task PostTradeRumor(int leagueId)
+        public async Task PostTradeRumor(string botId, int leagueId)
         {
             // TODO: make the rumor service a string builder service.
 
@@ -165,13 +165,13 @@ namespace DeadCapTracker.Services
                     if (postDate > DateTime.Now.AddMinutes(-11))
                     {
                         strForBot = await _rumor.GetTradeBaitString(leagueId, post);
-                        await _gm.BotPost(strForBot);
+                        await _gm.BotPost(botId, strForBot);
                     }
                 }
             }
         }
 
-        public async Task<string> FindAndPostContract(int leagueId, int year, string nameSearch)
+        public async Task<string> FindAndPostContract(string botId, int leagueId, int year, string nameSearch)
         {
             if (nameSearch.EndsWith(" ")) nameSearch = nameSearch.Trim();
             var hits = await _mflTranslationService.GetRosteredPlayersByName(leagueId, year, nameSearch);
@@ -187,11 +187,11 @@ namespace DeadCapTracker.Services
                     stringForBot = $"{stringForBot}{p.name} - ${p.salary}/{p.contractYear} ({p.owner})\n";
                 });
             }
-            await _gm.BotPost(stringForBot);
+            await _gm.BotPost(botId, stringForBot);
             return stringForBot;
         }
 
-        public async Task CheckLineupsForHoles(int leagueId)
+        public async Task CheckLineupsForHoles(string botId, int leagueId)
         {
             var thisWeek = await _mflTranslationService.GetThisLeagueWeek(leagueId);
 
@@ -208,7 +208,7 @@ namespace DeadCapTracker.Services
             }
             catch (Exception)
             {
-                await _gm.BotPost("I don't know MFL is busted.");
+                await _gm.BotPost(botId, "I don't know MFL is busted.");
                 return;
             }
             
@@ -237,14 +237,14 @@ namespace DeadCapTracker.Services
                     if (brokenTeams.Contains(franch.id)) continue;
                     var tagName = memberList.Find(m => m.user_id == _memberIds[leagueId][Int32.Parse(franch.id)]);
                     var tagString = $"@{tagName?.nickname}";
-                    await _gm.BotPostWithTag(botStr, tagString, tagName?.user_id ?? "");
+                    await _gm.BotPostWithTag(botId, botStr, tagString, tagName?.user_id ?? "");
                     brokenTeams.Add(franch.id);
                 }
             }
-            if (!brokenTeams.Any()) await _gm.BotPost("Lineups are all straight, mate.");
+            if (!brokenTeams.Any()) await _gm.BotPost(botId, "Lineups are all straight, mate.");
         }
 
-        public async Task PostCapSpace(int leagueId)
+        public async Task PostCapSpace(string botId, int leagueId)
         {
             var botStr = "Current Cap Space (Next Year)\n";
            
@@ -258,7 +258,7 @@ namespace DeadCapTracker.Services
             }
             catch (Exception e)
             {
-                await _gm.BotPost("I'm having trouble reaching MFL. Try again later.");
+                await _gm.BotPost(botId, "I'm having trouble reaching MFL. Try again later.");
             }
 
 
@@ -276,10 +276,10 @@ namespace DeadCapTracker.Services
                           $"${leagueTask.Result.First(_ => _.Id == tm.Id).SalaryCapAmount - (tm.CurrentRosterSalary + tm.CurrentTaxiSalary + tm.CurrentIRSalary) - teamAdj} " +
                           $"(${500 - (tm.NextYearRosterSalary + (tm.DeadCapData.ContainsKey((_thisYear + 1).ToString()) ? tm.DeadCapData[(_thisYear + 1).ToString()] : 0))})\n";
             });
-            await _gm.BotPost(botStr);
+            await _gm.BotPost(botId, botStr);
         }
 
-        public async Task<string> FindAndPostLiveScores(int leagueId)
+        public async Task<string> FindAndPostLiveScores(string botId, int leagueId)
         {
             try
             {
@@ -317,7 +317,7 @@ namespace DeadCapTracker.Services
                     botText += $"-----\n{team1}{team2}";
                 }
 
-                await _gm.BotPost(botText);
+                await _gm.BotPost(botId, botText);
                 return botText;
             }
             catch (Exception)
@@ -344,7 +344,7 @@ namespace DeadCapTracker.Services
             return totalProjectedScore;
         }
 
-        public async Task PostFranchiseTagAmounts(int leagueId)
+        public async Task PostFranchiseTagAmounts(string botId, int leagueId)
         {
             try
             {
@@ -383,15 +383,15 @@ namespace DeadCapTracker.Services
                 var strForBot = $"Avg salary of top 6 at each position in {year}:\n";
                 tagAmounts.ForEach(t => strForBot += $"{t.Position}: ${Decimal.Round(t.Salary)}\n");
 
-                await _gm.BotPost(strForBot);
+                await _gm.BotPost(botId, strForBot);
             }
             catch (Exception)
             {
-                await _gm.BotPost("Error calculating franchise tag amounts.");
+                await _gm.BotPost(botId, "Error calculating franchise tag amounts.");
             }
         }
 
-        public async Task PostTopUpcomingFreeAgents(int leagueId, string positionRequest, int nextYearAsDefault)
+        public async Task PostTopUpcomingFreeAgents(string botId, int leagueId, string positionRequest, int nextYearAsDefault)
         {
             var year = DateTime.UtcNow.Year;
             var pos = positionRequest.ToUpper().Trim();
@@ -444,10 +444,10 @@ namespace DeadCapTracker.Services
                 isFirst = false;
             });
 
-            await _gm.BotPost(strForBot);
+            await _gm.BotPost(botId, strForBot);
         }
 
-        public async Task PostDraftProjections(int leagueId, int year)
+        public async Task PostDraftProjections(string botId, int leagueId, int year)
         {
             //TODO: need to check if we are predraft in the offseason, just get this year's order from that 
             var standingsTask = _mflTranslationService.GetFranchiseStandings(leagueId);
@@ -467,7 +467,7 @@ namespace DeadCapTracker.Services
                     var pickNum = $"{pick.Round}.{pick.Pick.ToString("D2")}";
                     botStr += $"{pickNum} {_owners[pick.CurrentOwner]}\n";
                 });
-                await _gm.BotPost(botStr);
+                await _gm.BotPost(botId, botStr);
             }
 
             else
@@ -503,12 +503,12 @@ namespace DeadCapTracker.Services
 
                         pickNum++;
                     });
-                    await _gm.BotPost(botStr);
+                    await _gm.BotPost(botId, botStr);
                 }
             }
         }
 
-        public async Task PostFutureDeadCap()
+        public async Task PostFutureDeadCap(string botId)
         {
             var deadCapInfo = await _leagueService.GetDeadCapData();
             var botStr = "";
@@ -523,15 +523,15 @@ namespace DeadCapTracker.Services
 
                 botStr += "\n";
             });
-            await _gm.BotPost(botStr);
+            await _gm.BotPost(botId, botStr);
         }
 
-        public async Task PostDraftBudgets(int leagueId)
+        public async Task PostDraftBudgets(string botId, int leagueId)
         {
              await _leagueService.MapPickBudgetToOwners(leagueId);
         }
 
-        public async Task PostHelpMessage()
+        public async Task PostHelpMessage(string botId)
         {
             var str = $"Live scores: \"#scores\"\n" +
                       $"Standings: \"#standings\"\n" +
@@ -544,10 +544,10 @@ namespace DeadCapTracker.Services
                       $"Projected draft pick budget: \"#budget\"\n" +
                       $"Franchise Tag projections: \"#tag\"\n" +
                       $"Rules: http://tinyurl.com/m8y37433";
-            await _gm.BotPost(str);
+            await _gm.BotPost(botId, str);
         }
 
-        public async Task StrayTag()
+        public async Task StrayTag(string botId)
         {
             var insult = "";
 
@@ -557,12 +557,12 @@ namespace DeadCapTracker.Services
             }
             catch (Exception ) {/*ignore*/}
             var insultString = string.IsNullOrEmpty(insult) ? "" : $"Otherwise...\n\n{insult}";
-            await _gm.BotPost($"If you need something from me, type \"#help\". {insultString}");
+            await _gm.BotPost(botId, $"If you need something from me, type \"#help\". {insultString}");
         }
 
-        public async Task BotPost(string post, bool isError = false)
+        public async Task BotPost(string botId, string post, bool isError = false)
         {
-            await _gm.BotPost(post, isError: isError);
+            await _gm.BotPost(botId, post, isError: isError);
         }
     }
 }
