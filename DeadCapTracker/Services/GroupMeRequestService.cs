@@ -250,8 +250,8 @@ namespace DeadCapTracker.Services
            
             //get total salaries this season + adjustments, subtract from team budget
             var salaryAdjustmentsTask = _mflTranslationService.GetSalaryAdjustments(leagueId, _thisYear);
-            var salariesTask = _mflTranslationService.GetFranchiseSalaries();
-            var leagueTask = _mflTranslationService.GetTeamAdjustedSalaryCaps();
+            var salariesTask = _mflTranslationService.GetFranchiseSalaries(leagueId);
+            var leagueTask = _mflTranslationService.GetTeamAdjustedSalaryCaps(leagueId);
             try
             {
                 await Task.WhenAll(salariesTask, leagueTask, salaryAdjustmentsTask);

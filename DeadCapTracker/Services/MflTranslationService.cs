@@ -24,8 +24,8 @@ namespace DeadCapTracker.Services
         Task<List<LiveScoreFranchise>> GetLiveScoresForFranchises(int leagueId, string thisWeek);
         Task<List<string>> GetByesThisWeek(string thisWeek);
         Task<List<string>> GetInjurredPlayerIdsThisWeek(string thisWeek);
-        Task<List<FranchiseRoster>> GetFranchiseSalaries();
-        Task<List<TeamAdjustedSalaryCap>> GetTeamAdjustedSalaryCaps();
+        Task<List<FranchiseRoster>> GetFranchiseSalaries(int leagueId);
+        Task<List<TeamAdjustedSalaryCap>> GetTeamAdjustedSalaryCaps(int leagueId);
         List<DraftPickTranslation> GetFutureFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
         Task<List<MflFranchiseStandings>> GetFranchiseStandings(int leagueId);
         List<DraftPickTranslation> GetCurrentFranchiseDraftPicks(List<MflAssetsFranchise> franchises);
@@ -57,7 +57,7 @@ namespace DeadCapTracker.Services
         private readonly IGroupMePostRepo _gm;
         private static Dictionary<int, Dictionary<int, string>> _owners;
         private static Dictionary<int, Dictionary<int, string>> _memberIds;
-        private static int _thisYear;
+
 
 
         public IMapper Mapper { get; }
@@ -265,12 +265,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<FranchiseRoster>> GetFranchiseSalaries()
+        public async Task<List<FranchiseRoster>> GetFranchiseSalaries(int leagueId)
         {
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetRostersWithContracts(_thisYear, year)).rosters.franchise;
+                return (await _mfl.GetRostersWithContracts(leagueId, year)).rosters.franchise;
             }
             catch (Exception e)
             {
@@ -280,12 +280,12 @@ namespace DeadCapTracker.Services
 
         }
 
-        public async Task<List<TeamAdjustedSalaryCap>> GetTeamAdjustedSalaryCaps()
+        public async Task<List<TeamAdjustedSalaryCap>> GetTeamAdjustedSalaryCaps(int leagueId)
         {
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetFullLeagueDetails(_thisYear, year)).league.franchises.franchise
+                return (await _mfl.GetFullLeagueDetails(leagueId, year)).league.franchises.franchise
                     .Select(tm => new TeamAdjustedSalaryCap()
                     {
                         Id = int.Parse(tm.id),
@@ -379,7 +379,7 @@ namespace DeadCapTracker.Services
                     var arr = pick.pick.Split("_");
                     return new DraftPickTranslation
                     {
-                        Year = _thisYear,
+                        Year = DateTime.Now.Year,
                         Round = Int32.Parse(arr[1]) + 1,
                         Pick = Int32.Parse(arr[2]) + 1,
                         CurrentOwner = Int32.Parse(_.id),
