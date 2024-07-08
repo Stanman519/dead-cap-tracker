@@ -81,16 +81,16 @@ namespace DeadCapTracker.Controllers
         }
 
         [HttpPost("auctionError")]
-        public async Task PostAuctionError([FromBody] ErrorMessage error)
+        public async Task PostAuctionError([FromBody] GmBotMessage msg)
         {
 
-            await _groupMeRequestService.BotPost(string.Empty, error.Message, true);
+            await _groupMeRequestService.BotPost(string.Empty, msg.Message, true);
         }
 
         [HttpPost("stanfan-msg")]
-        public async Task PostMessageFromStanfan([FromBody] ErrorMessage error)
+        public async Task PostMessageFromStanfan([FromBody] GmBotMessage msg)
         {
-            await _groupMeRequestService.BotPost(string.Empty, error.Message, false);
+            await _groupMeRequestService.BotPost(msg.BotId, msg.Message, false);
         }
 
 

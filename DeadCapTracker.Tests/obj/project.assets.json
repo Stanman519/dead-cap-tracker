@@ -6121,36 +6121,39 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\DKS0584182\\.nuget\\packages\\": {}
+    "C:\\Users\\Stanley\\.nuget\\packages\\": {},
+    "C:\\Microsoft\\Xamarin\\NuGet\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\DKS0584182\\Development\\sides\\dead-cap-tracker\\DeadCapTracker.Tests\\DeadCapTracker.Tests.csproj",
+      "projectUniqueName": "C:\\Users\\Stanley\\Development\\dead-cap-tracker\\DeadCapTracker.Tests\\DeadCapTracker.Tests.csproj",
       "projectName": "DeadCapTracker.Tests",
-      "projectPath": "C:\\Users\\DKS0584182\\Development\\sides\\dead-cap-tracker\\DeadCapTracker.Tests\\DeadCapTracker.Tests.csproj",
-      "packagesPath": "C:\\Users\\DKS0584182\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\DKS0584182\\Development\\sides\\dead-cap-tracker\\DeadCapTracker.Tests\\obj\\",
+      "projectPath": "C:\\Users\\Stanley\\Development\\dead-cap-tracker\\DeadCapTracker.Tests\\DeadCapTracker.Tests.csproj",
+      "packagesPath": "C:\\Users\\Stanley\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Stanley\\Development\\dead-cap-tracker\\DeadCapTracker.Tests\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Microsoft\\Xamarin\\NuGet\\"
+      ],
       "configFilePaths": [
-        "C:\\Users\\DKS0584182\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Stanley\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://nuget.pkg.github.com/dsg-tech/index.json": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "C:\\Users\\DKS0584182\\Development\\sides\\dead-cap-tracker\\DeadCapTracker\\DeadCapTracker.csproj": {
-              "projectPath": "C:\\Users\\DKS0584182\\Development\\sides\\dead-cap-tracker\\DeadCapTracker\\DeadCapTracker.csproj"
+            "C:\\Users\\Stanley\\Development\\dead-cap-tracker\\DeadCapTracker\\DeadCapTracker.csproj": {
+              "projectPath": "C:\\Users\\Stanley\\Development\\dead-cap-tracker\\DeadCapTracker\\DeadCapTracker.csproj"
             }
           }
         }
@@ -6159,11 +6162,6 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -6237,7 +6235,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.300\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
       }
     }
   }

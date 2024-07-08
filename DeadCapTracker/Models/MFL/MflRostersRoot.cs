@@ -15,7 +15,7 @@ namespace DeadCapTracker.Models.MFL
     public class FranchiseRoster
     {
         public string week { get; set; }
-        public List<RosterPlayer> player { get; set; }
+        public List<RosterPlayer> player { get; set; } = new List<RosterPlayer>();
         public string id { get; set; }
     }
 
