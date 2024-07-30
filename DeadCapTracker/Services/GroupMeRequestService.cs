@@ -262,7 +262,7 @@ namespace DeadCapTracker.Services
             }
 
 
-            var thisSznAdj = salaryAdjustmentsTask.Result;
+            var thisSznAdj = salaryAdjustmentsTask.Result ?? new List<MflSalaryAdjustment>();
             var adjustments = await _leagueService.GetDeadCapData();
             // add up salaries for this year - but dont forget to * .5  and .4 for taxi and IR
             
@@ -272,7 +272,7 @@ namespace DeadCapTracker.Services
             {
                 var teamAdj = thisSznAdj.Where(adj => Int32.Parse(adj.Franchise_Id) == tm.Id)
                     .Select(adj => Decimal.TryParse(adj.Amount, out var x) ? x : 0).Sum();
-                botStr += $"{_owners[tm.Id]}: " +
+                botStr += $"{_owners[leagueId][tm.Id]}: " +
                           $"${leagueTask.Result.First(_ => _.Id == tm.Id).SalaryCapAmount - (tm.CurrentRosterSalary + tm.CurrentTaxiSalary + tm.CurrentIRSalary) - teamAdj} " +
                           $"(${500 - (tm.NextYearRosterSalary + (tm.DeadCapData.ContainsKey((_thisYear + 1).ToString()) ? tm.DeadCapData[(_thisYear + 1).ToString()] : 0))})\n";
             });
