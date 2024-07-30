@@ -41,7 +41,7 @@ namespace DeadCapTracker.Services
         private readonly ILogger<GroupMeRequestService> _logger;
         private static Dictionary<int, Dictionary<int, string>> _owners;
         private static Dictionary<int, Dictionary<int, string>> _memberIds;
-        private static int _thisYear;
+
         
         public GroupMeRequestService(IMflTranslationService mflTranslationService, 
             IDataSetHelperService dataHelper, 
@@ -247,7 +247,7 @@ namespace DeadCapTracker.Services
         public async Task PostCapSpace(string botId, int leagueId)
         {
             var botStr = "Current Cap Space (Next Year)\n";
-           
+            var _thisYear = DateTime.Now.Year;
             //get total salaries this season + adjustments, subtract from team budget
             var salaryAdjustmentsTask = _mflTranslationService.GetSalaryAdjustments(leagueId, _thisYear);
             var salariesTask = _mflTranslationService.GetFranchiseSalaries(leagueId);
@@ -510,6 +510,7 @@ namespace DeadCapTracker.Services
 
         public async Task PostFutureDeadCap(string botId)
         {
+            var _thisYear = DateTime.Now.Year;
             var deadCapInfo = await _leagueService.GetDeadCapData();
             var botStr = "";
             deadCapInfo.ForEach(franchise =>
