@@ -13,13 +13,14 @@ namespace DeadCapTracker.Services
 
     public class DataSetHelperService : IDataSetHelperService
     {
-        private static int _thisYear;
+
         public DataSetHelperService()
         {
         }
         
         public List<FranchiseCapSummary> CreateFranchiseCapSummaries(List<FranchiseRoster> rosters, List<DeadCapData> adjustments)
         {
+            var _thisYear = DateTime.Now.Year;
             var salarySummaries = new List<FranchiseCapSummary>();
                         rosters.ForEach(roster =>
             {
