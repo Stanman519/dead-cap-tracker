@@ -127,7 +127,7 @@ namespace DeadCapTracker.Controllers
                 },
                 ["#tag"] = async () => { await _groupMeRequestService.PostFranchiseTagAmounts(botId, leagueId); return null; },
                 ["#help"] = async () => { await _groupMeRequestService.PostHelpMessage(botId); return null; },
-                ["#dead"] = async () => { await _groupMeRequestService.PostFutureDeadCap(botId); return null; },
+                ["#dead"] = async () => { await _groupMeRequestService.PostFutureDeadCap(botId, leagueId); return null; },
                 ["#budget"] = async () => { await _groupMeRequestService.PostDraftBudgets(botId, leagueId); return null; },
                 ["#bid"] = async () => { await _gmFA.PostQuickBidByLotId(message); return null; },
                 ["@cap"] = async () => { await _groupMeRequestService.StrayTag(botId); return null; },

@@ -226,7 +226,7 @@ namespace DeadCapTracker.Services
             var strBot = $"Projected cap for upcoming draft picks\n(max savings via taxi squad)\n-----------\n";
             picksByOwner.ForEach(o =>
             {
-                strBot += $"{Utils.owners[o.OwnerId]}: ${o.RawBudget} (${o.PotentialSavings})\n";
+                strBot += $"{Utils.owners[leagueId][o.OwnerId]}: ${o.RawBudget} (${o.PotentialSavings})\n";
             });
             await _gm.BotPost(botId, strBot);
         }

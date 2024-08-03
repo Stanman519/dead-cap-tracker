@@ -151,8 +151,8 @@ namespace DeadCapTracker.Services
         }
         public async Task<string> GetCompletedTradeString(int leagueId, TradeSingle trade)
         {
-            _owners.TryGetValue(Int32.Parse(trade.franchise), out var owner1);
-            _owners.TryGetValue(Int32.Parse(trade.franchise2), out var owner2);
+            _owners[leagueId].TryGetValue(Int32.Parse(trade.franchise), out var owner1);
+            _owners[leagueId].TryGetValue(Int32.Parse(trade.franchise2), out var owner2);
             var strForBot = $"{GetSources()}{owner1} and {owner2} have completed a trade.\n";
            
             var assets1 = CheckForMultiplePlayers(trade.franchise1_gave_up)
@@ -171,7 +171,7 @@ namespace DeadCapTracker.Services
         {
             var year = DateTime.UtcNow.Year;
             var strForBot = GetSources();
-            _owners.TryGetValue(Int32.Parse(post.franchise_id), out var ownerName);
+            _owners[leagueId].TryGetValue(Int32.Parse(post.franchise_id), out var ownerName);
             strForBot += $"{ownerName} ";
             strForBot += AddBaitAction(); // add verbage
             var hasEarlyPicks = CheckForFirstRounders(post.willGiveUp);

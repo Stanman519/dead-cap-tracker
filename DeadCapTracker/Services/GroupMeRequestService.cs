@@ -25,7 +25,7 @@ namespace DeadCapTracker.Services
         Task StrayTag(string botId);
         Task PostTopUpcomingFreeAgents(string botId, int leagueId, string positionRequested, int year);
         Task PostFranchiseTagAmounts(string botId, int leagueId);
-        Task PostFutureDeadCap(string botId);
+        Task PostFutureDeadCap(string botId, int leagueId);
         Task BotPost(string botId, string post, bool isError = false);
         Task PostDraftBudgets(string botId, int leagueId);
     }
@@ -78,7 +78,7 @@ namespace DeadCapTracker.Services
             var tytString = "Tri-Year Trophy Presented by Taco Bell\nTOP 5\n";
             standings.ForEach(s =>
             {
-                strForBot = $"{strForBot}{_owners[s.FranchiseId]}  ({s.VictoryPoints} VP)  {s.H2hWins}-{s.H2hLosses}    {s.PointsFor} pts\n";
+                strForBot = $"{strForBot}{_owners[leagueId][s.FranchiseId]}  ({s.VictoryPoints} VP)  {s.H2hWins}-{s.H2hLosses}    {s.PointsFor} pts\n";
             });
             // TODO: add guard to check if this is year one of cycle - not worth posting if so
             var tytScores = standingsData.Select(t => new TYTScore
@@ -465,7 +465,7 @@ namespace DeadCapTracker.Services
                 draftPicks.ForEach(pick =>
                 {
                     var pickNum = $"{pick.Round}.{pick.Pick.ToString("D2")}";
-                    botStr += $"{pickNum} {_owners[pick.CurrentOwner]}\n";
+                    botStr += $"{pickNum} {_owners[leagueId][pick.CurrentOwner]}\n";
                 });
                 await _gm.BotPost(botId, botStr);
             }
@@ -479,7 +479,7 @@ namespace DeadCapTracker.Services
                     .Select(_ => new
                     {
                         Id = Int32.Parse(_.id),
-                        Name = _owners[Int32.Parse(_.id)]
+                        Name = _owners[leagueId][Int32.Parse(_.id)]
                     }).ToList();
 
                 //go through standings twice. write a message on each one 
@@ -495,8 +495,8 @@ namespace DeadCapTracker.Services
                             .FirstOrDefault(d => d.Year == year && d.Round == rd && d.OriginalOwner == origSlot)?.CurrentOwner;
                         if (currentPickOwner != null)
                         {
-                            botStr += $"{pickNum}) {_owners[currentPickOwner ?? 0]}";
-                            botStr += origSlot == currentPickOwner ? "\n" : $" (via {_owners[origSlot]})\n";
+                            botStr += $"{pickNum}) {_owners[leagueId][currentPickOwner ?? 0]}";
+                            botStr += origSlot == currentPickOwner ? "\n" : $" (via {_owners[leagueId][origSlot]})\n";
                         }
 
 
@@ -508,7 +508,7 @@ namespace DeadCapTracker.Services
             }
         }
 
-        public async Task PostFutureDeadCap(string botId)
+        public async Task PostFutureDeadCap(string botId, int leagueId)
         {
             var _thisYear = DateTime.Now.Year;
             var deadCapInfo = await _leagueService.GetDeadCapData();
@@ -516,7 +516,7 @@ namespace DeadCapTracker.Services
             deadCapInfo.ForEach(franchise =>
             {
                 var relevantYears = franchise.Amount.AsQueryable().Where(_ => _.Value != 0 && int.Parse(_.Key) >= _thisYear);
-                botStr += $"{_owners[franchise.FranchiseId]}\n";
+                botStr += $"{_owners[leagueId][franchise.FranchiseId]}\n";
                 foreach (var year in relevantYears)
                 {
                     botStr += $"('{year.Key.Substring(2)}  ${year.Value}) ";
