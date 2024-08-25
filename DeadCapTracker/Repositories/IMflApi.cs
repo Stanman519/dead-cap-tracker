@@ -8,6 +8,7 @@ using RestEase;
 
 namespace DeadCapTracker.Repositories
 {
+    [Header("User-Agent", "CapnCrunch")]
     public interface IMflApi
     {
         [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvqLri1vmaQfEYDs%3D")]
