@@ -228,6 +228,13 @@ namespace DeadCapTracker.Services
             foreach (var franch in onlyStarters)
             {
                 var botStr = ", your lineup is invalid";
+                if (!franch.players.player.Any()) // no starters
+                {
+                    var tagName = memberList.Find(m => m.user_id == _memberIds[leagueId][Int32.Parse(franch.id)]);
+                    var tagString = $"@{tagName?.nickname}";
+                    await _gm.BotPostWithTag(botId, botStr, tagString, tagName?.user_id ?? "");
+                    brokenTeams.Add(franch.id);
+                }
                 foreach (var player in franch.players.player)
                 {
                     player.nflTeam = allPlayersTask.Result.FirstOrDefault(allPlayer => allPlayer.id == player.id)?.team;
@@ -241,7 +248,7 @@ namespace DeadCapTracker.Services
                     brokenTeams.Add(franch.id);
                 }
             }
-            if (!brokenTeams.Any()) await _gm.BotPost(botId, "Lineups are all straight, mate.");
+            if (!brokenTeams.Any()) await _gm.BotPost(botId, "All lineups seem valid... but can you really trust me?");
         }
 
         public async Task PostCapSpace(string botId, int leagueId)
