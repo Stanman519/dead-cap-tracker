@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Threading.Tasks;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
@@ -38,16 +39,18 @@ namespace DeadCapTracker.Services
         private readonly ILeagueService _leagueService;
         private readonly IRumorService _rumor;
         private readonly IInsultApi _insult;
+         
         private readonly ILogger<GroupMeRequestService> _logger;
         private static Dictionary<int, Dictionary<int, string>> _owners;
         private static Dictionary<int, Dictionary<int, string>> _memberIds;
+        private readonly DeadCapTrackerContext _db;
 
-        
         public GroupMeRequestService(IMflTranslationService mflTranslationService, 
             IDataSetHelperService dataHelper, 
             IGroupMePostRepo gm, 
             ILeagueService leagueService, 
             IRumorService rumor, 
+            DeadCapTrackerContext db,
             IInsultApi insult,
             ILogger<GroupMeRequestService> logger)
         {
@@ -60,7 +63,7 @@ namespace DeadCapTracker.Services
             _logger = logger;
             _owners = Utils.owners;
             _memberIds = Utils.memberIds;
-
+            _db = db;
         }
 
         public async Task<List<AnnualScoringData>> PostStandingsToGroup(string botId, int leagueId, int year)
@@ -133,18 +136,119 @@ namespace DeadCapTracker.Services
         public async Task PostCompletedTradeToGroup(string botId, int leagueId)
         {
             DateTime tenMinAgo = DateTime.Now.AddMinutes(-11);
-
             var tradeInfoList = await _mflTranslationService.GetCompletedTrades(leagueId);
-            //TODO: CHECK FOR NULL?? it would mean it could not serialize it as either type
-            
+
             foreach (var trade in tradeInfoList)
             {
                 if (trade != null && !string.IsNullOrEmpty(trade.franchise2))
                 {
+                    var trader1 = int.TryParse(trade.franchise, out var x) ? x : 0;
+                    var trader2 = int.TryParse(trade.franchise2, out var y) ? y : 0;
+                    var capEats = _db.CapEatCandidates
+                        .Where(c => c.Proposal.Expires.ToString() == trade.expires && ((trader1 == c.Proposal.SenderId && trader2 == c.Proposal.ReceiverId) || 
+                        (trader2 == c.Proposal.SenderId && trader1 == c.Proposal.ReceiverId))).ToList();
+
+                    if (capEats.Count > 0)
+                    {
+                        var playerInfos = await _mflTranslationService.GetMultiMflPlayers(leagueId, string.Join(",", capEats.Select(f => f.MflPlayerId)));
+                        // implement this year cap eats via salary adjustments
+                        var thisYearEats = capEats.Where(c => c.Year == tenMinAgo.Year).ToList();
+                        
+                        if (thisYearEats.Count > 0)
+                        {
+                            // need to actually make 2 adjustments for each capEat.  one to rebate the receiver and one to fine the sender.
+                            var penalties = thisYearEats.Select(_ => {
+
+                                var thisPlayer = playerInfos.FirstOrDefault(p => p.id == _.MflPlayerId.ToString());
+                                return new SalaryAdjustment
+                                {
+                                    //explanation=\"{s.reason} {s.player.LastName}, {s.player.FirstName} {s.player.Team} {s.player.Position} (Salary: ${s.player.Salary}, years left: {s.length})\"/>");
+                                    adjustmentAmount = _.CapAdjustment,
+                                    franchiseId = _.EaterId.ToString("D4"),
+                                    length = 1,
+                                    player = new PlayerDTO
+                                    {
+                                        FirstName = thisPlayer?.name.Split(",")[1] ?? "ERROR",
+                                        LastName = thisPlayer?.name.Split(",")[0] ?? "ERROR",
+                                        Team = thisPlayer?.team ?? "N/A",
+                                        Position = thisPlayer?.position ?? "N/A",
+                                        Salary = _.CapAdjustment,
+                                        Length = 1,
+                                        MflId = int.TryParse(thisPlayer.id, out var p) ? p : 0
+                                    },
+                                    reason = "SENDING"
+
+                                };
+                            });
+                            var rebates = thisYearEats.Select(_ => {
+
+                                var thisPlayer = playerInfos.FirstOrDefault(p => p.id == _.Id.ToString());
+                                return new SalaryAdjustment
+                                {
+                                    adjustmentAmount = -_.CapAdjustment,
+                                    franchiseId = _.ReceiverId.ToString("D4"),
+                                    length = 1,
+                                    player = new PlayerDTO
+                                    {
+                                        FirstName = thisPlayer?.name.Split(",")[1] ?? "ERROR",
+                                        LastName = thisPlayer?.name.Split(",")[0] ?? "ERROR",
+                                        Team = thisPlayer?.team ?? "N/A",
+                                        Position = thisPlayer?.position ?? "N/A",
+                                        Salary = _.CapAdjustment,
+                                        Length = 1,
+
+
+                                    },
+                                    reason = "RECEIVING"
+                                };
+                            });
+                            
+                            penalties.ToList().AddRange(rebates);
+                            //check here to make sure these havent already happened
+                            await _mflTranslationService.BuildAndPostSalaryAdjustments(leagueId, penalties.ToList(), tenMinAgo.Year);
+                        }
+
+                        // future years go into db
+                        var futureYearEats = capEats.Where(c => c.Year != tenMinAgo.Year).ToList();
+
+                        if (futureYearEats.Count > 0 && _db.Transactions.FirstOrDefault(t => futureYearEats.Select(f => f.Id).ToList().Contains(t.CapEatId ?? -1)) != null)
+                        {
+
+                            var newAdds = futureYearEats.Select(f =>
+                            {
+                                var player = playerInfos.FirstOrDefault(p => p.id == f.MflPlayerId.ToString());
+                                return new Repositories.Transaction
+                                {
+                                    Amount = f.CapAdjustment,
+                                    Franchiseid = f.EaterId,
+                                    Leagueid = f.LeagueId,
+                                    Playername = player?.name ?? "",
+                                    Position = player?.position ?? "",
+                                    Salary = f.CapAdjustment,
+                                    Yearoftransaction = tenMinAgo.Year,
+                                    Team = player?.team ?? "",
+                                    Timestamp = tenMinAgo,
+                                    Transactionid = f.Id,
+                                    Years = 1,
+                                    CapEatId = f.Id
+
+                                };
+                            });
+                            try
+                            {
+                                _db.Transactions.AddRange(newAdds);
+                                _db.SaveChanges();
+                            }
+                            catch (Exception ex)
+                            {
+                                await _gm.BotPost("", $"failed to load cap eats to db. {ex.Message}", true);
+                            }
+                        }
+                    }
                     var tradeTime = DateTimeOffset.FromUnixTimeSeconds(Int64.Parse(trade.timestamp));
                     // check if trade was not in the last 10 minutes to bail early
                     if (tradeTime <= tenMinAgo) continue;
-                    var strForBot = await _rumor.GetCompletedTradeString(leagueId, trade);
+                    var strForBot = await _rumor.GetCompletedTradeString(leagueId, trade, capEats);  
                     await _gm.BotPost(botId, strForBot);
                 }
             }

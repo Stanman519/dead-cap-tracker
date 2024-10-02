@@ -10,6 +10,11 @@ using DeadCapTracker.Models.MFL;
 using DeadCapTracker.Repositories;
 using Microsoft.Extensions.Logging;
 using RestEase;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
+using System.Numerics;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace DeadCapTracker.Services
 {
@@ -32,6 +37,7 @@ namespace DeadCapTracker.Services
         Task<List<StandingsV2>> GetStandings(int leagueId, int year);
         Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int leagueId, int year);
         Task<List<MflPlayer>> GetAllSalaries(int leagueId);
+        Task BuildAndPostSalaryAdjustments(int leagueId, List<SalaryAdjustment> adjustments, int year);
         Task<List<MflTransaction>> GetMflTransactionsByType(int leagueId, int year, string type);
         Task<List<PendingTradeDTO>> FindPendingTrades(int leagueId, int year);
         Task<List<Player>> GetMultiMflPlayers(int leagueId, string playerIds);
@@ -57,13 +63,12 @@ namespace DeadCapTracker.Services
         private readonly IGroupMePostRepo _gm;
         private static Dictionary<int, Dictionary<int, string>> _owners;
         private static Dictionary<int, Dictionary<int, string>> _memberIds;
-
-
+        private readonly DeadCapTrackerContext _db;
 
         public IMapper Mapper { get; }
         public ILogger<MflTranslationService> _logger { get; }
 
-        public MflTranslationService(IMflApi mfl, IGlobalMflApi globalMflApi, IRumorService rumor, IMapper mapper, ILogger<MflTranslationService> logger, IGroupMePostRepo gm)
+        public MflTranslationService(IMflApi mfl, IGlobalMflApi globalMflApi, IRumorService rumor, IMapper mapper, ILogger<MflTranslationService> logger, IGroupMePostRepo gm, DeadCapTrackerContext db)
         {
             _mfl = mfl;
             _globalMflApi = globalMflApi;
@@ -72,6 +77,7 @@ namespace DeadCapTracker.Services
             _gm = gm;
             _owners = Utils.owners;
             _memberIds = Utils.memberIds;
+            _db = db;
         }
 
         public async Task<List<TradeSingle>> GetCompletedTrades(int leagueId)
@@ -164,7 +170,7 @@ namespace DeadCapTracker.Services
         public async Task<string> GetThisLeagueWeek(int leagueId)
         {
             var year = DateTime.UtcNow.Year;
-            return (await _mfl.GetMatchupSchedule(leagueId, year, Utils.ApiKeys[leagueId]   )).schedule.weeklySchedule.First(_ =>
+            return (await _mfl.GetMatchupSchedule(leagueId, year, Utils.ApiKeys[leagueId])).schedule.weeklySchedule.First(_ =>
                 _.matchup.All(gm => gm.franchise.Any(tm => tm.result == "T" && tm.score == null))).week;
         }
 
@@ -398,7 +404,7 @@ namespace DeadCapTracker.Services
             var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId: leagueId, year, Utils.ApiKeys[leagueId]);
             var picksMadeWithOutSalaries = mflDraftRoot.DraftResults.DraftUnit.DraftPick.Where(p => !string.IsNullOrEmpty(p.Player));
             var queryString = string.Join(",", picksMadeWithOutSalaries.Select(p => p.Player));
-            var picksWithPlayerInfo = await _mfl.GetBotPlayersDetails(leagueId, queryString,  year, Utils.ApiKeys[leagueId]);
+            var picksWithPlayerInfo = await _mfl.GetBotPlayersDetails(leagueId, queryString, year, Utils.ApiKeys[leagueId]);
 
             var picksWithValues = picksMadeWithOutSalaries.Select(_ => {
                 var rawSalary = GetDraftPickPrice(int.Parse(_.Round), int.Parse(_.Pick));
@@ -416,12 +422,12 @@ namespace DeadCapTracker.Services
                     Length = int.Parse(_.Round) > 2 ? 3 : 4
                 };
             }).ToList();
-        
+
             return picksWithValues;
-        } 
+        }
 
         public int GetDraftPickPrice(int round, int pick)
-        {   
+        {
             var slot = (round - 1) * 12 + pick;
             if (slot > 36) slot = 37;
             return Utils.draftPicks[slot];
@@ -438,14 +444,14 @@ namespace DeadCapTracker.Services
                     .ThenBy(tm => int.Parse(tm.h2hw))
                     .ThenBy(tm => Decimal.Parse(tm.pf)).ToList();
             }
-            catch (Exception e )
+            catch (Exception e)
             {
                 _logger.LogError("mfl error", e);
                 return new List<MflFranchiseStandings>();
             }
 
         }
-        
+
         public async Task<List<MflSalaryAdjustment>> GetSalaryAdjustments(int leagueId, int year)
         {
             try
@@ -458,7 +464,7 @@ namespace DeadCapTracker.Services
                 return new List<MflSalaryAdjustment>();
             }
         }
-        
+
         public async Task<List<MflTransaction>> GetMflTransactionsByType(int leagueId, int year, string type = "")
         {
             try
@@ -479,19 +485,24 @@ namespace DeadCapTracker.Services
 
 
         }
-        
+
         public async Task<List<PendingTradeDTO>> FindPendingTrades(int leagueId, int year)
         {
             var DTOs = new List<PendingTradeDTO>();
-            var responses = new List<Task<MflPendingTradesListRoot>>();
+            var mflTasks = new List<Task<MflPendingTradesListRoot>>();
             for (int i = 2; i < 13; i++)
             {
                 string franchiseNum = i.ToString("D4");
-                responses.Add(_mfl.GetPendingTrades(leagueId, franchiseNum, year, Utils.ApiKeys[leagueId]));
+                mflTasks.Add(_mfl.GetPendingTrades(leagueId, franchiseNum, year, Utils.ApiKeys[leagueId]));
+
             }
+            var dbTradesTask = _db.Proposals.Where(p => p.MflTradeId == null).ToListAsync();
+            var allTasks = mflTasks.Cast<Task>().ToList();  // Cast MFL tasks to Task type
             try
             {
-                await Task.WhenAll(responses);
+
+                allTasks.Add(dbTradesTask);
+                await Task.WhenAll(mflTasks);
             }
             catch (Exception e)
             {
@@ -499,8 +510,19 @@ namespace DeadCapTracker.Services
                 return new List<PendingTradeDTO>();
             }
 
+            //look for trades in db that dont have a tradeId.  do it based on offering team & expires.
+            var flattenedMflProposals = mflTasks.Select(_ => _.Result).Select(_ => _.pendingTrades).SelectMany(_ => _.pendingTrade).ToList();
+            dbTradesTask.Result.ForEach(t =>
+            {
+                var fixMe = flattenedMflProposals.FirstOrDefault(p => p.offeringTeam == t.SenderId.ToString("D4") && p.expires == t.Expires.ToString());
+                if (fixMe != null)
+                {
+                    t.MflTradeId = int.Parse(fixMe.trade_id);
+                }
+            });
+            await _db.SaveChangesAsync();
 
-            foreach (var task in responses)
+            foreach (var task in mflTasks)
             {
                 var response = task.Result;
                 var multiTrades = Mapper.Map<List<MflPendingTrade>, List<PendingTradeDTO>>(response.pendingTrades.pendingTrade);
@@ -515,7 +537,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetBotPlayersDetails(leagueId, playerIds, year, Utils.ApiKeys[leagueId]  )).players.player;
+                return (await _mfl.GetBotPlayersDetails(leagueId, playerIds, year, Utils.ApiKeys[leagueId])).players.player;
             }
             catch (Exception e)
             {
@@ -621,7 +643,7 @@ namespace DeadCapTracker.Services
         public async Task<List<PlayerAvgScore>> GetAveragePlayerScores(int leagueId, int year)
         {
             try
-            {   
+            {
                 return (await _mfl.GetAveragePlayerScores(leagueId, year, Utils.ApiKeys[leagueId])).playerScores.playerScore;
             }
             catch (Exception e)
@@ -635,8 +657,8 @@ namespace DeadCapTracker.Services
         {
             if (!Utils.leagueBotDict.TryGetValue(leagueId, out var botId)) {
                 _gm.BotPost(string.Empty, "giveContractToNewPlayerfailed with bad league id...", true);
-                    return;
-             };
+                return;
+            };
             var year = DateTime.UtcNow.Year;
             var data = CreateBodyDataForNewContract(mflPlayerId, salary, length);
             try
@@ -648,7 +670,7 @@ namespace DeadCapTracker.Services
                     var error = respString.XmlDeserializeFromString<MflXmlError>();
                     _logger.LogInformation(respString);
                     _logger.LogError("{lastname}'s contract was not updated in mfl.", mflPlayerId);
-                    await _gm.BotPost(botId, $"league: {leagueId} player:{mflPlayerId} contract was not updated in mfl. \n\n${error.ErrorMsg}", isError: true) ;
+                    await _gm.BotPost(botId, $"league: {leagueId} player:{mflPlayerId} contract was not updated in mfl. \n\n${error.ErrorMsg}", isError: true);
                 }
             }
             catch (Exception e)
@@ -656,6 +678,71 @@ namespace DeadCapTracker.Services
                 _logger.LogError(e, "New Contract mfl");
                 return;
             }
+        }
+
+        public async Task BuildAndPostSalaryAdjustments(int leagueId, List<SalaryAdjustment> adjustments, int year)
+        {
+            //TODO: CHECK HERE TO MAKE SURE THESE SALARY ADJUSTMENTS ARENT ALREADY IN MFL
+            var yesterday = DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeSeconds();
+            
+
+            // we have timestamp, so just check that theres not another one with the same amount and franchise within the last 15? that starts with SENDING/RECEIVING?
+            var adjResp = await _mfl.GetSalaryAdjustments(leagueId, year);
+            var existingAdjustments = adjResp.salaryAdjustments.salaryAdjustment.Where(old => long.Parse(old.Timestamp) > yesterday);
+            var preExistingConditions = adjustments.Join(existingAdjustments, n => new { franchise = n.franchiseId, amount = n.adjustmentAmount, firstWord = n.reason.Split(" ")[0] }, 
+                o => new { franchise = o.Franchise_Id, amount = double.Parse(o.Amount), firstWord = o.Description.Split(" ")[0] }, 
+                (n, o) =>  new SalaryAdjustment
+                    {
+                        adjustmentAmount = n.adjustmentAmount,
+                        franchiseId = n.franchiseId,
+                        reason = n.reason,
+                        length = n.length,
+                        player = n.player
+                    }
+                );
+            if (preExistingConditions.Count() > 0)
+            {
+                await _gm.BotPost("", $"There's already some cap eats here for the {leagueId} trade that has {preExistingConditions.First().player.LastName}", true);
+                return;  // I dont know... this means there are some in there? 
+            }
+            try
+            {
+                var body = CreateBodyDataForNewSalaryAdj(adjustments);
+                var resp = await _mfl.AddSalaryAdjustment(leagueId, body, year);
+                var respString = await resp.Content.ReadAsStringAsync();
+                if (respString.ToUpper().Contains("ERROR"))
+                {
+                    var error = respString.XmlDeserializeFromString<MflXmlError>();
+                    _logger.LogInformation(error.ErrorMsg);
+                    await _gm.BotPost("", $"{leagueId} trade failed on salary adjustments! \n\n{error.ErrorMsg}", true);
+                }
+            }
+            catch (Exception e) 
+            {
+                await _gm.BotPost("", $"{leagueId} trade exception on salary adjustments! \n\n{e.Message}", true);
+            }
+
+            return;
+        }
+
+        private Dictionary<string, string> CreateBodyDataForNewSalaryAdj(List<SalaryAdjustment> salAdjustments)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            salAdjustments.ForEach(s =>
+            {
+                sb.Append($"<salary_adjustment franchise_id =\"{s.franchiseId}\" amount=\"{s.adjustmentAmount}\" explanation=\"{s.reason} {s.player.LastName}, {s.player.FirstName} {s.player.Team} {s.player.Position} (Salary: ${s.player.Salary}, years left: {s.length})\"/>");
+            });
+            var salaryAdjustments = sb.ToString();
+
+            var ret = new Dictionary<string, string>()
+            {
+                {
+                    "DATA",
+                    $"<?xml version='1.0' encoding='UTF-8' ?><salary_adjustments>{salaryAdjustments}</salary_adjustments>"
+                }
+            };
+            return ret;
         }
         private Dictionary<string, string> CreateBodyDataForNewContract(int playerId, int salary, int length = 1)
         {
@@ -702,4 +789,13 @@ namespace DeadCapTracker.Services
         }
 
     }
+    public class SalaryAdjustment
+    {
+        public string franchiseId { get; set; }
+        public double adjustmentAmount { get; set; }
+        public string reason { get; set; }
+        public PlayerDTO player { get; set; }
+        public int length { get; set; }
+    }
+
 }

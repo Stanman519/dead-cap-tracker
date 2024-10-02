@@ -43,7 +43,8 @@ namespace DeadCapTracker.Repositories
         public DbSet<SeasonWins> SeasonWins { get;set; }
         public DbSet<OverUnderPick> OverUnderPicks { get; set; }
         public DbSet<WaiverExtension> WaiverExtensions { get; set; }
-
+        public DbSet<CapEatCandidate> CapEatCandidates { get; set; }
+        public DbSet<Proposal> Proposals { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -155,6 +156,7 @@ namespace DeadCapTracker.Repositories
                 entity.Property(e => e.Team).HasColumnName("team");
                 entity.Property(e => e.Years).HasColumnName("years");
                 entity.Property(e => e.Yearoftransaction).HasColumnName("yearoftransaction");
+                entity.Property(e => e.CapEatId).HasColumnName("capeatid");
                 entity.HasOne(d => d.League).WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.Leagueid)
                     .OnDelete(DeleteBehavior.ClientSetNull)
@@ -523,6 +525,54 @@ namespace DeadCapTracker.Repositories
                     .HasForeignKey(d => d.LineId)
                     .HasConstraintName("FK_seasonwins_nflteam");
                 entity.HasKey(e => e.Id);
+            }); 
+            modelBuilder.Entity<Proposal>(entity =>
+            {
+                entity.ToTable("proposal");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
+                entity.Property(e => e.LeagueId)
+                    .HasColumnName("leagueId");
+                entity.Property(e => e.SenderId)
+                    .HasColumnName("senderId");
+                entity.Property(e => e.ReceiverId)
+                    .HasColumnName("receiverId");
+                entity.Property(e => e.Accepted)
+                    .HasColumnName("accepted");
+                entity.Property(e => e.Expires)
+                    .HasColumnName("expires");
+                entity.Property(e => e.MflTradeId)
+                    .HasColumnName("mflTradeId");
+
+
+                entity.HasKey(e => e.Id);
+            });
+            modelBuilder.Entity<CapEatCandidate>(entity =>
+            {
+                entity.ToTable("capeatcandidate");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
+                entity.Property(e => e.LeagueId)
+                    .HasColumnName("leagueId");
+                entity.Property(e => e.EaterId)
+                    .HasColumnName("eaterid");
+                entity.Property(e => e.ReceiverId)
+                    .HasColumnName("receiverId");
+                entity.Property(e => e.Year)
+                    .HasColumnName("year");
+                entity.Property(e => e.MflPlayerId)
+                    .HasColumnName("mflPlayerId");
+                entity.Property(e => e.CapAdjustment).HasColumnName("capAdjustment");
+                entity.Property(e => e.TradeId).HasColumnName("tradeId");
+                entity.HasOne(e => e.Proposal)
+                    .WithMany(l => l.CapEatCandidates)
+                    .HasForeignKey(d => d.TradeId)
+                    .HasConstraintName("FK_capeatcandidate_proposal");
+                entity.HasKey(e => e.Id);
             });
             modelBuilder.Entity<FranchiseTagPlayer>(entity =>
             {
@@ -750,6 +800,7 @@ namespace DeadCapTracker.Repositories
         public int? Yearoftransaction { get; set; }
         public int Leagueid { get; set; }
         public int Globalid { get; set; }
+        public int? CapEatId { get; set; }
         public virtual LeagueEntity League { get; set; } = null!;
     }
     public partial class FranchiseTagPlayer
@@ -906,5 +957,30 @@ namespace DeadCapTracker.Repositories
         public int LineAdjustment { get; set; }
         public virtual SeasonWins WinLine { get; set; } = null!;
         public virtual OwnerEntity Owner { get; set; } = null!;
+    }
+    public class CapEatCandidate
+    {
+        [Key]
+        public int Id { get; set; }
+        public int EaterId { get; set; }
+        public int ReceiverId { get; set; }
+        public int LeagueId { get; set; }
+        public int TradeId { get; set; }
+        public int Year { get; set; }
+        public int MflPlayerId { get; set; }
+        public int CapAdjustment { get; set; }
+        public virtual Proposal Proposal { get; set; } = null!;
+    }
+    public class Proposal
+    {
+        [Key]
+        public int Id { get; set; }
+        public int LeagueId { get; set; }
+        public int SenderId { get; set; }
+        public int ReceiverId { get; set; }
+        public bool Accepted { get; set; }
+        public long Expires { get; set; }
+        public int? MflTradeId { get; set; }
+        public virtual ICollection<CapEatCandidate> CapEatCandidates { get; set; } = new List<CapEatCandidate>();
     }
 }

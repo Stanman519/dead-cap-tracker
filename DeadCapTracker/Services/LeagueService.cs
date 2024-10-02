@@ -182,7 +182,10 @@ namespace DeadCapTracker.Services
         //TODO: Needs Testing!
         public async Task<List<PendingTradeDTO>> FindPendingTrades(int leagueId, int year)
         {
-            return await _mflSvc.FindPendingTrades(leagueId, year);
+            var pendingTrades =  await _mflSvc.FindPendingTrades(leagueId, year);
+
+
+            return pendingTrades;
         }
 
         public async Task MapPickBudgetToOwners(int leagueId)

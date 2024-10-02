@@ -11,7 +11,7 @@ namespace DeadCapTracker.Repositories
         
         [Get("v3/groups/59795205?token=YjMEBw8kwXkJMKxDz2nd2o0iG9aC1GG4NjD9O1ih")]
         Task<GroupParent> GetMemberIds();
-        
-        //TODO: trade rumors
+
     }
+
 }

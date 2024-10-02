@@ -9,7 +9,7 @@ namespace DeadCapTracker.Services
 {
     public interface IRumorService
     {
-        Task<string> GetCompletedTradeString(int leagueId, TradeSingle trade);
+        Task<string> GetCompletedTradeString(int leagueId, TradeSingle trade, List<CapEatCandidate> capEats);
         Task<string> GetTradeBaitString(int leagueId, TradeBait post);
 
     }
@@ -100,7 +100,7 @@ namespace DeadCapTracker.Services
             return false;
         }
 
-        public async Task<string> ListTradeInfoWithMultiplePlayers(int leagueId, string assets)
+        public async Task<string> ListTradeInfoWithMultiplePlayers(int leagueId, string assets, List<CapEatCandidate> capEats, string otherPlayer)
         {
             var year = DateTime.UtcNow.Year;
             var ret = "";
@@ -130,6 +130,17 @@ namespace DeadCapTracker.Services
                 salary = contract?.Salary;
                 years = contract?.ContractYear;
                 ret += $"{name} (${salary}, {years} yrs left)\n";
+                var thisPlayerEats = capEats.Where(_ => _.MflPlayerId.ToString() == player.id && _.CapAdjustment > 0).OrderBy(_ => _.Year).ToList();
+
+                if (thisPlayerEats.Any())
+                {
+                    ret += $"\t{otherPlayer} retains:\n";
+                    thisPlayerEats.ForEach(e =>
+                    {
+                        ret += $"\t{e.Year}: ${e.CapAdjustment}\n";
+                    });
+
+                }
             }
             
             foreach (var pick in picksOnly)
@@ -149,19 +160,19 @@ namespace DeadCapTracker.Services
             }
             return ret;
         }
-        public async Task<string> GetCompletedTradeString(int leagueId, TradeSingle trade)
+        public async Task<string> GetCompletedTradeString(int leagueId, TradeSingle trade, List<CapEatCandidate> capEats)
         {
             _owners[leagueId].TryGetValue(Int32.Parse(trade.franchise), out var owner1);
             _owners[leagueId].TryGetValue(Int32.Parse(trade.franchise2), out var owner2);
             var strForBot = $"{GetSources()}{owner1} and {owner2} have completed a trade.\n";
-           
+            
             var assets1 = CheckForMultiplePlayers(trade.franchise1_gave_up)
-                ? await ListTradeInfoWithMultiplePlayers(leagueId, trade.franchise1_gave_up)
-                : await ListTradeInfoWithSinglePlayer(leagueId, trade.franchise1_gave_up);
+                ? await ListTradeInfoWithMultiplePlayers(leagueId, trade.franchise1_gave_up, capEats, owner2)
+                : await ListTradeInfoWithSinglePlayer(leagueId, trade.franchise1_gave_up, capEats, owner2);
             
             var assets2 = CheckForMultiplePlayers(trade.franchise2_gave_up)
-                ? await ListTradeInfoWithMultiplePlayers(leagueId, trade.franchise2_gave_up)
-                : await ListTradeInfoWithSinglePlayer(leagueId, trade.franchise2_gave_up);
+                ? await ListTradeInfoWithMultiplePlayers(leagueId, trade.franchise2_gave_up, capEats, owner1)
+                : await ListTradeInfoWithSinglePlayer(leagueId, trade.franchise2_gave_up, capEats, owner1);
 
             strForBot += $"{owner1} sends:\n{assets1}\n{owner2} sends:\n{assets2}";
             return strForBot;
@@ -188,7 +199,7 @@ namespace DeadCapTracker.Services
             return strForBot;
         }
         
-        public async Task<string> ListTradeInfoWithSinglePlayer(int leagueId, string assets)
+        public async Task<string> ListTradeInfoWithSinglePlayer(int leagueId, string assets, List<CapEatCandidate> capEats, string otherPlayer)
         {
             var ret = "";
             var salary = "";
@@ -207,7 +218,17 @@ namespace DeadCapTracker.Services
                     var contract = salaries.Salaries.LeagueUnit.Player.FirstOrDefault(_ => _.Id == player.id);
                     salary = contract?.Salary;
                     years = contract?.ContractYear;
+                    var thisPlayerEats = capEats.Where(_ => _.MflPlayerId.ToString() == player.id && _.CapAdjustment > 0).OrderBy(_ => _.Year).ToList();
                     ret += $"{name} (${salary}, {years} yrs left) \n";
+                    if (thisPlayerEats.Any())
+                    {
+                        ret += $"\t{otherPlayer} retains:\n";
+                        thisPlayerEats.ForEach(e =>
+                        {
+                            ret += $"\t{e.Year}: ${e.CapAdjustment}\n";
+                        });
+
+                    }
                     return ret;
                 }
                 var pickDetails = asset.Split("_");
