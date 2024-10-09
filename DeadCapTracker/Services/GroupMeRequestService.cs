@@ -404,7 +404,8 @@ namespace DeadCapTracker.Services
                 var projections = scoreProjectionsTask.Result;
 
                 var botText = "Live Scores (Live Projections)\n";
-
+                var medianActual = new List<double>();
+                var medianProj = new List<double>();
                 foreach (var matchup in matchups)
                 {
                     _owners[leagueId].TryGetValue(int.Parse(matchup.franchise.First().id), out var team1);
@@ -424,10 +425,13 @@ namespace DeadCapTracker.Services
 
                     team1 += $": {team1Score} ({team1ProjectedScore:F})\n";
                     team2 += $": {team2Score} ({team2ProjectedScore:F})\n";
-
+                    medianActual.Add(team1Score);
+                    medianActual.Add(team2Score);
+                    medianProj.Add(team1ProjectedScore);
+                    medianProj.Add(team2ProjectedScore);
                     botText += $"-----\n{team1}{team2}";
                 }
-
+                botText += $"\n-----\nMedian: {medianActual.GetMedian():F} ({medianProj.GetMedian():F})";
                 await _gm.BotPost(botId, botText);
                 return botText;
             }
@@ -675,6 +679,33 @@ namespace DeadCapTracker.Services
         public async Task BotPost(string botId, string post, bool isError = false)
         {
             await _gm.BotPost(botId, post, isError: isError);
+        }
+    }
+    public static class SomeExtensions
+    {
+        public static double GetMedian(this List<double> source)
+        {
+            // Create a copy of the input, and sort the copy
+            double[] temp = source.ToArray();
+            Array.Sort(temp);
+
+            int count = temp.Length;
+            if (count == 0)
+            {
+                throw new InvalidOperationException("Empty collection");
+            }
+            else if (count % 2 == 0)
+            {
+                // count is even, average two middle elements
+                double a = temp[count / 2 - 1];
+                double b = temp[count / 2];
+                return (a + b) / 2;
+            }
+            else
+            {
+                // count is odd, return the middle element
+                return temp[count / 2];
+            }
         }
     }
 }
