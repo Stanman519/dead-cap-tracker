@@ -515,7 +515,7 @@ namespace DeadCapTracker.Services
             var strForBot = $"Top {pos} Free Agents for {nextYearAsDefault}\n";
             var lookupYear = nextYearAsDefault < year + 1 ? (nextYearAsDefault - 1 ) : year; // if looking up future, use this year for lookup, if past, use past
             var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(leagueId, lookupYear);
-            var salariesTask = _mflTranslationService.GetAllSalaries(lookupYear);
+            var salariesTask = _mflTranslationService.GetAllSalaries(leagueId);
             var playerTask = _mflTranslationService.GetAllRelevantPlayers(leagueId);
             await Task.WhenAll(avgPtsTask, playerTask, salariesTask);
 
