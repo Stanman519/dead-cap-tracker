@@ -202,10 +202,11 @@ namespace DeadCapTracker.Services
                                     reason = "RECEIVING"
                                 };
                             });
-                            
-                            penalties.ToList().AddRange(rebates);
+                            var salaryAdj = penalties.ToList();
+
+                            salaryAdj.AddRange(rebates);
                             //check here to make sure these havent already happened
-                            await _mflTranslationService.BuildAndPostSalaryAdjustments(leagueId, penalties.ToList(), tenMinAgo.Year);
+                            await _mflTranslationService.BuildAndPostSalaryAdjustments(leagueId, salaryAdj, tenMinAgo.Year);
                         }
 
                         // future years go into db

@@ -689,8 +689,9 @@ namespace DeadCapTracker.Services
             // we have timestamp, so just check that theres not another one with the same amount and franchise within the last 15? that starts with SENDING/RECEIVING?
             var adjResp = await _mfl.GetSalaryAdjustments(leagueId, year);
             var existingAdjustments = adjResp.salaryAdjustments.salaryAdjustment.Where(old => long.Parse(old.Timestamp) > yesterday);
-            var preExistingConditions = adjustments.Join(existingAdjustments, n => new { franchise = n.franchiseId, amount = n.adjustmentAmount, firstWord = n.reason.Split(" ")[0] }, 
-                o => new { franchise = o.Franchise_Id, amount = double.Parse(o.Amount), firstWord = o.Description.Split(" ")[0] }, 
+            var preExistingConditions = adjustments.Join(existingAdjustments, 
+                n => new { franchise = n.franchiseId, amount = n.adjustmentAmount, firstWord = n.reason.Split(" ")[0], lastName = n.reason.Split(" ").Length > 1 ? n.reason.Split(" ")[1].ToLower() : "" }, 
+                o => new { franchise = o.Franchise_Id, amount = double.Parse(o.Amount), firstWord = o.Description.Split(" ")[0], lastName = o.Description.Split(" ").Length > 1 ? o.Description.Split(" ")[1].ToLower() : "" }, 
                 (n, o) =>  new SalaryAdjustment
                     {
                         adjustmentAmount = n.adjustmentAmount,
@@ -699,7 +700,7 @@ namespace DeadCapTracker.Services
                         length = n.length,
                         player = n.player
                     }
-                );
+                ).ToList();
             if (preExistingConditions.Count() > 0)
             {
                 await _gm.BotPost("", $"There's already some cap eats here for the {leagueId} trade that has {preExistingConditions.First().player.LastName}", true);
