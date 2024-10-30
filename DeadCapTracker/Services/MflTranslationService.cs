@@ -690,8 +690,8 @@ namespace DeadCapTracker.Services
             var adjResp = await _mfl.GetSalaryAdjustments(leagueId, year);
             var existingAdjustments = adjResp.salaryAdjustments.salaryAdjustment.Where(old => long.Parse(old.Timestamp) > yesterday);
             var preExistingConditions = adjustments.Join(existingAdjustments, 
-                n => new { franchise = n.franchiseId, amount = n.adjustmentAmount, firstWord = n.reason.Split(" ")[0], lastName = n.reason.Split(" ").Length > 1 ? n.reason.Split(" ")[1].ToLower() : "" }, 
-                o => new { franchise = o.Franchise_Id, amount = double.Parse(o.Amount), firstWord = o.Description.Split(" ")[0], lastName = o.Description.Split(" ").Length > 1 ? o.Description.Split(" ")[1].ToLower() : "" }, 
+                n => new { franchise = n.franchiseId, amount = n.adjustmentAmount, firstWord = n.reason.Split(" ")[0], lastName = n.player.LastName }, 
+                o => new { franchise = o.Franchise_Id, amount = double.Parse(o.Amount), firstWord = o.Description.Split(" ")[0], lastName = string.Join(" ", o.Description.Split(",")[0].Split(" ").Skip(1)) }, 
                 (n, o) =>  new SalaryAdjustment
                     {
                         adjustmentAmount = n.adjustmentAmount,
@@ -703,8 +703,12 @@ namespace DeadCapTracker.Services
                 ).ToList();
             if (preExistingConditions.Count() > 0)
             {
-                await _gm.BotPost("", $"There's already some cap eats here for the {leagueId} trade that has {preExistingConditions.First().player.LastName}", true);
-                return;  // I dont know... this means there are some in there? 
+                if (preExistingConditions.Count() != adjustments.Count)
+                {
+                    await _gm.BotPost("", $"There's already some cap eats here for the {leagueId} trade that has {preExistingConditions.First().player.LastName}", true);
+                }
+                
+                return;  
             }
             try
             {

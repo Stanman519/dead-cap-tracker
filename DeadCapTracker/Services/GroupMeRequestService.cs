@@ -152,7 +152,7 @@ namespace DeadCapTracker.Services
                     {
                         var playerInfos = await _mflTranslationService.GetMultiMflPlayers(leagueId, string.Join(",", capEats.Select(f => f.MflPlayerId)));
                         // implement this year cap eats via salary adjustments
-                        var thisYearEats = capEats.Where(c => c.Year == tenMinAgo.Year).ToList();
+                        var thisYearEats = capEats.Where(c => c.Year == tenMinAgo.Year && c.CapAdjustment != 0).ToList();
                         
                         if (thisYearEats.Count > 0)
                         {
@@ -182,7 +182,7 @@ namespace DeadCapTracker.Services
                             });
                             var rebates = thisYearEats.Select(_ => {
 
-                                var thisPlayer = playerInfos.FirstOrDefault(p => p.id == _.Id.ToString());
+                                var thisPlayer = playerInfos.FirstOrDefault(p => p.id == _.MflPlayerId.ToString());
                                 return new SalaryAdjustment
                                 {
                                     adjustmentAmount = -_.CapAdjustment,
