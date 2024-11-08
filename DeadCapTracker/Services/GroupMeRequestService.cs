@@ -606,11 +606,29 @@ namespace DeadCapTracker.Services
                             // If positional requirements met, add to flex if there’s space
                             if (flex.Count < flexRequired)
                             {
-                                if ((player.Position.position.Contains("QB") && qbCount < qbMax) ||
-                                    (player.Position.position.Contains("WR") && wrCount < wrMax) ||
-                                     (player.Position.position.Contains("TE") && teCount < teMax) ||
-                                    (player.Position.position.Contains("RB") && rbCount < rbMax))
+                                var position = player.Position.position;
+                                if ((position.Contains("QB") && qbCount < qbMax) ||
+                                    (position.Contains("WR") && wrCount < wrMax) ||
+                                     (position.Contains("TE") && teCount < teMax) ||
+                                    (position.Contains("RB") && rbCount < rbMax))
                                 {
+                                    switch (position)
+                                    {
+                                        case var p when p?.Contains("QB") ?? false:
+                                            qbCount++;
+                                            break;
+                                        case var p when p?.Contains("RB") ?? false:
+                                            rbCount++;
+                                            break;
+                                        case var p when p?.Contains("WR") ?? false:
+                                            wrCount++;
+                                            break;
+                                        case var p when p?.Contains("TE") ?? false:
+                                            teCount++;
+                                            break;
+                                        default:
+                                            break;
+                                    }
                                     flex.Add(player);
                                     strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {scoreStr}");
                                 }
