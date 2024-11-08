@@ -572,7 +572,8 @@ namespace DeadCapTracker.Services
                 strBuilder.Append("Successfully Optimized Lineup");
                 foreach (var player in joined)
                 {
-
+                    var realScore = player.IsLockedStart ? (decimal.TryParse(player.Player.score, out var scr) ? scr : 0) : 0;
+                    var scoreStr = player.IsLockedStart ? realScore + " scored" : player.Projection.score + " proj";
 
                     // Add players based on their position requirements
                     switch (player.Position)
@@ -580,25 +581,25 @@ namespace DeadCapTracker.Services
                         case var pos when pos.position.Contains("QB") && qbCount < qbRequired:
                             starters.Add(player);
                             qbCount++;
-                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {scoreStr}");
                             break;
 
                         case var pos when pos.position.Contains("RB") && rbCount < rbRequired:
                             starters.Add(player);
                             rbCount++;
-                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {scoreStr}");
                             break;
 
                         case var pos when pos.position.Contains("WR") && wrCount < wrRequired:
                             starters.Add(player);
                             wrCount++;
-                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {scoreStr}");
                             break;
 
                         case var pos when pos.position.Contains("TE") && teCount < teRequired:
                             starters.Add(player);
                             teCount++;
-                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {scoreStr}");
                             break;
 
                         default:
@@ -611,7 +612,7 @@ namespace DeadCapTracker.Services
                                     (player.Position.position.Contains("RB") && rbCount < rbMax))
                                 {
                                     flex.Add(player);
-                                    strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                                    strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {scoreStr}");
                                 }
 
                             }
