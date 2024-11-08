@@ -18,6 +18,9 @@ namespace DeadCapTracker.Repositories
         [Post("{year}/import?TYPE=salaryAdj&L={leagueId}")]
         Task<HttpResponseMessage> AddSalaryAdjustment([Path] int leagueId, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, string> data, [Path] int year);
 
+        [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvqLri1vmaQfEYDs%3D")]
+        [Post("{year}/import?TYPE=lineup&L={leagueId}&W=&STARTERS={starterIds}&COMMENTS={comments}&TIEBREAKERS=&BACKUPS=&FRANCHISE_ID={franchiseId}")]
+        Task<HttpResponseMessage> SetLineupForFranchiseId([Path] int leagueId, [Path] int year, [Path] string franchiseId, [Path] string starterIds, [Path] string comments = "Submitted by groupme bot.");
         // TODO: add API key to UTILs
         [Get("{year}/export?TYPE=salaryAdjustments&L={leagueId}&APIKEY=&JSON=1")]
         Task<MflSalaryAdjParent> GetSalaryAdjustments([Path] int leagueId, [Path] int year);
@@ -62,7 +65,7 @@ namespace DeadCapTracker.Repositories
         [Get("{year}/export?TYPE=liveScoring&L={leagueId}&APIKEY=&W={weekNum}&DETAILS=&JSON=1")]
         Task<LiveScoreRoot> GetLiveScores([Path] int leagueId, [Path] string weekNum, [Path] int year);
 
-        [Get("{year}/export?TYPE=projectedScores&L={leagueId}&APIKEY={ApiKey}&W={weekNum}&PLAYERS=&POSITION=&STATUS=&COUNT=&JSON=1")]
+        [Get("{year}/export?TYPE=projectedScores&L={leagueId}&APIKEY={ApiKey}&W={weekNum}&PLAYERS=&POSITION=&STATUS=&RULES=1COUNT=&JSON=1")]
         Task<ProjectedScoresRoot> GetProjections([Path] int leagueId, [Path] string weekNum, [Path] int year, [Path] string ApiKey);
 
         [Get("{year}/export?TYPE=schedule&L={leagueId}&APIKEY={ApiKey}&W=&F=&JSON=1")]

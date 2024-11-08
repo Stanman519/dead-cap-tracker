@@ -101,6 +101,8 @@ namespace DeadCapTracker.Controllers
             var request = message.text.ToLower();
             var groupId = message.group_id;
             var leagueId = Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == groupId).Item2;
+            var gmId = message.sender_id;
+
             if (!Utils.leagueBotDict.TryGetValue(leagueId, out var botId)) return "";
             var actions = new Dictionary<string, Func<Task<string>>>
             {
@@ -125,6 +127,7 @@ namespace DeadCapTracker.Controllers
                     await _groupMeRequestService.PostTopUpcomingFreeAgents(botId, leagueId, reqArr[1], isValidYear ? faYear : year + 1);
                     return "";
                 },
+                ["#optimize"] = async () => { await _groupMeRequestService.OptimizeLineup(botId, leagueId, gmId); return null; },
                 ["#tag"] = async () => { await _groupMeRequestService.PostFranchiseTagAmounts(botId, leagueId); return null; },
                 ["#help"] = async () => { await _groupMeRequestService.PostHelpMessage(botId); return null; },
                 ["#dead"] = async () => { await _groupMeRequestService.PostFutureDeadCap(botId, leagueId); return null; },

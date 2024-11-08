@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.AccessControl;
+using System.Text;
 using System.Threading.Tasks;
 using DeadCapTracker.Models.BotModels;
 using DeadCapTracker.Models.DTOs;
@@ -29,6 +30,7 @@ namespace DeadCapTracker.Services
         Task PostFutureDeadCap(string botId, int leagueId);
         Task BotPost(string botId, string post, bool isError = false);
         Task PostDraftBudgets(string botId, int leagueId);
+        Task OptimizeLineup(string botId, int leagueId, string gmId);
     }
     
     public class GroupMeRequestService : IGroupMeRequestService
@@ -507,6 +509,164 @@ namespace DeadCapTracker.Services
             }
         }
 
+
+
+        public async Task OptimizeLineup(string botId, int leagueId, string gmId)
+        {
+            var mflFranchiseIdsAndGmIds = Utils.memberIds[leagueId];
+
+            var mflFranchiseId = mflFranchiseIdsAndGmIds.FirstOrDefault(f => f.Value.Contains(gmId)).Key.ToString("D4");
+
+
+            try
+            {
+                var rostersTask = _mflTranslationService.GetLiveScoresForFranchises(leagueId, "");
+                var projectionsTask = _mflTranslationService.GetProjections(leagueId, "");
+
+                await Task.WhenAll(rostersTask,  projectionsTask);
+                // get MFL rosters (does this come with player position?)
+
+                var scoreFranchise = rostersTask.Result.First(r => r.id == mflFranchiseId);
+                var yetToPlay = scoreFranchise.playersYetToPlay;
+                var usablePlayers = scoreFranchise.players.player;
+
+                var queryStr = string.Join(",", usablePlayers.Select(_ => _.id));
+
+                var positions = await _mflTranslationService.GetMultiMflPlayers(leagueId, queryStr);
+                int qbRequired = 1, rbRequired = 2, wrRequired = 3, teRequired = 1, flexRequired = 3;
+                // get mfl player projections
+                var joined = usablePlayers
+                    .GroupJoin(projectionsTask.Result, play => play.id, proj => proj.id, (play, proj) => new JoinedLineupPlayer
+                    {
+                        Player = play,
+                        Projection = proj.FirstOrDefault() ?? new ProjectedPlayerScore { 
+                            id= play.id, 
+                            score= "0"}
+                    })
+                    .GroupJoin(positions, joinedPlayer => joinedPlayer.Player.id, pos => pos.id, (joinedPlayer, pos) => new JoinedLineupPlayer
+                    {
+                        Player = joinedPlayer.Player,
+                        Projection = joinedPlayer.Projection,
+                        Position = pos.FirstOrDefault() ?? new Player(),
+                        IsLockedStart = (joinedPlayer.Player.status == "starter" && 
+                            ((int.TryParse(joinedPlayer.Player.gameSecondsRemaining, out var x) ? x : 0) < 3600 ||
+                            (decimal.TryParse(joinedPlayer.Player.score, out var y) ? y : 0) > 0)),
+                        IsLockedBench = (joinedPlayer.Player.status == "nonstarter") && 
+                            ((int.TryParse(joinedPlayer.Player.gameSecondsRemaining, out var z) ? z : 0) < 3600 ||
+                            (decimal.TryParse(joinedPlayer.Player.score, out var r) ? r : 0) > 0)
+                    }).ToList()
+                    .Where(p => !p.IsLockedBench)
+                    .OrderByDescending(p => p.IsLockedStart)
+                    .ThenByDescending(p => decimal.TryParse(p.Projection.score, out var q) ? q : 0).ToList();
+                //marry the rosters (with position) to the projections order by projection
+
+
+                var starters = new List<JoinedLineupPlayer>();
+                var flex = new List<JoinedLineupPlayer>();
+
+                int qbCount = 0, rbCount = 0, wrCount = 0, teCount = 0;
+                int qbMax = 2, rbMax = 5, wrMax = 6, teMax = 4;
+
+                var strBuilder = new StringBuilder();
+
+                strBuilder.Append("Successfully Optimized Lineup");
+                foreach (var player in joined)
+                {
+
+
+                    // Add players based on their position requirements
+                    switch (player.Position)
+                    {
+                        case var pos when pos.position.Contains("QB") && qbCount < qbRequired:
+                            starters.Add(player);
+                            qbCount++;
+                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                            break;
+
+                        case var pos when pos.position.Contains("RB") && rbCount < rbRequired:
+                            starters.Add(player);
+                            rbCount++;
+                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                            break;
+
+                        case var pos when pos.position.Contains("WR") && wrCount < wrRequired:
+                            starters.Add(player);
+                            wrCount++;
+                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                            break;
+
+                        case var pos when pos.position.Contains("TE") && teCount < teRequired:
+                            starters.Add(player);
+                            teCount++;
+                            strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                            break;
+
+                        default:
+                            // If positional requirements met, add to flex if there’s space
+                            if (flex.Count < flexRequired)
+                            {
+                                if ((player.Position.position.Contains("QB") && qbCount < qbMax) ||
+                                    (player.Position.position.Contains("WR") && wrCount < wrMax) ||
+                                     (player.Position.position.Contains("TE") && teCount < teMax) ||
+                                    (player.Position.position.Contains("RB") && rbCount < rbMax))
+                                {
+                                    flex.Add(player);
+                                    strBuilder.Append($"\n{player.Position.position} {player.Position.name} - {player.Projection.score}");
+                                }
+
+                            }
+                            break;
+                    }
+
+                    // Break early if all required slots are filled
+                    if (qbCount >= qbRequired && rbCount >= rbRequired && wrCount >= wrRequired &&
+                        teCount >= teRequired && flex.Count >= flexRequired)
+                    {
+                        break;
+                    }
+                }
+
+                // Combine starters and flex
+                starters.AddRange(flex);
+
+                if (starters.Count < 10)
+                {
+                    if (starters.Where(_ => _.Position.position.Contains("QB")).Count() < qbRequired)
+                    {
+                        throw new Exception("Not enough active QBs");
+                    }
+                    if (starters.Where(_ => _.Position.position.Contains("TE")).Count() < teRequired)
+                    {
+                        throw new Exception("Not enough active TEs");
+                    }
+                    if (starters.Where(_ => _.Position.position.Contains("WR")).Count() < wrRequired)
+                    {
+                        throw new Exception("Not enough active WRs");
+                    }
+                    if (starters.Where(_ => _.Position.position.Contains("RB")).Count() < rbRequired)
+                    {
+                        throw new Exception("Not enough active RBs");
+                    }
+                    else
+                    {
+                        throw new Exception("You do not have enough active viable players to start a full lineup.");
+                    }
+                }
+                var starterIds = string.Join(",", starters.Select(s => s.Player.id));
+                //SUBMIT LINEUP TO MFL
+                await _mflTranslationService.SetLineupForFranchise(leagueId, starterIds, mflFranchiseId, botId);
+
+                await _gm.BotPost(botId, strBuilder.ToString());
+                //POST BOT STRING ON SUCCESS
+
+                }
+            catch (Exception e)
+            {
+                await _gm.BotPost(botId, "Lineup submission failed. " + e.Message);
+            }
+        }
+
+
         public async Task PostTopUpcomingFreeAgents(string botId, int leagueId, string positionRequest, int nextYearAsDefault)
         {
             var year = DateTime.UtcNow.Year;
@@ -708,5 +868,19 @@ namespace DeadCapTracker.Services
                 return temp[count / 2];
             }
         }
+        public static T PopAt<T>(this List<T> list, int index)
+        {
+            T r = list[index];
+            list.RemoveAt(index);
+            return r;
+        }
+    }
+    public class JoinedLineupPlayer
+    {
+        public LiveScorePlayer Player { get; set; }
+        public ProjectedPlayerScore Projection { get; set; }
+        public Player Position { get; set; }
+        public bool IsLockedStart { get; set; }
+        public bool IsLockedBench { get; set; }
     }
 }

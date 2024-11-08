@@ -50,6 +50,7 @@ namespace DeadCapTracker.Services
         Task<List<PlayerAvgScore>> GetAveragePlayerScores(int leagueId, int year);
         Task<List<MflAssetsFranchise>> GetFranchiseAssets(int leagueId);
         Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId);
+        Task SetLineupForFranchise(int leagueId, string starterIds, string franchiseId, string botId);
         int GetDraftPickPrice(int round, int pick);
     }
 
@@ -679,6 +680,30 @@ namespace DeadCapTracker.Services
                 return;
             }
         }
+
+        public async Task SetLineupForFranchise(int leagueId, string starterIds, string franchiseId, string botId)
+        {
+            var year = DateTime.UtcNow.Year;
+            try
+            {
+                var resp = await _mfl.SetLineupForFranchiseId(leagueId, year, franchiseId, starterIds);
+                var respString = await resp.Content.ReadAsStringAsync();
+                if (respString.ToUpper().Contains("ERROR"))
+                {
+                    var error = respString.XmlDeserializeFromString<MflXmlError>();
+                    _logger.LogInformation(respString);
+                    _logger.LogError("{franchiseId} lineup failed to submit", franchiseId);
+                    throw new Exception($"lineup failed to submit to mfl.  \nresponse: \n{respString}");
+                    
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "lineup submission");
+                throw;
+            }
+        }
+
 
         public async Task BuildAndPostSalaryAdjustments(int leagueId, List<SalaryAdjustment> adjustments, int year)
         {
