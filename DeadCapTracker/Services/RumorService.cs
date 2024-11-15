@@ -134,7 +134,7 @@ namespace DeadCapTracker.Services
 
                 if (thisPlayerEats.Any())
                 {
-                    ret += $"\t{otherPlayer} retains:\n";
+                    ret += $"\tretains:\n";
                     thisPlayerEats.ForEach(e =>
                     {
                         ret += $"\t{e.Year}: ${e.CapAdjustment}\n";
@@ -222,7 +222,7 @@ namespace DeadCapTracker.Services
                     ret += $"{name} (${salary}, {years} yrs left) \n";
                     if (thisPlayerEats.Any())
                     {
-                        ret += $"\t{otherPlayer} retains:\n";
+                        ret += $"\tretains:\n";
                         thisPlayerEats.ForEach(e =>
                         {
                             ret += $"\t{e.Year}: ${e.CapAdjustment}\n";
