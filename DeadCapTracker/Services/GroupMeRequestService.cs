@@ -516,12 +516,12 @@ namespace DeadCapTracker.Services
             var mflFranchiseIdsAndGmIds = Utils.memberIds[leagueId];
 
             var mflFranchiseId = mflFranchiseIdsAndGmIds.FirstOrDefault(f => f.Value.Contains(gmId)).Key.ToString("D4");
-
+            var thisWeek = await  _mflTranslationService.GetThisLeagueWeek(leagueId);
 
             try
             {
                 var rostersTask = _mflTranslationService.GetLiveScoresForFranchises(leagueId, "");
-                var projectionsTask = _mflTranslationService.GetProjections(leagueId, "");
+                var projectionsTask = _mflTranslationService.GetProjections(leagueId, thisWeek);
 
                 await Task.WhenAll(rostersTask,  projectionsTask);
                 // get MFL rosters (does this come with player position?)
