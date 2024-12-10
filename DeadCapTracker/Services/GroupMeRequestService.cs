@@ -15,12 +15,12 @@ namespace DeadCapTracker.Services
     public interface IGroupMeRequestService
     {
         public Task<List<AnnualScoringData>> PostStandingsToGroup(string botId, int leagueId, int year);
-        public Task<List<PendingTradeDTO>> PostTradeOffersToGroup(string botId, int leagueId, int year);
+        public Task<List<PendingTradeDTO>> PostTradeOffersToGroup(string botId, int leagueId, int year, string groupId);
         public Task PostTradeRumor(string botId, int leagueId);
         public Task PostCompletedTradeToGroup(string botId, int leagueId);
         public Task<string> FindAndPostContract(string botId, int leagueId, int year, string nameSearch);
         Task<string> FindAndPostLiveScores(string botId, int leagueId);
-        Task CheckLineupsForHoles(string botId, int leagueId);
+        Task CheckLineupsForHoles(string botId, int leagueId, string groupId);
         Task PostHelpMessage(string botId);
         Task PostCapSpace(string botId, int leagueId);
         Task PostDraftProjections(string botId, int leagueId, int year);
@@ -109,11 +109,11 @@ namespace DeadCapTracker.Services
             return h2hWins + vp - (h2hWins * 2);
         }*/
 
-        public async Task<List<PendingTradeDTO>> PostTradeOffersToGroup(string botId, int leagueId, int year)
+        public async Task<List<PendingTradeDTO>> PostTradeOffersToGroup(string botId, int leagueId, int year, string groupId)
         {
             var tenMinDuration = new TimeSpan(0, 0, 10, 0);
             var trades = await _leagueService.FindPendingTrades(leagueId, year);
-            var memberList = (await _gm.GetMemberIds()).response.members;
+            var memberList = (await _gm.GetMemberIds(groupId)).response.members;
 
             string strForBot = "";
            
@@ -298,7 +298,7 @@ namespace DeadCapTracker.Services
             return stringForBot;
         }
 
-        public async Task CheckLineupsForHoles(string botId, int leagueId)
+        public async Task CheckLineupsForHoles(string botId, int leagueId, string groupId)
         {
             var thisWeek = await _mflTranslationService.GetThisLeagueWeek(leagueId);
 
@@ -307,7 +307,7 @@ namespace DeadCapTracker.Services
             var byesTask = _mflTranslationService.GetByesThisWeek(thisWeek);
             var injuriesTask = _mflTranslationService.GetInjurredPlayerIdsThisWeek(thisWeek);
             var allPlayersTask = _mflTranslationService.GetAllRelevantPlayers(leagueId);
-            var groupTask = _gm.GetMemberIds();
+            var groupTask = _gm.GetMemberIds(groupId);
 
             try
             {

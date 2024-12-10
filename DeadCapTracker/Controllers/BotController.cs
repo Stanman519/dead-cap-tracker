@@ -52,7 +52,7 @@ namespace DeadCapTracker.Controllers
             foreach (var item in leagues)
             {
                 if (!Utils.leagueBotDict.TryGetValue(item.Item2, out var botId)) continue;
-                await _groupMeRequestService.PostTradeOffersToGroup(botId, item.Item2, year);
+                await _groupMeRequestService.PostTradeOffersToGroup(botId, item.Item2, year, item.Item1);
             }
 
         }
@@ -113,7 +113,7 @@ namespace DeadCapTracker.Controllers
                     return await _groupMeRequestService.FindAndPostContract(botId, leagueId, year, searchText.ToLower());
                 },
                 ["#scores"] = () => _groupMeRequestService.FindAndPostLiveScores(botId, leagueId),
-                ["#lineups"] = async () => { await _groupMeRequestService.CheckLineupsForHoles(botId, leagueId); return null; },
+                ["#lineups"] = async () => { await _groupMeRequestService.CheckLineupsForHoles(botId, leagueId, message.group_id); return null; },
                 ["#standings"] = async () => { await _groupMeRequestService.PostStandingsToGroup(botId, leagueId, year); return null; },
                 ["#cap"] = async () => { await _groupMeRequestService.PostCapSpace(botId, leagueId); return null; },
                 ["#draft"] = async () => { await _groupMeRequestService.PostDraftProjections(botId, leagueId, year); return null; },

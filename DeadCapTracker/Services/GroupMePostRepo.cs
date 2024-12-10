@@ -12,7 +12,7 @@ namespace DeadCapTracker.Services
     {
         Task BotPost(string botId, string text, bool isError = false);
         Task BotPostWithTag(string botId, string text, string nickname, string memberId);
-        Task<GroupParent> GetMemberIds();
+        Task<GroupParent> GetMemberIds(string groupId);
     }
 
     public class GroupMePostRepo : IGroupMePostRepo
@@ -64,11 +64,11 @@ namespace DeadCapTracker.Services
             }
         }
 
-        public async Task<GroupParent> GetMemberIds()
+        public async Task<GroupParent> GetMemberIds(string groupId)
         {
             try
             {
-                return await _gmApi.GetMemberIds();
+                return await _gmApi.GetMemberIds(groupId);
             }
             catch (Exception e)
             {

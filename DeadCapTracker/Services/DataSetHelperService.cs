@@ -27,22 +27,22 @@ namespace DeadCapTracker.Services
                 var rosterBoys = roster.player.Where(p => p.status == "ROSTER").Select(_ => new PlayerSalaryDTO
                 {
                     Id = _.id,
-                    ContractYear = Int32.Parse(_.contractYear),
-                    Salary = Decimal.Parse(_.salary),
+                    ContractYear = Int32.TryParse(_.contractYear, out var x) ? x : 1,
+                    Salary = Decimal.TryParse(_.salary, out var y) ? y : 1,
                     Status = _.status
                 }).ToList();
                 var irBoys = roster.player.Where(p => p.status == "INJURED_RESERVE").Select(_ => new PlayerSalaryDTO
                 {
                     Id = _.id,
-                    ContractYear = Int32.Parse(_.contractYear),
-                    Salary = Decimal.Parse(_.salary),
+                    ContractYear = Int32.TryParse(_.contractYear, out var x) ? x : 1,
+                    Salary = Decimal.TryParse(_.salary, out var y) ? y : 1,
                     Status = _.status
                 }).ToList();
                 var taxiBoys = roster.player.Where(p => p.status == "TAXI_SQUAD").Select(_ => new PlayerSalaryDTO
                 {
                     Id = _.id,
-                    ContractYear = Int32.Parse(_.contractYear),
-                    Salary = Decimal.Parse(_.salary),
+                    ContractYear = Int32.TryParse(_.contractYear, out var x) ? x : 1,
+                    Salary = Decimal.TryParse(_.salary, out var y) ? y : 1,
                     Status = _.status
                 }).ToList();
                 var nextYearBoys = roster.player.Where(p => Int32.Parse(p.contractYear) > 1).Select(_ => new PlayerSalaryDTO
