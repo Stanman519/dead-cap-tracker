@@ -467,7 +467,7 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year - 1;
-                var salariesTask = _mflTranslationService.GetAllSalaries(leagueId);
+                var salariesTask = _mflTranslationService.GetAllSalaries(leagueId, year);
                 var positionsTask = _mflTranslationService.GetAllRelevantPlayers(leagueId);
 
                 await Task.WhenAll(salariesTask, positionsTask);
@@ -688,29 +688,31 @@ namespace DeadCapTracker.Services
 
         public async Task PostTopUpcomingFreeAgents(string botId, int leagueId, string positionRequest, int nextYearAsDefault)
         {
-            var year = DateTime.UtcNow.Year;
+            var thisYear = DateTime.UtcNow.Year;
             var pos = positionRequest.ToUpper().Trim();
             if (pos != "QB" && pos != "RB" && pos != "WR" && pos != "TE") return;
 
             var strForBot = $"Top {pos} Free Agents for {nextYearAsDefault}\n";
-            var lookupYear = nextYearAsDefault < year + 1 ? (nextYearAsDefault - 1 ) : year; // if looking up future, use this year for lookup, if past, use past
-            var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(leagueId, lookupYear);
-            var salariesTask = _mflTranslationService.GetAllSalaries(leagueId);
+            var lookupYear = nextYearAsDefault > thisYear + 1 ? (nextYearAsDefault - 1 ) : thisYear; // if looking up future, use this year for lookup, if past, use past
+            var isOffseason = DateTime.UtcNow.Month < 9 && DateTime.UtcNow.Month > 1;
+
+            var avgPtsTask = _mflTranslationService.GetAveragePlayerScores(leagueId, (!isOffseason && thisYear == lookupYear) ? lookupYear : lookupYear - 1); // always do scores from prior year unless we are inseason of lookup year
+            var salariesTask = _mflTranslationService.GetAllSalaries(leagueId, isOffseason ? lookupYear - 1 : lookupYear); // get last year's contracts when it is offseason
             var playerTask = _mflTranslationService.GetAllRelevantPlayers(leagueId);
             await Task.WhenAll(avgPtsTask, playerTask, salariesTask);
 
             var playerInfos = playerTask.Result;
             var scores = avgPtsTask.Result;
             var contractYear = "";
-            if (nextYearAsDefault == year + 1)
+            if (nextYearAsDefault == thisYear + 1)
             {
                 contractYear = "1";
             }
-            else if (nextYearAsDefault == year + 2)
+            else if (nextYearAsDefault == thisYear + 2)
             {
                 contractYear = "2";
             }
-            else if (nextYearAsDefault == year + 3)
+            else if (nextYearAsDefault == thisYear + 3)
             {
                 contractYear = "3";
             }

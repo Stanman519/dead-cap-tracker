@@ -295,7 +295,7 @@ namespace DeadCapTracker.Services
             var year = DateTime.Now.Year;
             DateTime oneHourAgo = DateTime.Now.AddHours(-1);
             var picksWithValuesTask = _mflSvc.GetDraftPicksAndContractValues(leagueId);
-            var salariesTask = _mflSvc.GetAllSalaries(year);
+            var salariesTask = _mflSvc.GetAllSalaries(leagueId, year);
             await Task.WhenAll(picksWithValuesTask, salariesTask);
             var playersWithoutSalaries = salariesTask.Result.Where(p => (string.IsNullOrEmpty(p.Salary) || p.Salary == "0")).ToList();
             playersWithoutSalaries.ForEach(async p =>

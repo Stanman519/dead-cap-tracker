@@ -355,7 +355,7 @@ namespace DeadCapTracker.Tests.Services
                 }
             };
 
-            _mflTranslationServiceMock.Setup(x => x.GetAllSalaries(leagueId)).ReturnsAsync(salaries);
+            _mflTranslationServiceMock.Setup(x => x.GetAllSalaries(leagueId, 1)).ReturnsAsync(salaries);
             _mflTranslationServiceMock.Setup(x => x.GetAllRelevantPlayers(leagueId)).ReturnsAsync(positions);
             _gmMock.Setup(x => x.BotPost(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(Task.CompletedTask);
 
@@ -449,7 +449,7 @@ namespace DeadCapTracker.Tests.Services
             };
 
             _mflTranslationServiceMock.Setup(x => x.GetAveragePlayerScores(leagueId, nextYearAsDefault - 1)).ReturnsAsync(avgPts);
-            _mflTranslationServiceMock.Setup(x => x.GetAllSalaries(leagueId)).ReturnsAsync(salaries);
+            _mflTranslationServiceMock.Setup(x => x.GetAllSalaries(leagueId, 1)).ReturnsAsync(salaries);
             _mflTranslationServiceMock.Setup(x => x.GetAllRelevantPlayers(leagueId)).ReturnsAsync(players);
             _gmMock.Setup(x => x.BotPost(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(Task.CompletedTask);
 
