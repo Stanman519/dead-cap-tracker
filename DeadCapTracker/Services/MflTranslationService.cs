@@ -52,6 +52,7 @@ namespace DeadCapTracker.Services
         Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId);
         Task SetLineupForFranchise(int leagueId, string starterIds, string franchiseId, string botId);
         int GetDraftPickPrice(int round, int pick);
+        Task CutPlayersWithExpiredContracts(int leagueId, string queryString, string franchiseId);
     }
 
     public class MflTranslationService : IMflTranslationService
@@ -93,7 +94,11 @@ namespace DeadCapTracker.Services
                 return new List<TradeSingle>();
             }
         }
-
+        public async Task CutPlayersWithExpiredContracts(int leagueId, string queryString, string franchiseId)
+        {
+            var thisYear = DateTime.UtcNow.Year;
+            var res = await _mfl.DropPlayer(leagueId, queryString, franchiseId, thisYear);
+        }
         public async Task<List<TradeBait>> GetNewTradeBait(int leagueId)
         {
             var year = DateTime.UtcNow.Year;
@@ -602,7 +607,8 @@ namespace DeadCapTracker.Services
             try
             {
                 var year = DateTime.UtcNow.Year;
-                return (await _mfl.GetFranchiseAssets(leagueId, year, Utils.ApiKeys[leagueId])).assets.franchise;
+                var res = await _mfl.GetFranchiseAssets(leagueId, year, Utils.ApiKeys[leagueId]);
+                return res.assets.franchise;
             }
             catch (Exception e)
             {

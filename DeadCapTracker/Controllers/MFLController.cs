@@ -32,13 +32,12 @@ namespace DeadCapTracker.Controllers
         {
             return _leagueService.GetAllTransactions();
         }
-        
-/*        [HttpGet("franchises/{year}")]
-        public async Task<List<FranchiseDTO>> GetFranchises(int year)
+        [HttpGet("support/leagues/{leagueId}/remove-players-with-zero-years")]
+        public async Task RemoveContractsThatAreExpired(int leagueId)
         {
-            return await _leagueService.UpdateFranchises(year);
-        }*/
-        
+            await _leagueService.RemoveExpiredContractsForLeague(leagueId);
+        }
+
         [HttpGet("leagues/{leagueId}/years/{year}/standings")]
         public async Task<List<StandingsV2>> GetStandings(int leagueId, int year)
         {

@@ -28,6 +28,7 @@ namespace DeadCapTracker.Services
         Task<List<StandingsV2>> GetStandingsV2(int leagueId, int year);
         Task FindLatestDraftPicks(int leagueId);
         Task MapPickBudgetToOwners(int leagueId);
+        Task RemoveExpiredContractsForLeague(int leagueId);
     }
     
     public class LeagueService : ILeagueService
@@ -112,7 +113,28 @@ namespace DeadCapTracker.Services
             }
 
         }
+        public async  Task RemoveExpiredContractsForLeague(int leagueId)
+        {
+            var salaries = await _mflSvc.GetAllSalaries(leagueId);
+            var franchRes = await _mflSvc.GetFranchiseAssets(leagueId);
+            var franchises = franchRes.Select(f => new {franchiseId = f.id, players = f.players.player}).ToList();
 
+            foreach (var fid in franchises)
+            {
+                var thisFranchPlayers = fid.players.GroupJoin(salaries, pInfo => pInfo.id, sal => sal.Id, (pInfo, sal) => new {
+                    MflId = int.Parse(pInfo.id),
+                    ContractValue = int.TryParse(sal.FirstOrDefault().Salary, out var z) ? z : 0,
+                    Length = int.TryParse(sal.FirstOrDefault().ContractYear, out var y) ? y : 0,
+                    FranchiseId = fid.franchiseId
+                }).ToList();
+
+                var expiredContracts = thisFranchPlayers.Where(p => p.Length == 0).Select(p => p.MflId);
+
+                var queryString = string.Join(",", expiredContracts);
+
+                await _mflSvc.CutPlayersWithExpiredContracts(leagueId, queryString, fid.franchiseId);
+            }
+        }
         public async Task<List<StandingsV2>> GetStandingsV2(int leagueId, int year)
         {
 
@@ -128,6 +150,8 @@ namespace DeadCapTracker.Services
             var newEntities = new List<Repositories.Transaction>();
             var playerLookups = new Dictionary<int, List<string>>();
             var botStr = "Waiver Wire Report:\n";
+            
+
 
             foreach (var league in leagues)
             {
@@ -138,7 +162,8 @@ namespace DeadCapTracker.Services
 
             for (var i = 0; i < leagues.Count; i++)
             {
-                var salaryAdjList = SortTransactions(salaryAdjTasks[i].Result.Where(adj => !adj.Description.StartsWith("X")).ToList());
+                var thisTaskResult = salaryAdjTasks[i].Result;
+                var salaryAdjList = SortTransactions(thisTaskResult.Where(adj => !adj.Description.StartsWith("X")).ToList());
                 playerLookups[leagues[i].Mflid] = transactionTasks[i].Result.Select(t => t.transaction.Split(',')[0]).ToList();
                 // something is wrong with this.  if i want to post the latest adds,  I'm only looking at salary adjustments so ? ^^^
             

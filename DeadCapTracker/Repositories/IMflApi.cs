@@ -11,14 +11,14 @@ namespace DeadCapTracker.Repositories
     [Header("User-Agent", "CapnCrunch")]
     public interface IMflApi
     {
-        [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvqLri1vmaQfEYDs%3D")]
+        [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvuWrx0GmOVrJaDYeFbox")]
         [Post("{year}/import?TYPE=salaries&L={leagueId}&APPEND=1")]
         Task<HttpResponseMessage> EditPlayerSalary([Path] int leagueId, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, string> data, [Path] int year);
-        [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvqLri1vmaQfEYDs%3D")]
+        [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvuWrx0GmOVrJaDYeFbox")]
         [Post("{year}/import?TYPE=salaryAdj&L={leagueId}")]
         Task<HttpResponseMessage> AddSalaryAdjustment([Path] int leagueId, [Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, string> data, [Path] int year);
 
-        [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvqLri1vmaQfEYDs%3D")]
+        [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvuWrx0GmOVrJaDYeFbox")]
         [Post("{year}/import?TYPE=lineup&L={leagueId}&W=&STARTERS={starterIds}&COMMENTS={comments}&TIEBREAKERS=&BACKUPS=&FRANCHISE_ID={franchiseId}")]
         Task<HttpResponseMessage> SetLineupForFranchiseId([Path] int leagueId, [Path] int year, [Path] string franchiseId, [Path] string starterIds, [Path] string comments = "Submitted by groupme bot.");
         // TODO: add API key to UTILs
@@ -81,6 +81,9 @@ namespace DeadCapTracker.Repositories
         Task<MflAverageScoreRoot> GetAveragePlayerScores([Path] int leagueId, [Path] int year, [Path] string ApiKey);
         [Get("{year}/export?TYPE=draftResults&L={leagueId}&APIKEY={ApiKey}&JSON=1")]
         Task<MflDraftResultRoot> GetMflDraftResults([Path] int leagueId, [Path] int year,  [Path] string ApiKey);
+        [Header("cookie", "MFL_IS_COMMISH=K1E6gJXC6uSu0xW6O1HIZQ%3D%3D;MFL_USER_ID=ahBv1sGSvqLri1vmaQfEYDs%3D")]
+        [Get("{year}/import?TYPE=fcfsWaiver&L={leagueId}&DROP={playerId}&FRANCHISE_ID={franchiseId}")]
+        Task<HttpResponseMessage> DropPlayer([Path] int leagueId, [Path] string playerId, [Path] string franchiseId, [Path] int year);
     }
     
 }
