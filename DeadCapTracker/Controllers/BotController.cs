@@ -98,6 +98,7 @@ namespace DeadCapTracker.Controllers
         public async Task<string> ContractSearch([FromBody] GmMessage message, int fakeYear)
         {
             var year = DateTime.Now.Year;
+            var month = DateTime.Now.Month;
             var request = message.text.ToLower();
             var groupId = message.group_id;
             var leagueId = Utils.GmGroupToMflLeague.FirstOrDefault(t => t.Item1 == groupId).Item2;
@@ -124,7 +125,8 @@ namespace DeadCapTracker.Controllers
                     int faYear = 0;
                     var isValidYear = reqArr.Length > 2 && int.TryParse(reqArr[2], out faYear);
                     isValidYear = faYear > 2020 && faYear < year + 3;
-                    await _groupMeRequestService.PostTopUpcomingFreeAgents(botId, leagueId, reqArr[1], isValidYear ? faYear : year + 1);
+                    var isOffseason = month < 9;
+                    await _groupMeRequestService.PostTopUpcomingFreeAgents(botId, leagueId, reqArr[1], isValidYear ? faYear : isOffseason ? year : year + 1);
                     return "";
                 },
                 ["#optimize"] = async () => { await _groupMeRequestService.OptimizeLineup(botId, leagueId, gmId); return null; },

@@ -117,7 +117,8 @@ namespace DeadCapTracker.Services
         }
         public async  Task RemoveExpiredContractsForLeague(int leagueId)
         {
-            var salaries = await _mflSvc.GetAllSalaries(leagueId);
+            var year = DateTime.UtcNow.Year;
+            var salaries = await _mflSvc.GetAllSalaries(leagueId, year);
             var franchRes = await _mflSvc.GetFranchiseAssets(leagueId);
             var franchises = franchRes.Select(f => new {franchiseId = f.id, players = f.players.player}).ToList();
 
@@ -321,14 +322,14 @@ namespace DeadCapTracker.Services
         {
             var year = DateTime.Now.Year;
             DateTime oneHourAgo = DateTime.Now.AddHours(-1);
-            var picksWithValuesTask = _mflSvc.GetDraftPicksAndContractValues(leagueId);
-            var salariesTask = _mflSvc.GetAllSalaries(year);
-            await Task.WhenAll(picksWithValuesTask, salariesTask);
-            var playersWithoutSalaries = salariesTask.Result.Where(p => (string.IsNullOrEmpty(p.Salary) || p.Salary == "0")).ToList();
+            var picksWithValuesTask = await _mflSvc.GetDraftPicksAndContractValues(leagueId);
+            var salariesTask = await _mflSvc.GetAllSalaries(leagueId, year);
+            //await Task.WhenAll(picksWithValuesTask, salariesTask);
+            var playersWithoutSalaries = salariesTask.Where(p => (string.IsNullOrEmpty(p.Salary) || p.Salary == "0")).ToList();
             playersWithoutSalaries.ForEach(async p =>
             {
                 //find draft pick
-                var foundDraftPick = picksWithValuesTask.Result.FirstOrDefault(_ => _.Player == p.Id);
+                var foundDraftPick = picksWithValuesTask.FirstOrDefault(_ => _.Player == p.Id);
                 //if exists, post contract
                 if (foundDraftPick != null)
                 {
