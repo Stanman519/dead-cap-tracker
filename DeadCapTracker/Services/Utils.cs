@@ -7,7 +7,7 @@ namespace DeadCapTracker.Services
     {
         /*public const int ThisYear = 2024;*/
         public static Dictionary<int, string> ApiKeys = new Dictionary<int, string>() {
-            {13894, "ahBv1sGSvuWrx1mmOVrJaDYeFLox"},
+            {13894, "ahBv1sGSvuWqx0CmOVrJaDYeFbox"},
             {26548, "ahBv1sGSvuWqx0CmOl/EZToeFbox"}
          };
         public const string LongTermPlayerHack = "14777"; // Joe Burrow, used to add to mfl player lookups so you always get array rather than obj
