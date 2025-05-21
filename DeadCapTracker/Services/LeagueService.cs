@@ -67,34 +67,36 @@ namespace DeadCapTracker.Services
                 return new List<DeadCapData>();
             }
 
-            var allTransactions = (
-                from t in transactions
-                join f in franchises on t.Franchiseid equals f.Mflfranchiseid 
-                    select new
-                    {
-                        FranchiseId = t.Franchiseid,
-                        TeamName = f.Owner.Displayname,
-                        DeadAmount = t.Amount,
-                        PlayerName = t.Playername,
-                        TransactionYear = t.Yearoftransaction,
-                        NumOfYears = t.Years
-                    }).ToList();
+            var allTransactions = transactions.Join(franchises, 
+                t => new {FranchiseId = t.Franchiseid, LeagueId = t.Leagueid },
+                f => new { FranchiseId = f.Mflfranchiseid, LeagueId = f.Leagueid }, 
+                (t, f) => new
+            {
+                LeagueId = f.Leagueid,
+                FranchiseId = t.Franchiseid,
+                TeamName = f.Owner.Displayname,
+                DeadAmount = t.Amount,
+                PlayerName = t.Playername,
+                TransactionYear = t.Yearoftransaction,
+                NumOfYears = t.Years
+            }).ToList();
+            
                 
                 // go through each transaction - add up amount for each year
-                var distinct = allTransactions.GroupBy(t => t.FranchiseId)
+                var distinct = allTransactions.GroupBy(t => new { t.FranchiseId, t.LeagueId })
                     .Select(grp => grp.First())
-                    .Select(t => new DeadCapData(t.FranchiseId, t.TeamName))
+                    .Select(t => new DeadCapData(t.FranchiseId, t.TeamName, t.LeagueId))
                     .ToList();
                 
                 distinct.ForEach(t =>
                 {
-                    returnData.Add(new DeadCapData(t.FranchiseId, t.Team));
+                    returnData.Add(new DeadCapData(t.FranchiseId, t.Team, t.LeagueId));
                 });
                 
                 allTransactions.ForEach(t =>
                 {
                     //get year, then get length.  add ammount to list for each year in that span. 0 = 2020
-                    returnData.FirstOrDefault(_ => _.FranchiseId == t.FranchiseId)?.AddPenalties((int)t.TransactionYear, t.DeadAmount, t.NumOfYears);
+                    returnData.FirstOrDefault(_ => _.FranchiseId == t.FranchiseId && _.LeagueId == t.LeagueId)?.AddPenalties((int)t.TransactionYear, t.DeadAmount, t.NumOfYears);
                 });
                 return returnData;
         }

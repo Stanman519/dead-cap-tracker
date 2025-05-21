@@ -4,13 +4,15 @@ namespace DeadCapTracker.Models.BotModels
 {
     public class DeadCapData
     {
+        public int LeagueId { get; set; }
         public int StartingYear = 2020;
         public string Team { get; set; }
         public Dictionary<string, decimal> Amount { get; set; }
         public int FranchiseId { get; set; }
 
-        public DeadCapData(int id, string name)
+        public DeadCapData(int id, string name, int leagueId)
         {
+            LeagueId = leagueId;
             Amount = new Dictionary<string, decimal> { {(StartingYear).ToString(), 0} };
             FranchiseId = id;
             Team = name;
