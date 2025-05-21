@@ -512,7 +512,11 @@ namespace DeadCapTracker.Services
             }
 
             //look for trades in db that dont have a tradeId.  do it based on offering team & expires.
-            var flattenedMflProposals = mflTasks.Select(_ => _.Result).Select(_ => _.pendingTrades).SelectMany(_ => _.pendingTrade).ToList();
+            var flattenedMflProposals = mflTasks
+                .Select(_ => _.Result)
+                .Where(result => result?.pendingTrades?.pendingTrade != null)
+                .SelectMany(result => result.pendingTrades.pendingTrade)
+                .ToList();
             dbTradesTask.Result.ForEach(t =>
             {
                 var fixMe = flattenedMflProposals.FirstOrDefault(p => p.offeringTeam == t.SenderId.ToString("D4") && p.expires == t.Expires.ToString());
