@@ -407,9 +407,21 @@ namespace DeadCapTracker.Services
         public async Task<List<DraftPickWithSlotValue>> GetDraftPicksAndContractValues(int leagueId)
         {
             var year = DateTime.UtcNow.Year;
-            var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId: leagueId, year, Utils.ApiKeys[leagueId]);
-            var picksMadeWithOutSalaries = mflDraftRoot.DraftResults.DraftUnit.DraftPick.Where(p => !string.IsNullOrEmpty(p.Player));
+            var picksMadeWithOutSalaries = new List<RookieDraftPick>();
+            try
+            {
+                var mflDraftRoot = await _mfl.GetMflDraftResults(leagueId, year, Utils.ApiKeys[leagueId]);
+                picksMadeWithOutSalaries = mflDraftRoot.DraftResults.DraftUnit.DraftPick.Where(p => !string.IsNullOrEmpty(p.Player)).ToList();
+
+            } catch (Exception e)
+            {
+                _logger.LogError("mfl error", e);
+                return new List<DraftPickWithSlotValue>();
+            }
+
+
             var queryString = string.Join(",", picksMadeWithOutSalaries.Select(p => p.Player));
+
             var picksWithPlayerInfo = await _mfl.GetBotPlayersDetails(leagueId, queryString, year, Utils.ApiKeys[leagueId]);
 
             var picksWithValues = picksMadeWithOutSalaries.Select(_ => {

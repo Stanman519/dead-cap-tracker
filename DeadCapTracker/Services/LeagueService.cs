@@ -326,6 +326,15 @@ namespace DeadCapTracker.Services
             var salariesTask = await _mflSvc.GetAllSalaries(leagueId, year);
             //await Task.WhenAll(picksWithValuesTask, salariesTask);
             var playersWithoutSalaries = salariesTask.Where(p => (string.IsNullOrEmpty(p.Salary) || p.Salary == "0")).ToList();
+            var draftPicksNotInSalariesResponse = picksWithValuesTask
+                .Where(p => !salariesTask.Select(s => s.Id).Contains(p.Player))
+                .Select(p => new MflPlayer
+                    {
+                        Id = p.Player
+                    });
+
+            playersWithoutSalaries.AddRange(draftPicksNotInSalariesResponse);  // New draft picks not showing sometimes for salaries.
+
             playersWithoutSalaries.ForEach(async p =>
             {
                 //find draft pick
